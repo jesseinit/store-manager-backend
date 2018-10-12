@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="css/app.css">
+  <title>Product Settings - Store Manager</title>
+</head>
+
+<body>
+  <header id="site-header">
+    <a class="logo" href="./make-sale.html">Store Manager</a>
+    <nav class="top-nav">
+      <ul>
+        <li class="cart"><a href="./cart.html">Cart</a></li>
+        <li><a href="#">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main id="site-main" class="row">
+    <aside class="aside">
+      <nav class="aside__nav">
+        <ul>
+          <li><a href="./make-sale.html">Make Sale</a></li>
+          <li><a href="./my-sales.html">My Sales</a></li>
+          <li><a href="./all-products.html">All Products</a></li>
+        </ul>
+      </nav>
+      <nav class="aside__nav admin">
+        <ul>
+          <li><a href="./admin.html">Admin Dashboard</a></li>
+          <li><a href="./staff-accounts.html">Staff Accounts</a></li>
+          <li><a class="selected" href="./product-settings.html">Products Settings</a></li>
+          <li><a href="./sale-records.html">Sale Records</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <section class="main">
+      <section class="sales">
+        <div class="sales__meta">
+          <h3 class="header">Product List</h3>
+          <div class="sort">
+            <section class="filter">
+              <form id="sort__id">
+                <fieldset>
+                  <legend>Filter By Sales ID</legend>
+                  <input type="text" placeholder="Enter Sales ID">
+                  <input type="submit" value="Retrieve Records">
+                </fieldset>
+              </form>
+              <form id="sort__stock">
+                <fieldset>
+                  <legend>Filter Available Stock</legend>
+                  <input type="text" placeholder="Fetch stock remaining...">
+                  <input type="submit" value="Retrieve Records">
+                </fieldset>
+              </form>
+              <button class="clear">Clear Filters</button>
+            </section>
+          </div>
+          <div class="add-new">
+            <fieldset>
+              <legend>Add New</legend>
+              <form id="sort__date">
+                <fieldset>
+                  <legend>Add New Product</legend>
+                  <input type="text" placeholder="Product Name" required>
+                  <input type="text" placeholder="Product Stock" required>
+                  <input type="text" placeholder="Product Price" required>
+                  <select name="" id="">
+                    <option value="">Select Category</option>
+                    <option value="All">Storage Devices</option>
+                    <option value="All">Smart Electronics</option>
+                    <option value="All">Phones</option>
+                    <option value="All">Networking</option>
+                    <option value="All">Software</option>
+                    <option value="All">Gaming</option>
+                    <option value="All">Monitors</option>
+                    <option value="All">Computers</option>
+                  </select>
+                  <input type="submit" value="Add Product" id="new-product">
+                </fieldset>
+              </form>
+              <form id="sort__date">
+                <fieldset>
+                  <legend>Add New Category</legend>
+                  <input type="text" placeholder="Category Name" required>
+                  <input type="submit" value="Add Category" id="new-category">
+                </fieldset>
+              </form>
+            </fieldset>
+          </div>
+        </div>
+        <table class="sales__table">
+          <thead>
+            <tr>
+              <th>Actions</th>
+              <th>ID</th>
+              <th>Product Name</th>
+              <th>Stock</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center"><button>Update</button>
+                <button class="red">Delete</button></td>
+              <td>2341</td>
+              <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
+              <td>2</td>
+              <td>249,999</td>
+            </tr>
+            <tr>
+              <td style="text-align: center"><button>Update</button>
+                <button class="red">Delete</button></td>
+              <td>1201</td>
+              <td>Xiaomi Redmi S2 3GB 32GB Snapdragon 625 Octa Core 5.99" 18:9 Full Screen
+                Dual Camera 12MP+5MP Smartphone</td>
+              <td>1</td>
+              <td>89,999</td>
+            </tr>
+            <tr>
+              <td style="text-align: center"><button>Update</button>
+                <button class="red">Delete</button></td>
+              <td>2341</td>
+              <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
+              <td>2</td>
+              <td>249,999</td>
+            </tr>
+            <tr>
+              <td style="text-align: center"><button>Update</button>
+                <button class="red">Delete</button></td>
+              <td>2341</td>
+              <td>Original Sandisk Micro SD card Class10 TF card16gb 32gb 64gb 128gb
+                80Mb/s memory card for samrtphone and table PC</td>
+              <td>1</td>
+              <td>6,999</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+  </main>
+  <footer id="site-footer">
+    <p>Store Manager &copy; 2018</p>
+  </footer>
+</body>
+
+</html>
