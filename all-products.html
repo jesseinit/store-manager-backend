@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="css/app.css">
+  <title>Products - Store Manager</title>
+</head>
+
+<body>
+  <header id="site-header">
+    <a class="logo" href="./make-sale.html">Store Manager</a>
+    <nav class="top-nav">
+      <ul>
+        <li class="cart"><a href="./cart.html">Cart</a></li>
+        <li><a href="#">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main id="site-main" class="row">
+    <aside class="aside">
+      <nav class="aside__nav">
+        <ul>
+          <li><a href="./make-sale.html">Make Sale</a></li>
+          <li><a href="./my-sales.html">My Sales</a></li>
+          <li><a class="selected" href="./all-products.html">All Products</a></li>
+        </ul>
+      </nav>
+      <nav class="aside__nav admin">
+        <ul>
+          <li><a href="./admin.html">Admin Area</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <section class="main row">
+      <section class="search">
+        <form id="search-form" class="search__form">
+          <input type="text" name="" id="product-name" class="search__input" placeholder="search products" required>
+          <select name="" id="product-cat" class="search__catergory">
+            <option class="catergory" value="All">All</option>
+            <option value="All">Storage Devices</option>
+            <option value="All">Smart Electronics</option>
+            <option value="All">Phones</option>
+            <option value="All">Networking</option>
+            <option value="All">Software</option>
+            <option value="All">Gaming</option>
+            <option value="All">Monitors</option>
+            <option value="All">Computers</option>
+          </select>
+          <input type="submit" class="search__submit" value="Search">
+        </form>
+      </section>
+      <section class="products">
+
+        <div class="product out-stock">
+          <img class="product__image" src="./img/phone.jpg" alt="product-image">
+          <div class="product__details">
+            <a class="product__name" href="./view-product.html?pid=1">Xiaomi Redmi S2 3GB 32GB Snapdragon 625 Octa Core
+              5.99" 18:9 Full Screen
+              Dual Camera 12MP+5MP Smartphone</a>
+            <p class="product__price"><span class="currency">₦</span>89,999.99</p>
+            <div class="product__stkInfo">
+              <p class="product__cat">Phones</p>
+              <p class="product__stock">0</p>
+            </div>
+          </div>
+        </div>
+        <div class="product in-stock">
+          <img class="product__image" src="./img/laptop.jpg" alt="product-image">
+          <div class="product__details">
+            <a class="product__name" href="#">Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</a>
+            <p class="product__price"><span class="currency">₦</span>249,999.99</p>
+            <div class="product__stkInfo">
+              <p class="product__cat">Computers</p>
+              <p class="product__stock">37</p>
+            </div>
+          </div>
+        </div>
+        <div class="product out-stock">
+          <img class="product__image" src="./img/memcard.jpg" alt="product-image">
+          <div class="product__details">
+            <a class="product__name" href="#">100% Original Sandisk Micro SD card Class10 TF card16gb 32gb 64gb 128gb
+              80Mb/s memory card for samrtphone and table PC
+            </a>
+            <p class="product__price"><span class="currency">₦</span>6,999.99</p>
+            <div class="product__stkInfo">
+              <p class="product__cat">Storage Devices</p>
+              <p class="product__stock">0</p>
+            </div>
+          </div>
+        </div>
+        <div class="product in-stock">
+          <img class="product__image" src="./img/watch.jpg" alt="product-image">
+          <div class="product__details">
+            <a class="product__name" href="#">Xiaomi Huami Amazfit Bip Smart Watch GPS Gloness Smartwatch Smart-watch
+              Watchs 45 Days Standby for Phone MI8 IOS</a>
+            <p class="product__price"><span class="currency">₦</span>49,999.99</p>
+            <div class="product__stkInfo">
+              <p class="product__cat">Phones</p>
+              <p class="product__stock">37</p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+      <section class="pagination">
+        <button class="pagination__prev">Previous Page</button>
+        <button class="pagination__next">Next Page</button>
+      </section>
+    </section>
+  </main>
+  <footer id="site-footer">
+    <p>Store Manager &copy; 2018</p>
+  </footer>
+</body>
+
+</html>
