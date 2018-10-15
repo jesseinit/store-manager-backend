@@ -33,7 +33,7 @@ describe('Store Manager', () => {
       .get('/api/v1/products/5')
       .end((err, res) => {
         expect(res.status).to.equal(404);
-        expect(res.body.result).to.have.length(0);
+        expect(res.body).to.not.have.property('result');
         done(err);
       });
   });

@@ -1,4 +1,10 @@
-import { validationResult } from 'express-validator/check';
+import { param, validationResult } from 'express-validator/check';
+
+const validateProductId = [
+  param('id')
+    .isInt({ min: 1 })
+    .withMessage('Product ID must be a positve number from 1')
+];
 
 const validationHandler = (req, res, next) => {
   const errors = validationResult(req);
@@ -9,5 +15,5 @@ const validationHandler = (req, res, next) => {
   }
 };
 
-const validations = { validationHandler };
+const validations = { validateProductId, validationHandler };
 export default validations;
