@@ -11,4 +11,10 @@ router.get(
   validtor.validationHandler,
   ProductController.getSingleProduct
 );
+router.post(
+  '/products',
+  validtor.validateNewProduct,
+  validtor.validationHandler,
+  ProductController.createProduct
+);
 export default router;
