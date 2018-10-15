@@ -60,7 +60,7 @@ describe('Store Manager', () => {
           name: '32inch LED Television',
           category: 'Electronics',
           price: '78900',
-          qty: '5'
+          qty: 0
         })
         .end((err, res) => {
           expect(res.status).to.equal(422);
@@ -74,7 +74,7 @@ describe('Store Manager', () => {
         .request(app)
         .post('/api/v1/products')
         .send({
-          imgUrl: 'product-image.jpeg',
+          imgUrl: 'https://example.com/tv.jpg',
           name: '32inch LED Television',
           category: 'Electronics',
           price: 78900,
@@ -85,6 +85,7 @@ describe('Store Manager', () => {
           expect(res.body).to.have.property('result');
           expect(res.body.result).to.have.length(1);
           expect(res.body.result[0]).to.have.all.keys(
+            'id',
             'imgUrl',
             'name',
             'category',

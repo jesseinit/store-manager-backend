@@ -5,7 +5,7 @@ const products = [
     name: 'Television',
     category: 'Electronics',
     qty: 13,
-    price: 78500
+    price: 78500.0
   },
   {
     id: 2,
@@ -13,7 +13,7 @@ const products = [
     name: 'PlayStaytion 4',
     category: 'Gaming',
     qty: 11,
-    price: 150000
+    price: 150000.0
   },
   {
     id: 3,
@@ -21,7 +21,7 @@ const products = [
     name: 'Iphone X',
     category: 'Mobile Phones',
     qty: 10,
-    price: 90000
+    price: 90000.0
   },
   {
     id: 4,
@@ -29,7 +29,7 @@ const products = [
     name: 'Fridge',
     category: 'Electronics',
     qty: 9,
-    price: 65800
+    price: 65800.0
   }
 ];
 
