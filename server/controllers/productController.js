@@ -56,6 +56,32 @@ class ProductController {
     });
     res.status(201).json({ result: newProduct });
   }
+
+  /**
+   * @description Updates a product
+   * @returns {object} Updated product
+   * @static
+   * @param {object} req - Request Object
+   * @param {object} res - Response Object
+   * @memberof ProductController
+   */
+  static updateProduct(req, res) {
+    const id = parseInt(req.params.id, 10);
+    const { imgUrl, name, category, price, qty } = req.body;
+    const updatedProduct = ProductHelper.updateProduct({
+      id,
+      imgUrl,
+      name,
+      category,
+      price,
+      qty
+    });
+    if (!updatedProduct.length) {
+      res.status(404).json({ message: 'Product not found' });
+      return;
+    }
+    res.status(200).json({ result: updatedProduct });
+  }
 }
 
 export default ProductController;

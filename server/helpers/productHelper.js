@@ -55,6 +55,33 @@ class ProductHelper {
     products.push(createdProduct);
     return [createdProduct];
   }
+
+  /**
+   *
+   * @description Helper method that updates a product and mutates the data structure
+   * @static
+   * @param {*} productArg Updated product object body
+   * @returns {object} An array with an object reporesenting the updated product
+   * @memberof ProductHelper
+   */
+  static updateProduct(productArg) {
+    const updatedProduct = [];
+    products.forEach(product => {
+      if (product.id === productArg.id) {
+        const modifiedProduct = {
+          id: product.id,
+          imgUrl: product.imgUrl === productArg.imgUrl ? product.imgUrl : productArg.imgUrl,
+          name: product.name === productArg.name ? product.name : productArg.name,
+          category: product.category === productArg.category ? product.category : productArg.category,
+          qty: product.qty === productArg.qty ? product.qty : productArg.qty,
+          price: product.price === productArg.price ? product.price : productArg.price
+        };
+        updatedProduct.push(modifiedProduct);
+        products[products.indexOf(product)] = modifiedProduct;
+      }
+    });
+    return updatedProduct;
+  }
 }
 
 export default ProductHelper;

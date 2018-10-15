@@ -17,4 +17,10 @@ router.post(
   validtor.validationHandler,
   ProductController.createProduct
 );
+router.put(
+  '/products/:id',
+  validtor.validateProductUpdate,
+  validtor.validationHandler,
+  ProductController.updateProduct
+);
 export default router;
