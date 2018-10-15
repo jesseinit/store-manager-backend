@@ -56,6 +56,14 @@ class ProductHelper {
     return [createdProduct];
   }
 
+  /**
+   *
+   * @description Helper method that updates a product and mutates the data structure
+   * @static
+   * @param {*} productArg Updated product object body
+   * @returns {object} An array with an object reporesenting the updated product
+   * @memberof ProductHelper
+   */
   static updateProduct(productArg) {
     const updatedProduct = [];
     products.forEach(product => {
