@@ -1,5 +1,11 @@
 # Store Manager
+### Build Status
+[![Build Status](https://travis-ci.com/jesseinit/store-manager.svg?branch=develop)](https://travis-ci.com/jesseinit/store-manager)
+[![Coverage Status](https://coveralls.io/repos/github/jesseinit/store-manager/badge.svg?branch=develop)](https://coveralls.io/github/jesseinit/store-manager?branch=develop)
+[![Maintainability](https://api.codeclimate.com/v1/badges/44a1e89e17ea4ccbd7a3/maintainability)](https://codeclimate.com/github/jesseinit/store-manager/maintainability)
+
 Store Manager is a web application that helps store owners manage sales and product inventory records.
+
 
 ## Implemented Features
 * Admin can add a product
