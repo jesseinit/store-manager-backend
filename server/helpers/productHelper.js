@@ -73,14 +73,36 @@ class ProductHelper {
           imgUrl: product.imgUrl === productArg.imgUrl ? product.imgUrl : productArg.imgUrl,
           name: product.name === productArg.name ? product.name : productArg.name,
           category: product.category === productArg.category ? product.category : productArg.category,
-          qty: product.qty === productArg.qty ? product.qty : productArg.qty,
-          price: product.price === productArg.price ? product.price : productArg.price
+          price:
+            product.price === productArg.price
+              ? parseInt(product.price, 10)
+              : parseInt(productArg.price, 10),
+          qty: product.qty === productArg.qty ? parseInt(product.qty, 10) : parseInt(productArg.qty, 10)
         };
         updatedProduct.push(modifiedProduct);
         products[products.indexOf(product)] = modifiedProduct;
       }
     });
     return updatedProduct;
+  }
+
+  /**
+   *
+   * @description Helper method that delete a product and mutates the data structure
+   * @static
+   * @param {*} prodId Product ID of the product to be deleted
+   * @memberof ProductHelper
+   */
+  static deleteProduct(prodId) {
+    let isDeleted = false;
+    products.forEach(product => {
+      if (product.id === prodId) {
+        const productIndex = products.indexOf(product);
+        products.splice(productIndex, 1);
+        isDeleted = true;
+      }
+    });
+    return isDeleted;
   }
 }
 

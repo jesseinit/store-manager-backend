@@ -15,6 +15,7 @@ const validateNewProduct = [
     .withMessage('Image Input should be a valid image url'),
   body('name')
     .isString()
+    .withMessage('Product name must be a string')
     .isLength({ min: 2 })
     .withMessage('Product name must be atlease 2 letters long'),
   body('category')
@@ -26,7 +27,7 @@ const validateNewProduct = [
     .isInt({ min: 1 })
     .withMessage('Product price must be decimal number of 1 or more'),
   body('qty')
-    .isNumeric({ min: 1 })
+    .isInt({ min: 1 })
     .withMessage('Product qty must be a positive number from 1')
 ];
 
@@ -42,6 +43,7 @@ const validateProductUpdate = [
     .withMessage('Image Input should be a valid image url'),
   body('name')
     .isString()
+    .withMessage('Product name must be a string')
     .isLength({ min: 2 })
     .withMessage('Product name must be atlease 2 letters long'),
   body('category')
@@ -53,7 +55,7 @@ const validateProductUpdate = [
     .isInt({ min: 1 })
     .withMessage('Product price must be decimal number of 1 or more'),
   body('qty')
-    .isNumeric({ min: 1 })
+    .isInt({ min: 1 })
     .withMessage('Product qty must be a positive number from 1')
 ];
 
