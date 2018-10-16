@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "rm -rf ./dist/* && babel ./server --out-dir ./dist --ignore ./server/test",
-    "start": "node ./dist",
+    "start": "npm run build && node ./dist",
     "dev": "nodemon --exec babel-node ./server/index.js --env",
     "test": "nyc --reporter=text-summary --reporter=html mocha ./server/test --exit --require babel-register"
   },
