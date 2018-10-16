@@ -35,6 +35,13 @@ class SalesHelper {
     return saleRecord;
   }
 
+  /**
+   *
+   * @description Helper method that creates a sales record
+   * @static
+   * @param {object} - sales record object to be created
+   * @memberof SalesHelper
+   */
   static createSalesRecord(newSale) {
     const newSaleRecord = {
       id: sales[sales.length - 1].id + 1,

@@ -17,6 +17,7 @@ describe('Store Manager', () => {
         });
     });
   });
+
   describe('Products', () => {
     describe('GET /products', () => {
       it('Users should be able to get all product', done => {

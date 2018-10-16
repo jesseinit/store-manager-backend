@@ -1,4 +1,5 @@
 import express from 'express';
+import log from 'fancy-log';
 import router from './routes';
 
 const app = express();
@@ -8,7 +9,7 @@ app.use(express.json());
 app.use(router);
 
 app.listen(port, () => {
-  console.log('Server Started');
+  log('Server Started');
 });
 
 export default app;
