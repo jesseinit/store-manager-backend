@@ -172,5 +172,27 @@ describe('Store Manager', () => {
           });
       });
     });
+
+    describe('DELETE /products/:id', () => {
+      it('Non-existing product id should return a not found error when trying to delete a proudct', done => {
+        chai
+          .request(app)
+          .del('/api/v1/products/10')
+          .end((err, res) => {
+            expect(res.status).to.equal(404);
+            done(err);
+          });
+      });
+
+      it('Admin should be able to delete a product after passing a product id that exist', done => {
+        chai
+          .request(app)
+          .del('/api/v1/products/5')
+          .end((err, res) => {
+            expect(res.status).to.equal(200);
+            done(err);
+          });
+      });
+    });
   });
 });

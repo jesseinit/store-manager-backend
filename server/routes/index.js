@@ -23,4 +23,10 @@ router.put(
   validtor.validationHandler,
   ProductController.updateProduct
 );
+router.delete(
+  '/products/:id',
+  validtor.validateProductId,
+  validtor.validationHandler,
+  ProductController.deleteProduct
+);
 export default router;
