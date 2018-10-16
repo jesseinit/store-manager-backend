@@ -1,7 +1,5 @@
 import { body, param, validationResult } from 'express-validator/check';
 
-const checkUrl = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/g;
-
 const validateProductId = [
   param('id')
     .isInt({ min: 1 })
@@ -10,7 +8,7 @@ const validateProductId = [
 
 const validateNewProduct = [
   body('imgUrl')
-    .custom(imageUrl => checkUrl.test(imageUrl))
+    .custom(imageUrl => /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/g.test(imageUrl))
     .withMessage('Image Input should be a valid image url'),
   body('name')
     .isString()
@@ -35,7 +33,7 @@ const validateProductUpdate = [
     .isInt({ min: 1 })
     .withMessage('Product ID must be a positve number from 1'),
   body('imgUrl')
-    .custom(imageUrl => checkUrl.test(imageUrl))
+    .custom(imageUrl => /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/g.test(imageUrl))
     .withMessage('Image Input should be a valid image url'),
   body('name')
     .isString()
