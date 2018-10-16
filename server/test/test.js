@@ -206,6 +206,7 @@ describe('Store Manager', () => {
       });
     });
   });
+
   describe('Sales', () => {
     describe('GET /sales', () => {
       it('Admin should be able to retrieve all sales made in the store', done => {
@@ -218,6 +219,7 @@ describe('Store Manager', () => {
           });
       });
     });
+
     describe('GET /sales/:id', () => {
       it('Invalid sales id should return an unprocessable input error', done => {
         chai
@@ -249,6 +251,58 @@ describe('Store Manager', () => {
             expect(res.status).to.equal(200);
             expect(res.body).to.have.property('result');
             expect(res.body.result).to.have.length(1);
+            done(err);
+          });
+      });
+    });
+
+    describe('POST /sales', () => {
+      it('Invalid product id should return an unprocessable input error', done => {
+        chai
+          .request(app)
+          .post('/api/v1/sales')
+          .send({
+            id: 0,
+            name: '32inch LED Television',
+            price: '78900',
+            qty: 0
+          })
+          .end((err, res) => {
+            expect(res.status).to.equal(422);
+            expect(res.body).to.have.property('error');
+            done(err);
+          });
+      });
+
+      it('It should not be able to process orders on unavalable products or enough stock', done => {
+        chai
+          .request(app)
+          .post('/api/v1/sales')
+          .send({
+            id: 1,
+            name: '32inch LED Television',
+            price: 78900,
+            qty: 14
+          })
+          .end((err, res) => {
+            expect(res.status).to.equal(400);
+            done(err);
+          });
+      });
+
+      it('Attendant should be able to create a sales record on product and update stock', done => {
+        chai
+          .request(app)
+          .post('/api/v1/sales')
+          .send({
+            id: 1,
+            name: '32inch LED Television',
+            price: 78900,
+            qty: 5
+          })
+          .end((err, res) => {
+            expect(res.status).to.equal(201);
+            expect(res.body).to.have.property('result');
             done(err);
           });
       });

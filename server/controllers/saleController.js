@@ -1,4 +1,5 @@
 import SalesHelper from '../helpers/saleHelper';
+import ProductHelper from '../helpers/productHelper';
 
 /**
  *
@@ -15,7 +16,7 @@ class SalesController {
    * @param {object} res - Response Object
    * @memberof Sales
    */
-  static getAllProducts(req, res) {
+  static getAllSales(req, res) {
     const sales = SalesHelper.getAllSales();
     res.status(200).json({ result: sales });
   }
@@ -37,6 +38,28 @@ class SalesController {
       return;
     }
     res.status(200).json({ result: sale });
+  }
+
+  /**
+   *
+   * @description Retrieves a creates a new sales record
+   * @returns {object} Returned created product
+   * @static
+   * @param {*} req
+   * @param {*} res
+   * @memberof SalesController
+   */
+  static createNewSale(req, res) {
+    const { id, name, price, qty } = req.body;
+    const hasStock = ProductHelper.hasStock({ id, qty });
+    if (hasStock === false) {
+      res.status(400).send({ message: 'Product or stock not available' });
+      return;
+    }
+    const saleDetails = { name, price, qty };
+    const newSale = SalesHelper.createSalesRecord(saleDetails);
+    ProductHelper.updateStock({ id, qty });
+    res.status(201).send({ result: newSale });
   }
 }
 export default SalesController;

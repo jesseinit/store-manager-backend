@@ -34,6 +34,23 @@ class SalesHelper {
     });
     return saleRecord;
   }
+
+  static createSalesRecord(newSale) {
+    const newSaleRecord = {
+      id: sales[sales.length - 1].id + 1,
+      date: Date.now(),
+      imgUrl: newSale.img,
+      productName: newSale.name,
+      qty: newSale.qty,
+      price: newSale.price,
+      get total() {
+        return this.qty * this.price;
+      }
+    };
+
+    sales.push(newSaleRecord);
+    return [newSaleRecord];
+  }
 }
 
 export default SalesHelper;
