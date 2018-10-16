@@ -105,6 +105,14 @@ class ProductHelper {
     return isDeleted;
   }
 
+  /**
+   *
+   * @description Helper method that checks if a product is available and has stock
+   * @static
+   * @param {number} product
+   * @returns Boolean
+   * @memberof ProductHelper
+   */
   static hasStock(product) {
     const retrievedProduct = this.getSingleProduct(product.id);
     if (retrievedProduct.length < 1 || product.qty > retrievedProduct[0].qty) {
@@ -113,6 +121,13 @@ class ProductHelper {
     return true;
   }
 
+  /**
+   *
+   * @description Helper method that updates the product stock details
+   * @static
+   * @param {*} product
+   * @memberof ProductHelper
+   */
   static updateStock(product) {
     const retrievedProduct = this.getSingleProduct(product.id)[0];
     retrievedProduct.qty -= product.qty;

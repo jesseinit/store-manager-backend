@@ -40,6 +40,15 @@ class SalesController {
     res.status(200).json({ result: sale });
   }
 
+  /**
+   *
+   * @description Retrieves a creates a new sales record
+   * @returns {object} Returned created product
+   * @static
+   * @param {*} req
+   * @param {*} res
+   * @memberof SalesController
+   */
   static createNewSale(req, res) {
     const { id, name, price, qty } = req.body;
     const hasStock = ProductHelper.hasStock({ id, qty });
