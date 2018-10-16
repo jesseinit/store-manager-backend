@@ -1,32 +1,11 @@
-import express from 'express';
-import ProductController from '../controllers/productController';
-import validtor from '../middleware/inputValidator';
+import { Router } from 'express';
+import products from './products';
+import sales from './sales';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/products', ProductController.getAllProducts);
-router.get(
-  '/products/:id',
-  validtor.validateProductId,
-  validtor.validationHandler,
-  ProductController.getSingleProduct
-);
-router.post(
-  '/products',
-  validtor.validateNewProduct,
-  validtor.validationHandler,
-  ProductController.createProduct
-);
-router.put(
-  '/products/:id',
-  validtor.validateProductUpdate,
-  validtor.validationHandler,
-  ProductController.updateProduct
-);
-router.delete(
-  '/products/:id',
-  validtor.validateProductId,
-  validtor.validationHandler,
-  ProductController.deleteProduct
-);
+router.use('/api/v1', products, sales);
+router.all('*', (req, res) => {
+  res.status(404).send({ message: 'Welcome to the Begining of Awesomeness 🚀' });
+});
 export default router;
