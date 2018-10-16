@@ -6,6 +6,17 @@ const { expect } = chai;
 chai.use(chaiHttp);
 
 describe('Store Manager', () => {
+  describe('App', () => {
+    it('It should catch and respond to undefined routes', done => {
+      chai
+        .request(app)
+        .get('/*')
+        .end((err, res) => {
+          expect(res.status).to.equal(404);
+          done(err);
+        });
+    });
+  });
   describe('Products', () => {
     describe('GET /products', () => {
       it('Users should be able to get all product', done => {
@@ -188,6 +199,19 @@ describe('Store Manager', () => {
         chai
           .request(app)
           .del('/api/v1/products/5')
+          .end((err, res) => {
+            expect(res.status).to.equal(200);
+            done(err);
+          });
+      });
+    });
+  });
+  describe('Sales', () => {
+    describe('GET /sales', () => {
+      it('Admin should be able to retrieve all sales made in the store', done => {
+        chai
+          .request(app)
+          .get('/api/v1/sales/')
           .end((err, res) => {
             expect(res.status).to.equal(200);
             done(err);
