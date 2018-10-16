@@ -218,5 +218,40 @@ describe('Store Manager', () => {
           });
       });
     });
+    describe('GET /sales/:id', () => {
+      it('Invalid sales id should return an unprocessable input error', done => {
+        chai
+          .request(app)
+          .get('/api/v1/sales/*')
+          .end((err, res) => {
+            expect(res.status).to.equal(422);
+            expect(res.body).to.have.property('error');
+            done(err);
+          });
+      });
+
+      it('Non-existing sales id should return a not found error when fetching a sale', done => {
+        chai
+          .request(app)
+          .get('/api/v1/sales/5')
+          .end((err, res) => {
+            expect(res.status).to.equal(404);
+            expect(res.body).to.not.have.property('result');
+            done(err);
+          });
+      });
+
+      it('Existing sale id should return the matching sale record', done => {
+        chai
+          .request(app)
+          .get('/api/v1/sales/1')
+          .end((err, res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body).to.have.property('result');
+            expect(res.body.result).to.have.length(1);
+            done(err);
+          });
+      });
+    });
   });
 });
