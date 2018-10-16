@@ -104,6 +104,19 @@ class ProductHelper {
     });
     return isDeleted;
   }
+
+  static hasStock(product) {
+    const retrievedProduct = this.getSingleProduct(product.id);
+    if (retrievedProduct.length < 1 || product.qty > retrievedProduct[0].qty) {
+      return false;
+    }
+    return true;
+  }
+
+  static updateStock(product) {
+    const retrievedProduct = this.getSingleProduct(product.id)[0];
+    retrievedProduct.qty -= product.qty;
+  }
 }
 
 export default ProductHelper;

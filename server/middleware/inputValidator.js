@@ -59,6 +59,23 @@ const validateProductUpdate = [
     .withMessage('Product qty must be a positive number from 1')
 ];
 
+const validateNewSale = [
+  body('id')
+    .isInt({ min: 1 })
+    .withMessage('Product ID must be a positve number from 1'),
+  body('name')
+    .isString()
+    .withMessage('Product name must be a string')
+    .isLength({ min: 2 })
+    .withMessage('Product name must be atlease 2 letters long'),
+  body('price')
+    .isInt({ min: 1 })
+    .withMessage('Product price must be decimal number of 1 or more'),
+  body('qty')
+    .isInt({ min: 1 })
+    .withMessage('Order qty must be a positive number from 1')
+];
+
 const validationHandler = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -69,6 +86,7 @@ const validationHandler = (req, res, next) => {
 };
 
 const validations = {
+  validateNewSale,
   validateProductUpdate,
   validateNewProduct,
   validateProductId,

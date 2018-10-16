@@ -2,7 +2,7 @@ const sales = [
   {
     id: 1,
     date: Date.now(),
-    productName: 25,
+    productName: 'Television',
     qty: 5,
     price: 10,
     get total() {
