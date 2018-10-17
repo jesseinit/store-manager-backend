@@ -1,35 +1,35 @@
 const products = [
   {
     id: 1,
-    imgUrl: 'photo.jpg',
+    imgUrl: 'https://example.com/tv.jpg',
     name: 'Television',
     category: 'Electronics',
-    qty: 13,
-    price: 78500.0
+    price: 1900,
+    qty: 10
   },
   {
     id: 2,
-    imgUrl: 'photo.jpg',
-    name: 'PlayStaytion 4',
-    category: 'Gaming',
-    qty: 11,
-    price: 150000.0
+    imgUrl: 'https://example.com/radio.jpg',
+    name: 'Radio',
+    category: 'Electronics',
+    price: 65000,
+    qty: 3
   },
   {
     id: 3,
-    imgUrl: 'photo.jpg',
-    name: 'Iphone X',
-    category: 'Mobile Phones',
-    qty: 10,
-    price: 90000.0
+    imgUrl: 'https://example.com/watch.jpg',
+    name: 'Curren Watch',
+    category: 'Watches',
+    price: 5200,
+    qty: 19
   },
   {
     id: 4,
-    imgUrl: 'photo.jpg',
-    name: 'Fridge',
-    category: 'Electronics',
-    qty: 9,
-    price: 65800.0
+    imgUrl: 'https://example.com/phone.jpg',
+    name: 'iPhone X',
+    category: 'Phones',
+    price: 559000,
+    qty: 13
   }
 ];
 
