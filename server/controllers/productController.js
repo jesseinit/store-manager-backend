@@ -30,7 +30,7 @@ class ProductController {
   static getSingleProduct(req, res) {
     const productId = parseInt(req.params.id, 10);
     const product = ProductHelper.getSingleProduct(productId);
-    if (!product.length) {
+    if (typeof product[0] === 'undefined') {
       res.status(404).json({ message: 'Product not found' });
       return;
     }
@@ -46,14 +46,7 @@ class ProductController {
    * @memberof ProductController
    */
   static createProduct(req, res) {
-    const { imgUrl, name, category, price, qty } = req.body;
-    const newProduct = ProductHelper.createProduct({
-      imgUrl,
-      name,
-      category,
-      price,
-      qty
-    });
+    const newProduct = ProductHelper.createProduct(req.body);
     res.status(201).json({ result: newProduct });
   }
 
