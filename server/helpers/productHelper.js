@@ -21,18 +21,12 @@ class ProductHelper {
    *
    * @description Helper method that gets a single product's represenation from the data structure
    * @static
-   * @returns {object} An array of objects
-   * @param {*} prodId Id of the product to be retrieved
+   * @returns {object} An array containg the found product or undefined if product was not found
+   * @param {number} prodId Id of the product to be retrieved
    * @memberof ProductHelper
    */
   static getSingleProduct(prodId) {
-    const productFound = [];
-    products.forEach(product => {
-      if (product.id === prodId) {
-        productFound.push(product);
-      }
-    });
-    return productFound;
+    return [products.find(product => product.id === prodId)];
   }
 
   /**
@@ -65,25 +59,16 @@ class ProductHelper {
    * @memberof ProductHelper
    */
   static updateProduct(productArg) {
-    const updatedProduct = [];
-    products.forEach(product => {
-      if (product.id === productArg.id) {
-        const modifiedProduct = {
-          id: product.id,
-          imgUrl: product.imgUrl === productArg.imgUrl ? product.imgUrl : productArg.imgUrl,
-          name: product.name === productArg.name ? product.name : productArg.name,
-          category: product.category === productArg.category ? product.category : productArg.category,
-          price:
-            product.price === productArg.price
-              ? parseInt(product.price, 10)
-              : parseInt(productArg.price, 10),
-          qty: product.qty === productArg.qty ? parseInt(product.qty, 10) : parseInt(productArg.qty, 10)
-        };
-        updatedProduct.push(modifiedProduct);
-        products[products.indexOf(product)] = modifiedProduct;
-      }
-    });
-    return updatedProduct;
+    const foundProduct = products.find(product => product.id === productArg.id);
+    if (!foundProduct) {
+      return [];
+    }
+    foundProduct.imgUrl = productArg.imgUrl;
+    foundProduct.name = productArg.name;
+    foundProduct.category = productArg.category;
+    foundProduct.price = parseInt(productArg.price, 10);
+    foundProduct.qty = parseInt(productArg.qty, 10);
+    return [foundProduct];
   }
 
   /**
@@ -94,15 +79,13 @@ class ProductHelper {
    * @memberof ProductHelper
    */
   static deleteProduct(prodId) {
-    let isDeleted = false;
-    products.forEach(product => {
-      if (product.id === prodId) {
-        const productIndex = products.indexOf(product);
-        products.splice(productIndex, 1);
-        isDeleted = true;
-      }
-    });
-    return isDeleted;
+    const foundProduct = products.find(product => product.id === prodId);
+    if (!foundProduct) {
+      return false;
+    }
+    const foundProductIndex = products.indexOf(foundProduct);
+    products.splice(foundProductIndex, 1);
+    return true;
   }
 
   /**
