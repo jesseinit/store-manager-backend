@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css?family=Nunito:400,700");
 * {
   padding: 0;
   margin: 0;
@@ -147,7 +148,7 @@ a {
 }
 
 #site-main .aside__nav ul li a:hover {
-  background: #dae0e7;
+  background: #dcebff;
 }
 
 #site-main .aside__nav ul li a.selected {
@@ -304,7 +305,7 @@ a {
 #site-main .main .products .product {
   position: relative;
   margin-bottom: 10px;
-  padding: 10px;
+  padding: 20px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
@@ -314,8 +315,8 @@ a {
 
 @media (min-width: 1023px) {
   #site-main .main .products .product {
-    width: 31%;
-    margin-right: 21px;
+    width: 32%;
+    margin-right: 20px;
   }
   #site-main .main .products .product:nth-child(3n) {
     margin-right: 0px;
@@ -481,6 +482,13 @@ a {
   margin-bottom: 10px;
 }
 
+#site-main .main .sales input[type='submit'] {
+  padding: 5px 5px;
+  border: none;
+  background: #85BBFF;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
 #site-main .main .sales__meta {
   margin: 10px 0;
 }
@@ -490,10 +498,16 @@ a {
   margin-bottom: 10px;
 }
 
+#site-main .main .sales__meta .sort {
+  margin: 20px 0;
+}
+
 @media (min-width: 1023px) {
   #site-main .main .sales__meta .sort {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: space-between;
   }
 }
 
@@ -503,17 +517,31 @@ a {
 }
 
 #site-main .main .sales__meta .sort .filter {
-  display: flex;
+  display: block;
+}
+
+#site-main .main .sales__meta .sort .filter .clear {
+  margin-top: 0px;
+}
+
+@media (min-width: 1023px) {
+  #site-main .main .sales__meta .sort .filter {
+    display: flex;
+    align-items: center;
+  }
 }
 
 #site-main .main .sales__meta .sort .clear {
-  margin-top: 10px;
+  padding: 3px 5px;
   margin-left: 3px;
+  border: none;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 }
 
 #site-main .main .sales__meta fieldset {
   padding: 5px;
   border: 1px solid rgba(204, 204, 204, 0.5);
+  margin-bottom: 10px;
 }
 
 #site-main .main .sales__meta fieldset legend {
@@ -522,7 +550,8 @@ a {
 
 #site-main .main .sales__meta fieldset input {
   width: 100%;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
+  padding: 3px;
 }
 
 @media (min-width: 1023px) {
@@ -539,19 +568,18 @@ a {
   font-size: 11px;
 }
 
-#site-main .main .sales__meta .add-new {
-  margin-left: 0;
+#site-main .main .sales__meta fieldset select {
+  padding: 3px;
+  margin-bottom: 5px;
 }
 
-#site-main .main .sales__meta .add-new button {
-  padding: 3px;
+#site-main .main .sales__meta .add-new {
+  margin-left: 0;
 }
 
 #site-main .main .sales .table-wrapper {
   width: 100%;
   overflow-x: scroll;
-  overflow-y: scroll;
-  height: 700px;
 }
 
 @media (min-width: 1023px) {
@@ -575,12 +603,12 @@ a {
 #site-main .main .sales__table thead {
   background: #2c363b;
   color: #fff;
-  font-size: 0.6rem;
+  font-size: 0.8rem;
 }
 
 @media (min-width: 1023px) {
   #site-main .main .sales__table thead {
-    font-size: 0.8rem;
+    font-size: .9rem;
   }
 }
 
@@ -589,17 +617,18 @@ a {
 }
 
 #site-main .main .sales__table tbody {
-  font-size: 0.6rem;
+  font-size: 0.8rem;
 }
 
 @media (min-width: 1023px) {
   #site-main .main .sales__table tbody {
-    font-size: 0.8rem;
+    font-size: .9rem;
   }
 }
 
 #site-main .main .sales__table tbody button {
-  padding: 0 5px;
+  width: 50px;
+  padding: 5px;
   margin-bottom: 2px;
   border: none;
 }
@@ -613,10 +642,6 @@ a {
   background: #54ea8e;
 }
 
-#site-main .main .sales__table tbody tr td:nth-child(2n) {
-  white-space: nowrap;
-}
-
 #site-main .main .sales__table tbody tr:hover {
   background: rgba(238, 238, 238, 0.3);
 }
@@ -628,8 +653,8 @@ a {
 
 #site-main .main .sales__table td,
 #site-main .main .sales__table th {
-  padding: 0.5rem;
-  text-align: left;
+  padding: 1rem;
+  text-align: center;
 }
 
 #site-main .main .sales__table .price,
@@ -761,14 +786,23 @@ a {
 }
 
 #site-main .main .pagination {
-  display: flex;
-  justify-content: space-around;
+  display: inline-block;
+  margin-left: 50%;
+  transform: translateX(-50%);
 }
 
-@media (min-width: 1023px) {
-  #site-main .main .pagination {
-    display: block;
-  }
+#site-main .main .pagination button {
+  margin-right: 5px;
+  padding: 5px;
+  border-radius: 3px;
+  border: 1px solid #ff7a42;
+  background: white;
+  cursor: pointer;
+}
+
+#site-main .main .pagination button:hover {
+  background: #ff7a42;
+  color: white;
 }
 
 #site-main .form__wrapper {
