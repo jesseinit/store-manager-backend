@@ -230,7 +230,7 @@ a {
 }
 
 #site-main .main .search__submit {
-  background: #ffee5b;
+  background: #a9cfff;
   padding: 7px 20px;
   color: #141414;
   font-size: 1rem;
@@ -240,7 +240,7 @@ a {
 }
 
 #site-main .main .search__submit:hover {
-  background: #ffe928;
+  background: #76b3ff;
 }
 
 @media (min-width: 1023px) {
@@ -482,11 +482,17 @@ a {
   margin-bottom: 10px;
 }
 
-#site-main .main .sales input[type='submit'] {
+#site-main .main .sales input[type='submit'], #site-main .main .sales input[type='button'] {
   padding: 5px 5px;
   border: none;
-  background: #85BBFF;
+  background: #a9cfff;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 2023px) {
+  #site-main .main .sales input[type='submit'], #site-main .main .sales input[type='button'] {
+    padding: 10px 10px;
+  }
 }
 
 #site-main .main .sales__meta {
@@ -538,6 +544,12 @@ a {
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 }
 
+@media (min-width: 2023px) {
+  #site-main .main .sales__meta .sort .clear {
+    padding: 10px;
+  }
+}
+
 #site-main .main .sales__meta fieldset {
   padding: 5px;
   border: 1px solid rgba(204, 204, 204, 0.5);
@@ -555,12 +567,23 @@ a {
 }
 
 @media (min-width: 1023px) {
+  #site-main .main .sales__meta fieldset input {
+    width: auto;
+  }
+}
+
+@media (min-width: 2023px) {
+  #site-main .main .sales__meta fieldset input {
+    width: auto;
+    padding: 10px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 1023px) {
   #site-main .main .sales__meta fieldset {
     display: block;
     width: max-content;
-  }
-  #site-main .main .sales__meta fieldset input {
-    width: auto;
   }
 }
 
@@ -571,6 +594,13 @@ a {
 #site-main .main .sales__meta fieldset select {
   padding: 3px;
   margin-bottom: 5px;
+}
+
+@media (min-width: 2023px) {
+  #site-main .main .sales__meta fieldset select {
+    padding: 10px;
+    font-size: 1.1rem;
+  }
 }
 
 #site-main .main .sales__meta .add-new {
@@ -612,6 +642,12 @@ a {
   }
 }
 
+@media (min-width: 2023px) {
+  #site-main .main .sales__table thead {
+    font-size: 1.1rem;
+  }
+}
+
 #site-main .main .sales__table thead:hover {
   background: #2c363b;
 }
@@ -623,6 +659,12 @@ a {
 @media (min-width: 1023px) {
   #site-main .main .sales__table tbody {
     font-size: .9rem;
+  }
+}
+
+@media (min-width: 2023px) {
+  #site-main .main .sales__table tbody {
+    font-size: 1.1rem;
   }
 }
 
@@ -639,7 +681,8 @@ a {
 }
 
 #site-main .main .sales__table tbody button.green {
-  background: #54ea8e;
+  background: #4297ff;
+  color: #fff;
 }
 
 #site-main .main .sales__table tbody tr:hover {
@@ -786,23 +829,23 @@ a {
 }
 
 #site-main .main .pagination {
-  display: inline-block;
-  margin-left: 50%;
-  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
 }
 
 #site-main .main .pagination button {
   margin-right: 5px;
   padding: 5px;
   border-radius: 3px;
-  border: 1px solid #ff7a42;
+  border: 1px solid #a9cfff;
   background: white;
   cursor: pointer;
 }
 
 #site-main .main .pagination button:hover {
-  background: #ff7a42;
-  color: white;
+  background: #a9cfff;
+  color: #000;
 }
 
 #site-main .form__wrapper {

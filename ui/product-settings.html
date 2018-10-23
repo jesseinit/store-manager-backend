@@ -15,7 +15,7 @@
     <nav class="top-nav">
       <ul>
         <li class="cart"><a href="./cart.html">Cart</a></li>
-        <li><a href="#">Logout</a></li>
+        <li><a href="./index.html">Logout</a></li>
       </ul>
     </nav>
   </header>
@@ -100,54 +100,57 @@
                   <legend>Add New Category</legend>
                   <input type="text" placeholder="Category Name" required>
                   <input type="submit" value="Add Category" id="new-category">
+                  <input type="button" value="View Categories" id="view-categories">
                 </fieldset>
               </form>
             </fieldset>
           </div>
         </div>
-        <table class="sales__table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Product Name</th>
-              <th>Stock</th>
-              <th>Price</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>2341</td>
-              <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
-              <td>2</td>
-              <td>249,999</td>
-              <td style="text-align: center"><button>Edit</button><button class="red">Delete</button></td>
-            </tr>
-            <tr>
-              <td>1201</td>
-              <td>Xiaomi Redmi S2 3GB 32GB Snapdragon 625 Octa Core 5.99" 18:9 Full Screen
-                Dual Camera 12MP+5MP Smartphone</td>
-              <td>1</td>
-              <td>89,999</td>
-              <td style="text-align: center"><button>Edit</button><button class="red">Delete</button></td>
-            </tr>
-            <tr>
-              <td>2341</td>
-              <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
-              <td>2</td>
-              <td>249,999</td>
-              <td style="text-align: center"><button>Edit</button><button class="red">Delete</button></td>
-            </tr>
-            <tr>
-              <td>2341</td>
-              <td>Original Sandisk Micro SD card Class10 TF card16gb 32gb 64gb 128gb
-                80Mb/s memory card for samrtphone and table PC</td>
-              <td>1</td>
-              <td>6,999</td>
-              <td style="text-align: center"><button>Edit</button><button class="red">Delete</button></td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-wrapper">
+          <table class="sales__table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Product Name</th>
+                <th>Stock</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2341</td>
+                <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
+                <td>2</td>
+                <td>249,999</td>
+                <td style="text-align: center"><button class="green">Edit</button><button class="red">Delete</button></td>
+              </tr>
+              <tr>
+                <td>1201</td>
+                <td>Xiaomi Redmi S2 3GB 32GB Snapdragon 625 Octa Core 5.99" 18:9 Full Screen
+                  Dual Camera 12MP+5MP Smartphone</td>
+                <td>1</td>
+                <td>89,999</td>
+                <td style="text-align: center"><button class="green">Edit</button><button class="red">Delete</button></td>
+              </tr>
+              <tr>
+                <td>2341</td>
+                <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
+                <td>2</td>
+                <td>249,999</td>
+                <td style="text-align: center"><button class="green">Edit</button><button class="red">Delete</button></td>
+              </tr>
+              <tr>
+                <td>2341</td>
+                <td>Original Sandisk Micro SD card Class10 TF card16gb 32gb 64gb 128gb
+                  80Mb/s memory card for samrtphone and table PC</td>
+                <td>1</td>
+                <td>6,999</td>
+                <td style="text-align: center"><button class="green">Edit</button><button class="red">Delete</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
       <section class="pagination">
         <button class="pagination__prev">⬅ Previous Page</button>
