@@ -627,6 +627,7 @@ a {
 }
 
 #site-main .main .sales__table tbody button {
+  width: 50px;
   padding: 5px;
   margin-bottom: 2px;
   border: none;
