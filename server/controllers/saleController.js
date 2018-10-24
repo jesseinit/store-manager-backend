@@ -1,5 +1,6 @@
 import SalesHelper from '../helpers/saleHelper';
 import ProductHelper from '../helpers/productHelper';
+import isEmptyObject from '../utils/isEmptyObject';
 
 /**
  *
@@ -10,7 +11,7 @@ class SalesController {
   /**
    *
    * @description Retrieves all the sales from the data source
-   * @returns {object} Returned sales array
+   * @returns {array} Returns all sales records as an array
    * @static
    * @param {object} req - Request Object
    * @param {object} res - Response Object
@@ -18,13 +19,13 @@ class SalesController {
    */
   static getAllSales(req, res) {
     const sales = SalesHelper.getAllSales();
-    res.status(200).json({ result: sales });
+    res.status(200).json({ status: true, result: sales });
   }
 
   /**
    *
    * @description Retrieves a single sale record from the data source
-   * @returns {object} Returned sale array
+   * @returns {object} Returned sale record object
    * @static
    * @param {object} req - Request Object
    * @param {object} res - Response Object
@@ -33,33 +34,32 @@ class SalesController {
   static getSingleSale(req, res) {
     const saleId = parseInt(req.params.id, 10);
     const sale = SalesHelper.getSingleSale(saleId);
-    if (!sale.length) {
-      res.status(404).json({ message: 'Sale Record not found' });
+    if (isEmptyObject(sale)) {
+      res.status(404).json({ status: false, message: 'Sale Record not found' });
       return;
     }
-    res.status(200).json({ result: sale });
+    res.status(200).json({ status: true, result: sale });
   }
 
   /**
    *
-   * @description Retrieves a creates a new sales record
-   * @returns {object} Returned created product
+   * @description Creates a new sales record
+   * @returns {object} Returns created sale record
    * @static
    * @param {*} req
    * @param {*} res
    * @memberof SalesController
    */
   static createNewSale(req, res) {
-    const { id, name, price, qty } = req.body;
-    const hasStock = ProductHelper.hasStock({ id, qty });
-    if (hasStock === false) {
-      res.status(400).send({ message: 'Product or stock not available' });
+    const { id, qty } = req.body;
+    const inStock = ProductHelper.inStock({ id, qty });
+    if (inStock === false) {
+      res.status(400).send({ status: false, message: 'Product or stock not available' });
       return;
     }
-    const saleDetails = { name, price, qty };
-    const newSale = SalesHelper.createSalesRecord(saleDetails);
+    const newSale = SalesHelper.createSalesRecord({ id, qty });
     ProductHelper.updateStock({ id, qty });
-    res.status(201).send({ result: newSale });
+    res.status(201).send({ status: true, result: newSale });
   }
 }
 export default SalesController;
