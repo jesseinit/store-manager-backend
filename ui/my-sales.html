@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="css/app.css">
+  <title>My Sales - Store Manager</title>
+</head>
+
+<body>
+  <header id="site-header">
+    <a class="logo" href="./make-sale.html">Store Manager</a>
+    <nav class="top-nav">
+      <ul>
+        <li class="cart"><a href="./cart.html">Cart</a></li>
+        <li><a href="./index.html">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main id="site-main" class="row">
+    <aside class="aside">
+      <nav class="aside__nav">
+        <ul>
+          <li><a href="./make-sale.html">Make Sale</a></li>
+          <li><a class="selected" href="./my-sales.html">My Sales</a></li>
+          <li><a href="./all-products.html">All Products</a></li>
+        </ul>
+      </nav>
+      <nav class="aside__nav admin">
+        <ul>
+          <li><a href="./admin.html">Admin Area</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <section class="main">
+      <section class="summary">
+        <div class="summary__card">
+          <div class="details">
+            <p class="header">Sales Order Processed</p>
+            <h2 class="value">20,593</h2>
+          </div>
+          <div class="icon yellow"><img src="./img/sales-rec-icon.png" alt="card-icon"></div>
+        </div>
+        <div class="summary__card">
+          <div class="details">
+            <p class="header">Total Products Sold</p>
+            <h2 class="value">1,593</h2>
+          </div>
+          <div class="icon red"><img src="./img/product-sold-icon.png" alt="card-icon"></div>
+        </div>
+        <div class="summary__card">
+          <div class="details">
+            <p class="header">Product Worth Sold</p>
+            <h2 class="value">N157,593</h2>
+          </div>
+          <div class="icon green"><img src="./img/product-worth-icon.png" alt="card-icon"></div>
+        </div>
+      </section>
+      <section class="sales">
+        <div class="sales__meta">
+          <h3 class="header">My Sales History</h3>
+          <div class="sort">
+            <form id="sort__date">
+              <fieldset>
+                <legend>Date Range</legend>
+                <strong>From: </strong><input type="date" id="start-date" required>
+                <strong>To: </strong><input type="date" id="end-date" required>
+                <input type="submit" value="Retrieve Records">
+              </fieldset>
+            </form>
+            <form id="sort__id">
+              <fieldset>
+                <legend>By Sales ID</legend>
+                <input type="text" placeholder="Enter Sales ID">
+                <input type="submit" value="Retrieve Records">
+              </fieldset>
+            </form>
+            <button class="clear">Clear Filters</button>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="sales__table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th colspan="1">Date</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th class="total">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2341</td>
+                <td>29-11-2018</td>
+                <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
+                <td>2</td>
+                <td class="price">249,999</td>
+                <td class="total">499,998.00</td>
+              </tr>
+              <tr>
+                <td>1201</td>
+                <td>29-11-2018</td>
+                <td>Xiaomi Redmi S2 3GB 32GB Snapdragon 625 Octa Core 5.99" 18:9 Full Screen
+                  Dual Camera 12MP+5MP Smartphone</td>
+                <td>1</td>
+                <td class="price">89,999</td>
+                <td class="total">89,999.00</td>
+              </tr>
+              <tr>
+                <td>2341</td>
+                <td>29-11-2018</td>
+                <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
+                <td>2</td>
+                <td class="price">249,999</td>
+                <td class="total">499,998.00</td>
+              </tr>
+              <tr>
+                <td>2341</td>
+                <td>29-11-2018</td>
+                <td>Original Sandisk Micro SD card Class10 TF card16gb 32gb 64gb 128gb
+                  80Mb/s memory card for samrtphone and table PC</td>
+                <td>1</td>
+                <td class="price">6,999</td>
+                <td class="total">6,999.00</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th>Total:</th>
+              <th class="total">808,887.00</th>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+  <footer id="site-footer">
+    <p>Store Manager &copy; 2018</p>
+  </footer>
+</body>
+
+</html>
