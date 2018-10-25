@@ -1,6 +1,9 @@
 import express from 'express';
 import log from 'fancy-log';
 import router from './routes';
+import { setupDbTables } from './utils/connection';
+
+setupDbTables();
 
 const app = express();
 const port = process.env.PORT || 3000;
