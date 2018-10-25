@@ -10,7 +10,7 @@
     "build": "rm -rf ./dist/* && babel ./server --out-dir ./dist --ignore ./server/test",
     "start": "npm run build && node ./dist",
     "dev": "nodemon --exec babel-node ./server/index.js --env",
-    "test": "nyc --reporter=text-summary --reporter=html mocha --recursive ./server/tests --exit --require babel-register"
+    "test": "nyc --reporter=text --reporter=html mocha --recursive ./server/tests --exit --require babel-register"
   },
   "repository": {
     "type": "git",
