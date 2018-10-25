@@ -2,11 +2,16 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../../index';
 import mockData from '../mock';
+import { pool } from '../../utils/connection';
 
 const { invalidProductEntry, validProductEntry } = mockData;
 
 const { expect } = chai;
 chai.use(chaiHttp);
+
+after(() => {
+  pool.query(`DROP TABLE Users`);
+});
 
 describe('Products', () => {
   describe('GET /products', () => {
