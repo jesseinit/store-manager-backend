@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import products from './products';
 import sales from './sales';
+import user from './user';
 
 const router = Router();
-router.use((req, res, next) => {
-  req.validationErrors = [];
+
+router.use('/api/v1', user, products, sales);
+
+router.use((err, req, res, next) => {
+  res.status(err.status).json({ status: false, message: err.message });
   next();
 });
-router.use('/api/v1', products, sales);
-router.all('*', (req, res) => {
-  res.status(404).send({ message: 'Welcome to the Begining of Awesomeness 🚀' });
-});
+
 export default router;

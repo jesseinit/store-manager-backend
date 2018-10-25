@@ -5,7 +5,7 @@ const emptyObject = {};
 const nonEmptyObject = { hello: 'Hi' };
 
 describe('Empty Object Utility Function', () => {
-  it('Should the utility file should export a function', done => {
+  it('The utility file should export a function', done => {
     expect(isEmptyObject).to.be.a('function');
     done();
   });
