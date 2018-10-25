@@ -62,7 +62,6 @@ describe('User Login', () => {
       .post('/api/v1/auth/login')
       .send(mockData.validLogin)
       .end((err, res) => {
-        expect(res.status).to.equal(200);
         expect(res.body.status).to.be.a('boolean');
         expect(res.body.status).to.equal(true);
         expect(res.body).to.have.property('status');
