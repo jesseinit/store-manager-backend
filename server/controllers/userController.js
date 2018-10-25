@@ -16,16 +16,13 @@ class UserController {
    * @returns {string} User token
    * @memberof UserController
    */
-  static async loginUser(req, res) {
-    try {
-      const result = await UserHelper.loginUser(req.body);
-      if (result instanceof Error) {
-        throw result;
-      }
-      res.status(200).json({ status: true, token: result });
-    } catch (error) {
-      res.status(error.status || 500).json({ status: false, message: error.message });
+  static async loginUser(req, res, next) {
+    const result = await UserHelper.loginUser(req.body);
+    if (result instanceof Error) {
+      next(result);
+      return;
     }
+    res.status(200).json({ status: true, token: result });
   }
 }
 

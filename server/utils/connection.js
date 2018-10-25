@@ -39,18 +39,15 @@ const salesTable = `CREATE TABLE IF NOT EXISTS Sales (
   UserID int NOT NULL
 );`;
 
-const setupOwnerAccount = async () => {
-  const owner = await pool.query(query.findOwner());
-  if (owner.rows.length === 0) {
-    const ownerPassword = 'owner';
-    const hashedPassword = bcrypt.hashSync(ownerPassword, 10);
-    await pool.query(query.regUser('Store Owner', hashedPassword, 'Owner'));
-  }
-};
-
 const setupDbTables = async () => {
   await pool.query(`${usersTable} ${productsTable} ${categoryTable} ${salesTable}`);
-  await setupOwnerAccount();
+  await pool.query(query.findOwner()).then(owner => {
+    if (owner.rows.length === 0) {
+      const ownerPassword = 'owner';
+      const hashedPassword = bcrypt.hashSync(ownerPassword, 10);
+      pool.query(query.regUser('Store Owner', hashedPassword, 'Owner'));
+    }
+  });
 };
 
-export { pool, setupDbTables, setupOwnerAccount };
+export { pool, setupDbTables };
