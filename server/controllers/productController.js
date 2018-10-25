@@ -1,4 +1,5 @@
 import ProductHelper from '../helpers/productHelper';
+import isEmptyObject from '../utils/isEmptyObject';
 
 /**
  *
@@ -8,7 +9,7 @@ import ProductHelper from '../helpers/productHelper';
 class ProductController {
   /**
    * @description Retrieves all the products from the data source
-   * @returns {object} Returned products array
+   * @returns {array} Returned products array
    * @static
    * @param {object} req - Request Object
    * @param {object} res - Response Object
@@ -16,12 +17,12 @@ class ProductController {
    */
   static getAllProducts(req, res) {
     const products = ProductHelper.allProducts();
-    res.status(200).json({ result: products });
+    res.status(200).json({ status: true, result: products });
   }
 
   /**
    * @description Retrieves a single product from the data source
-   * @returns {object} Returned product array
+   * @returns {object} Returned product object
    * @static
    * @param {object} req - Request Object
    * @param {object} res - Response Object
@@ -30,11 +31,11 @@ class ProductController {
   static getSingleProduct(req, res) {
     const productId = parseInt(req.params.id, 10);
     const product = ProductHelper.getSingleProduct(productId);
-    if (typeof product[0] === 'undefined') {
-      res.status(404).json({ message: 'Product not found' });
+    if (isEmptyObject(product)) {
+      res.status(404).json({ status: false, message: 'Product not found' });
       return;
     }
-    res.status(200).json({ result: product });
+    res.status(200).json({ status: true, result: product });
   }
 
   /**
@@ -47,7 +48,11 @@ class ProductController {
    */
   static createProduct(req, res) {
     const newProduct = ProductHelper.createProduct(req.body);
-    res.status(201).json({ result: newProduct });
+    if (isEmptyObject(newProduct)) {
+      res.status(400).json({ status: false, message: 'Duplicate product name not allowed' });
+      return;
+    }
+    res.status(201).json({ status: true, result: newProduct });
   }
 
   /**
@@ -69,11 +74,11 @@ class ProductController {
       price,
       qty
     });
-    if (!updatedProduct.length) {
-      res.status(404).json({ message: 'Product not found' });
+    if (isEmptyObject(updatedProduct)) {
+      res.status(404).json({ status: false, message: 'Product not found' });
       return;
     }
-    res.status(200).json({ result: updatedProduct });
+    res.status(200).json({ status: true, result: updatedProduct });
   }
 
   /**
@@ -88,10 +93,10 @@ class ProductController {
     const productId = parseInt(req.params.id, 10);
     const isDeleted = ProductHelper.deleteProduct(productId);
     if (!isDeleted) {
-      res.status(404).json({ message: 'Product not found' });
+      res.status(404).json({ status: false, message: 'Product not found' });
       return;
     }
-    res.status(200).json({ message: 'Product deleted' });
+    res.status(200).json({ status: true, message: 'Product deleted' });
   }
 }
 
