@@ -8,7 +8,7 @@ const router = Router();
 router.use('/api/v1', user, products, sales);
 
 router.use((err, req, res, next) => {
-  res.status(err.status).json({ status: false, message: err.message });
+  res.status(err.status || 500).json({ status: false, message: err.message });
   next();
 });
 
