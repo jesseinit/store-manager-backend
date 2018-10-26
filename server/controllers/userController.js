@@ -1,14 +1,4 @@
-import 'babel-polyfill';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-// import UserHelper from '../helpers/userHelper';
-import pool from '../utils/connection';
-import query from '../utils/queries';
-
-dotenv.config();
-
-const SECRET_KEY = process.env.JWT_KEY;
+import UserHelper from '../helpers/userHelper';
 
 /**
  *
@@ -26,31 +16,14 @@ class UserController {
    * @returns {string} User token
    * @memberof UserController
    */
-  static async loginUser(req, res) {
+  static async loginUser(req, res, next) {
     const { userid, password } = req.body;
-    const foundUser = await pool.query(query.findUser(userid));
-
-    if (foundUser.rows.length < 1) {
-      res.status(404).send({ status: false, message: 'User not found' });
+    const result = await UserHelper.loginUser({ userid, password });
+    if (result instanceof Error) {
+      next(result);
       return;
     }
-
-    const isPasswordValid = await bcrypt.compare(password, foundUser.rows[0].password);
-    if (!isPasswordValid) {
-      res.status(401).send({ status: false, message: 'Authenication Failed' });
-      return;
-    }
-
-    const token = jwt.sign(
-      {
-        id: foundUser.rows[0].userid,
-        name: foundUser.rows[0].name,
-        role: foundUser.rows[0].role
-      },
-      SECRET_KEY
-    );
-
-    res.status(200).json({ status: true, token });
+    res.status(200).json({ status: true, token: result });
   }
 }
 
