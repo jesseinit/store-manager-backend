@@ -11,7 +11,7 @@
     "start": "npm run build && node ./dist",
     "migrations":"babel-node ./server/config/migrations.js --env",
     "dev": "nodemon --exec babel-node ./server/index.js --env",
-    "test": "npm run migrations && nyc --reporter=text --reporter=html mocha --recursive ./server/tests --exit --require babel-register"
+    "test": "nyc --reporter=text --reporter=html mocha --recursive ./server/tests --exit --require babel-register"
   },
   "repository": {
     "type": "git",
