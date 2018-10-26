@@ -68,4 +68,4 @@ const setupMigrations = () => {
     });
 };
 
-export default setupMigrations();
+export default setupMigrations;

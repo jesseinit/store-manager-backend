@@ -3,6 +3,9 @@ import chaiHttp from 'chai-http';
 import app from '../..';
 import mockData from '../mock';
 import pool from '../../utils/connection';
+import setupDb from '../../config/migrations';
+
+setupDb();
 
 const { expect } = chai;
 chai.use(chaiHttp);
