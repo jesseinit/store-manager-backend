@@ -1,7 +1,7 @@
 import 'babel-polyfill';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { pool } from '../utils/connection';
+import pool from '../utils/connection';
 import query from '../utils/queries';
 import errorHandler from '../utils/errorHandler';
 

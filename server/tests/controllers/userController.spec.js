@@ -2,7 +2,7 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../..';
 import mockData from '../mock';
-import { pool } from '../../utils/connection';
+import pool from '../../utils/connection';
 
 const { expect } = chai;
 chai.use(chaiHttp);
