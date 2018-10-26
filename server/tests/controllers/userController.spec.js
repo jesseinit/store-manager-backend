@@ -24,18 +24,6 @@ describe('User Login', () => {
       });
   });
 
-  it('Store Attendant or Admin should be able to login ', done => {
-    chai
-      .request(app)
-      .post('/api/v1/auth/login')
-      .send(mockData.validLogin)
-      .end((err, res) => {
-        expect(res.status).to.equal(200);
-        expect(res.body.token).to.be.a('string');
-        done(err);
-      });
-  });
-
   it('Non-existing account should return 404 error', done => {
     chai
       .request(app)
@@ -64,6 +52,18 @@ describe('User Login', () => {
         expect(res.body.status).to.be.a('boolean');
         expect(res.body.status).to.equal(false);
         expect(res.body.message).to.equal('Authenication Failed');
+        done(err);
+      });
+  });
+
+  it('Store Attendant or Admin should be able to login ', done => {
+    chai
+      .request(app)
+      .post('/api/v1/auth/login')
+      .send(mockData.validLogin)
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.body.token).to.be.a('string');
         done(err);
       });
   });
