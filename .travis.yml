@@ -10,9 +10,6 @@ directories:
 services:
   - postgresql
 
-addons:
-  postgresql: "10"
-
 before_script:
   - psql -c 'create database storemanager;' -U postgres
   - npm run migrations
