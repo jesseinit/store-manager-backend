@@ -1,9 +1,12 @@
 import 'babel-polyfill';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 // import UserHelper from '../helpers/userHelper';
 import pool from '../utils/connection';
 import query from '../utils/queries';
+
+dotenv.config();
 
 const SECRET_KEY = process.env.JWT_KEY;
 
