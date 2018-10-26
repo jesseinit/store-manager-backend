@@ -23,14 +23,13 @@ class AuthHelper {
    */
   static async loginUser(user) {
     try {
-      const { userid, password } = user;
-      const foundUser = await pool.query(query.findUser(userid));
+      const foundUser = await pool.query(query.findUser(user.userid));
 
       if (foundUser.rows.length < 1) {
         errorHandler(404, 'User not found');
       }
 
-      const isPasswordValid = await bcrypt.compare(password, foundUser.rows[0].password);
+      const isPasswordValid = await bcrypt.compare(user.password, foundUser.rows[0].password);
       if (!isPasswordValid) {
         errorHandler(401, 'Authenication Failed');
       }

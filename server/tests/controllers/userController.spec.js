@@ -9,7 +9,7 @@ chai.use(chaiHttp);
 
 describe('User Login', () => {
   after(() => {
-    pool.query('TRUNCATE TABLE Users RESTART IDENTITY');
+    pool.query('TRUNCATE TABLE users RESTART IDENTITY');
   });
 
   it('Invalid User ID should return an error', done => {
@@ -20,6 +20,18 @@ describe('User Login', () => {
       .end((err, res) => {
         expect(res.status).to.equal(422);
         expect(res.body).to.have.property('error');
+        done(err);
+      });
+  });
+
+  it('Store Attendant or Admin should be able to login ', done => {
+    chai
+      .request(app)
+      .post('/api/v1/auth/login')
+      .send(mockData.validLogin)
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.body.token).to.be.a('string');
         done(err);
       });
   });
@@ -52,21 +64,6 @@ describe('User Login', () => {
         expect(res.body.status).to.be.a('boolean');
         expect(res.body.status).to.equal(false);
         expect(res.body.message).to.equal('Authenication Failed');
-        done(err);
-      });
-  });
-
-  it('Store Attendant or Admin should be able to login ', done => {
-    chai
-      .request(app)
-      .post('/api/v1/auth/login')
-      .send(mockData.validLogin)
-      .end((err, res) => {
-        expect(res.status).to.equal(200);
-        expect(res.body.status).to.be.a('boolean');
-        expect(res.body.status).to.equal(true);
-        expect(res.body).to.have.property('status');
-        expect(res.body).to.have.property('token');
         done(err);
       });
   });

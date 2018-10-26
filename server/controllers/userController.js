@@ -17,7 +17,8 @@ class UserController {
    * @memberof UserController
    */
   static async loginUser(req, res, next) {
-    const result = await UserHelper.loginUser(req.body);
+    const { userid, password } = req.body;
+    const result = await UserHelper.loginUser({ userid, password });
     if (result instanceof Error) {
       next(result);
       return;
