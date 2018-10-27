@@ -1,70 +1,151 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import sinon from 'sinon';
 import app from '../..';
 import mockData from '../mock';
 import pool from '../../utils/connection';
+import UserHelper from '../../helpers/userHelper';
 
 const { expect } = chai;
 chai.use(chaiHttp);
 
-describe('User Login', () => {
-  after(() => {
-    pool.query('TRUNCATE TABLE users RESTART IDENTITY');
+let ownerToken;
+let attendantToken;
+
+describe('User', () => {
+  after(async () => {
+    await pool.query('TRUNCATE TABLE users RESTART IDENTITY');
   });
 
-  it('Invalid User ID should return an error', done => {
-    chai
-      .request(app)
-      .post('/api/v1/auth/login')
-      .send(mockData.invalidLogin)
-      .end((err, res) => {
-        expect(res.status).to.equal(422);
-        expect(res.body).to.have.property('error');
-        done(err);
-      });
+  describe('Login User', () => {
+    it('Invalid User ID should return an error', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/auth/login')
+        .send(mockData.login.invalidLogin);
+
+      expect(response.status).to.equal(422);
+      expect(response.body).to.have.property('error');
+    });
+
+    it('Non-existing account should return 404 error', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/auth/login')
+        .send(mockData.login.nonExistingLogin);
+
+      expect(response.status).to.equal(404);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+      expect(response.body.message).to.equal('User not found');
+    });
+
+    it('Invalid credentials should return 401 error', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/auth/login')
+        .send(mockData.login.failedLogin);
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+      expect(response.body.message).to.equal('Authenication Failed');
+    });
+
+    it('Store Attendant or Admin should be able to login ', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/auth/login')
+        .send(mockData.login.ownerLogin);
+
+      expect(response.status).to.equal(200);
+      expect(response.body.token).to.be.a('string');
+      ownerToken = response.body.token;
+    });
   });
 
-  it('Non-existing account should return 404 error', done => {
-    chai
-      .request(app)
-      .post('/api/v1/auth/login')
-      .send(mockData.nonExistingLogin)
-      .end((err, res) => {
-        expect(res.status).to.equal(404);
-        expect(res.body).to.have.property('message');
-        expect(res.body).to.have.property('status');
-        expect(res.body.status).to.be.a('boolean');
-        expect(res.body.status).to.equal(false);
-        expect(res.body.message).to.equal('User not found');
-        done(err);
-      });
-  });
+  describe('Signup User', () => {
+    it('Should return an authentication error when authorization headers are not present', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/auth/signup')
+        .send(mockData.signUp.invalidNewUser);
 
-  it('Invalid credentials should return 401 error', done => {
-    chai
-      .request(app)
-      .post('/api/v1/auth/login')
-      .send(mockData.failedLogin)
-      .end((err, res) => {
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property('message');
-        expect(res.body).to.have.property('status');
-        expect(res.body.status).to.be.a('boolean');
-        expect(res.body.status).to.equal(false);
-        expect(res.body.message).to.equal('Authenication Failed');
-        done(err);
-      });
-  });
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
 
-  it('Store Attendant or Admin should be able to login ', done => {
-    chai
-      .request(app)
-      .post('/api/v1/auth/login')
-      .send(mockData.validLogin)
-      .end((err, res) => {
-        expect(res.status).to.equal(200);
-        expect(res.body.token).to.be.a('string');
-        done(err);
-      });
+    it('Should return an authentication error when an invalid token is passed', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/auth/signup')
+        .set('Authorization', `Bearer WrongToken`)
+        .send(mockData.signUp.invalidNewUser);
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Unsupported new user details should return an error when creating a user', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/auth/signup')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.signUp.invalidNewUser);
+
+      expect(response.status).to.equal(422);
+      expect(response.body).to.have.property('error');
+    });
+
+    it('Only a store admin/owner should be able to create an account', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/auth/signup')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.signUp.validNewUser);
+
+      expect(response.status).to.equal(201);
+      expect(response.body).to.have.property('result');
+      expect(response.body).to.be.an('object');
+      expect(response.body.result).to.have.keys(['userid', 'name', 'password', 'role']);
+    });
+
+    it('It should return forbidden when an attendant wants to create an account', async () => {
+      const loginResponse = await chai
+        .request(app)
+        .post('/api/v1/auth/login')
+        .send(mockData.login.attendantLogin);
+
+      attendantToken = loginResponse.body.token;
+
+      const signupResponse = await chai
+        .request(app)
+        .post('/api/v1/auth/signup')
+        .set('Authorization', `Bearer ${attendantToken}`)
+        .send(mockData.signUp.validNewUser);
+      expect(signupResponse.status).to.equal(403);
+      expect(signupResponse.body.message).to.equal('You cant perform this action. Admins Only');
+    });
+
+    it('It should handle error from database when a creating user', async () => {
+      const userHelperStub = sinon.stub(UserHelper, 'createUser').returns(new Error());
+      const resonse = await chai
+        .request(app)
+        .post('/api/v1/auth/signup')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.signUp.validNewUser);
+      expect(resonse.status).to.equal(500);
+      userHelperStub.restore();
+    });
   });
 });

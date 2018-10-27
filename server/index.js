@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(router);
 
 app.use((err, req, res, next) => {
-  res.status(err.status);
+  res.status(err.status || 500);
   res.json({ message: err.message, status: false });
   next();
 });
