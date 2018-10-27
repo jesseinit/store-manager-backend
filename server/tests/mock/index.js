@@ -14,4 +14,31 @@ const validProductEntry = {
   qty: 5
 };
 
-export default { invalidProductEntry, validProductEntry };
+const validLogin = {
+  userid: 1,
+  password: 'owner'
+};
+
+const invalidLogin = {
+  userid: 0,
+  password: 'owner'
+};
+
+const nonExistingLogin = {
+  userid: 10,
+  password: 'owner'
+};
+
+const failedLogin = {
+  userid: 1,
+  password: 'wrongpassword'
+};
+
+export default {
+  validLogin,
+  invalidLogin,
+  nonExistingLogin,
+  failedLogin,
+  invalidProductEntry,
+  validProductEntry
+};
