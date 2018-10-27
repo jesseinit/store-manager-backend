@@ -2,24 +2,22 @@ import { Router } from 'express';
 
 import UserController from '../../controllers/userController';
 import validations from '../../middleware/inputValidator';
-import auth from '../../middleware/auth';
+import authMiddleware from '../../middleware/auth';
 
-const router = Router();
+const auth = Router();
+const users = Router();
 
-router.post(
-  '/login',
-  validations.validateLogin,
-  validations.validationHandler,
-  UserController.loginUser
-);
+auth.post('/login', validations.validateLogin, validations.validationHandler, UserController.loginUser);
 
-router.post(
+auth.post(
   '/signup',
-  auth.verifyToken,
-  auth.adminOnly,
+  authMiddleware.verifyToken,
+  authMiddleware.adminOnly,
   validations.validateSignup,
   validations.validationHandler,
   UserController.createUser
 );
 
-export default router;
+users.get('/', authMiddleware.verifyToken, authMiddleware.adminOnly, UserController.getAllUsers);
+
+export { auth, users };

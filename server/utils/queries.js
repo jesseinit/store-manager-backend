@@ -7,7 +7,8 @@ const query = {
   regUser: (name, password, role) => ({
     text: `INSERT INTO users (name,password,role) VALUES ( $1, $2, $3) RETURNING *`,
     values: [name, password, role]
-  })
+  }),
+  getAllUsers: () => `Select * FROM users`
 };
 
 export default query;

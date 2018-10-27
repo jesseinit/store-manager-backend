@@ -148,4 +148,49 @@ describe('User', () => {
       userHelperStub.restore();
     });
   });
+
+  describe('Get All User', () => {
+    it('Should return an authentication error when authorization headers are not present', async () => {
+      const response = await chai.request(app).get('/api/v1/users/');
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Attendants should not be able to retrieve all users', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/users/')
+        .set('Authorization', `Bearer ${attendantToken}`);
+
+      expect(response.status).to.equal(403);
+      expect(response.body.message).to.equal('You cant perform this action. Admins Only');
+    });
+
+    it('Store admin/owner should be able to retrieve all users', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/users/')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+      expect(response.body).to.have.property('result');
+      expect(response.body.result).to.be.an('array');
+      expect(response.body.result[0]).to.have.keys(['userid', 'name', 'password', 'role']);
+    });
+
+    it('It should handle error from database when retrieving all users', async () => {
+      const userHelperStub = sinon.stub(UserHelper, 'getAllUsers').returns(new Error());
+      const resonse = await chai
+        .request(app)
+        .get('/api/v1/users/')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(resonse.status).to.equal(500);
+      userHelperStub.restore();
+    });
+  });
 });

@@ -45,6 +45,25 @@ class UserController {
     }
     res.status(201).json({ status: true, result });
   }
+
+  /**
+   *
+   * @description Gets all registered users in the store
+   * @static
+   * @param {object} req Request Object
+   * @param {object} res Response Object
+   * @param {object} next calls the next middleware in the request-response cycle
+   * @returns {array} List of all users
+   * @memberof UserController
+   */
+  static async getAllUsers(req, res, next) {
+    const result = await UserHelper.getAllUsers();
+    if (result instanceof Error) {
+      next(result);
+      return;
+    }
+    res.status(200).json({ status: true, result });
+  }
 }
 
 export default UserController;

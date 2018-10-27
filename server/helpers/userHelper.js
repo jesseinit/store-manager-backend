@@ -69,6 +69,22 @@ class AuthHelper {
       return error;
     }
   }
+
+  /**
+   *
+   * @description Helper method that gets all users from the database
+   * @static
+   * @returns {array} List of users
+   * @memberof UserHelper
+   */
+  static async getAllUsers() {
+    try {
+      const users = await pool.query(query.getAllUsers());
+      return users.rows;
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 export default AuthHelper;
