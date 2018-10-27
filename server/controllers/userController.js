@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import UserHelper from '../helpers/userHelper';
 
 /**
@@ -24,6 +25,25 @@ class UserController {
       return;
     }
     res.status(200).json({ status: true, token: result });
+  }
+
+  /**
+   *
+   * @description Create a new user in the store
+   * @static
+   * @param {object} req Request Object
+   * @param {object} res Response Object
+   * @param {object} next calls the next middleware in the request-response cycle
+   * @returns {string} User token
+   * @memberof UserController
+   */
+  static async createUser(req, res, next) {
+    const result = await UserHelper.createUser(req.body);
+    if (result instanceof Error) {
+      next(result);
+      return;
+    }
+    res.status(201).json({ status: true, result });
   }
 }
 

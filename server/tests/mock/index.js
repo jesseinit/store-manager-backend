@@ -14,31 +14,45 @@ const validProductEntry = {
   qty: 5
 };
 
-const validLogin = {
-  userid: 1,
-  password: 'owner'
+const login = {
+  ownerLogin: {
+    userid: 1,
+    password: 'owner'
+  },
+  attendantLogin: {
+    userid: 2,
+    password: 'awsomeness'
+  },
+  invalidLogin: {
+    userid: 0,
+    password: 'err'
+  },
+  nonExistingLogin: {
+    userid: 10,
+    password: 'owner'
+  },
+  failedLogin: {
+    userid: 1,
+    password: 'wrongpassword'
+  }
 };
 
-const invalidLogin = {
-  userid: 0,
-  password: 'owner'
-};
-
-const nonExistingLogin = {
-  userid: 10,
-  password: 'owner'
-};
-
-const failedLogin = {
-  userid: 1,
-  password: 'wrongpassword'
+const signUp = {
+  invalidNewUser: {
+    name: 'Big Man',
+    password: 'bad',
+    role: 'Unsupported Role Type'
+  },
+  validNewUser: {
+    name: 'Big Man',
+    password: 'awsomeness',
+    role: 'Attendant'
+  }
 };
 
 export default {
-  validLogin,
-  invalidLogin,
-  nonExistingLogin,
-  failedLogin,
+  login,
+  signUp,
   invalidProductEntry,
   validProductEntry
 };

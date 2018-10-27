@@ -1,4 +1,5 @@
 import { body, param, validationResult } from 'express-validator/check';
+import { sanitizeBody } from 'express-validator/filter';
 
 const validateLogin = [
   body('userid')
@@ -7,6 +8,20 @@ const validateLogin = [
   body('password')
     .isLength({ min: 5 })
     .withMessage('Password should be atleast 5 characters')
+];
+
+const validateSignup = [
+  sanitizeBody('name').customSanitizer(value => value.replace(/\s\s+/g, ' ').trim()),
+  body('name')
+    .isLength({ min: 2 })
+    .withMessage('Staff name must be atleast 2 letters long'),
+  body('password')
+    .isLength({ min: 5 })
+    .withMessage('Staff password should have atleast 5 characters'),
+  sanitizeBody('role').customSanitizer(value => value[0].toUpperCase() + value.slice(1)),
+  body('role')
+    .isIn(['Admin', 'Attendant'])
+    .withMessage('User can either be an Admin or Attendant')
 ];
 
 const validateProductId = [
@@ -90,6 +105,7 @@ const validationHandler = (req, res, next) => {
 
 const validations = {
   validateLogin,
+  validateSignup,
   validateSaleId,
   validateNewSale,
   validateProductUpdate,

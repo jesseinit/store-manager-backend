@@ -2,7 +2,7 @@ import 'babel-polyfill';
 import pg from 'pg';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
-// import query from '../utils/queries';
+import query from '../utils/queries';
 
 dotenv.config();
 
@@ -39,29 +39,18 @@ const salesTable = `CREATE TABLE IF NOT EXISTS sales (
   userID int NOT NULL
 );`;
 
-pool
-  .query(`${usersTable}`)
-  .then(() => {
-    const ownerPassword = 'owner';
-    const hashedPassword = bcrypt.hashSync(ownerPassword, 10);
-    pool.query(`Select * from users where role = $1`, ['Owner']).then(result => {
-      if (result.rowCount < 1) {
-        pool
-          .query(`INSERT INTO users (name,password,role) VALUES ( $1, $2, $3) RETURNING *`, [
-            'Store Owner',
-            hashedPassword,
-            'Owner'
-          ])
-          .then(() => console.log('Owner Account Created'));
-      }
-    });
-  })
-  .then(() => {
-    pool.query(`${productsTable}`);
-  })
-  .then(() => {
-    pool.query(`${categoryTable}`);
-  })
-  .then(() => {
-    pool.query(`${salesTable}`);
+(async () => {
+  console.time('Seding Completed in');
+  const ownerPassword = 'owner';
+  const hashedPassword = await bcrypt.hash(ownerPassword, 10);
+  await pool.query(`${usersTable}`);
+  await pool.query(`Select * from users where role = $1`, ['Owner']).then(result => {
+    if (result.rowCount < 1) {
+      pool.query(query.regUser('Store Owner', hashedPassword, 'Owner'));
+    }
   });
+  await pool.query(`${productsTable}`);
+  await pool.query(`${categoryTable}`);
+  await pool.query(`${salesTable}`);
+  console.timeEnd('Seding Completed in');
+})();

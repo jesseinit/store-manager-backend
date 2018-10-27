@@ -50,6 +50,25 @@ class AuthHelper {
       return error;
     }
   }
+
+  /**
+   *
+   * @description Helper method that creates a new user in the store
+   * @static
+   * @param {object} user User registration information
+   * @returns {object} the created user or an error object
+   * @memberof UserHelper
+   */
+  static async createUser(user) {
+    try {
+      const { name, password, role } = user;
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const createdUser = await pool.query(query.regUser(name, hashedPassword, role));
+      return createdUser.rows[0];
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 export default AuthHelper;
