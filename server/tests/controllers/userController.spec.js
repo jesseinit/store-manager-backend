@@ -11,6 +11,7 @@ chai.use(chaiHttp);
 
 let ownerToken;
 let attendantToken;
+let adminToken;
 
 describe('User', () => {
   after(async () => {
@@ -188,6 +189,100 @@ describe('User', () => {
         .request(app)
         .get('/api/v1/users/')
         .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(resonse.status).to.equal(500);
+      userHelperStub.restore();
+    });
+  });
+
+  describe('Update User', () => {
+    it('Should return an authentication error when authorization headers are not present', async () => {
+      const response = await chai.request(app).put('/api/v1/users/2');
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Should return an authentication error when an invalid token is passed', async () => {
+      const response = await chai
+        .request(app)
+        .put('/api/v1/users/2')
+        .set('Authorization', `Bearer WrongToken`)
+        .send(mockData.signUp.invalidNewUser);
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('It should return a not found when trying to update a non-existing account', async () => {
+      const response = await chai
+        .request(app)
+        .put('/api/v1/users/10')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.modifyUser.validUpdateInfo);
+
+      expect(response.status).to.equal(404);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+      expect(response.body.message).to.equal('User not found');
+    });
+
+    it('Only a store owner/admin should be able to update an account', async () => {
+      const response = await chai
+        .request(app)
+        .put('/api/v1/users/2')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.modifyUser.validUpdateInfo);
+
+      expect(response.status).to.equal(200);
+      expect(response.body).to.have.property('result');
+      expect(response.body).to.be.an('object');
+      expect(response.body.result).to.have.keys(['userid', 'name', 'password', 'role']);
+    });
+
+    it('Store admin should not be able to update Store owner account', async () => {
+      await chai
+        .request(app)
+        .post('/api/v1/auth/signup')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.signUp.validNewAdmin);
+
+      const loginResponse = await chai
+        .request(app)
+        .post('/api/v1/auth/login')
+        .send(mockData.login.adminLogin);
+
+      adminToken = loginResponse.body.token;
+
+      const response = await chai
+        .request(app)
+        .put('/api/v1/users/1')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(mockData.modifyUser.validUpdateInfo);
+
+      expect(response.status).to.equal(403);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+      expect(response.body.message).to.equal('Admin cant update owner account');
+    });
+
+    it('It should handle error from database failure when modifying a user', async () => {
+      const userHelperStub = sinon.stub(UserHelper, 'updateUser').returns(new Error());
+      const resonse = await chai
+        .request(app)
+        .put('/api/v1/users/2')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.modifyUser.validUpdateInfo);
 
       expect(resonse.status).to.equal(500);
       userHelperStub.restore();

@@ -64,6 +64,28 @@ class UserController {
     }
     res.status(200).json({ status: true, result });
   }
+
+  /**
+   *
+   * @description Modify user's information
+   * @static
+   * @param {object} req Request Object
+   * @param {object} res Response Object
+   * @param {object} next calls the next middleware in the request-response cycle
+   * @returns {object} Updated user object
+   * @memberof UserController
+   */
+  static async updateUser(req, res, next) {
+    const userRole = req.user.role;
+    const { userid } = req.params;
+    const { name, password, role } = req.body;
+    const result = await UserHelper.updateUser({ userid, name, password, role, userRole });
+    if (result instanceof Error) {
+      next(result);
+      return;
+    }
+    res.status(200).json({ status: true, result });
+  }
 }
 
 export default UserController;
