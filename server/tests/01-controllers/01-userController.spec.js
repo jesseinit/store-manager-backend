@@ -3,7 +3,6 @@ import chaiHttp from 'chai-http';
 import sinon from 'sinon';
 import app from '../..';
 import mockData from '../mock';
-import pool from '../../utils/connection';
 import UserHelper from '../../helpers/userHelper';
 
 const { expect } = chai;
@@ -14,10 +13,6 @@ let attendantToken;
 let adminToken;
 
 describe('User', () => {
-  after(async () => {
-    await pool.query('TRUNCATE TABLE users RESTART IDENTITY');
-  });
-
   describe('Login User', () => {
     it('Invalid User ID should return an error', async () => {
       const response = await chai
@@ -220,7 +215,7 @@ describe('User', () => {
       expect(response.body.status).to.equal(false);
     });
 
-    it('It should return a not found when trying to update a non-existing account', async () => {
+    it('It should return a not found error when trying to update a non-existing account', async () => {
       const response = await chai
         .request(app)
         .put('/api/v1/users/10')
@@ -304,7 +299,7 @@ describe('User', () => {
       expect(response.body.message).to.equal('You cant perform this action. Owner account Only');
     });
 
-    it('It should return a not found when trying to delete a non-existing account', async () => {
+    it('It should return a not found error when trying to delete a non-existing account', async () => {
       const response = await chai
         .request(app)
         .del('/api/v1/users/10')

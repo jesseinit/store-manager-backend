@@ -67,10 +67,20 @@ const modifyUser = {
   }
 };
 
+const category = {
+  validCategoryName: {
+    name: 'Electronics'
+  },
+  invalidCategoryName: {
+    name: 'E'
+  }
+};
+
 export default {
   login,
   signUp,
   modifyUser,
+  category,
   invalidProductEntry,
   validProductEntry
 };
