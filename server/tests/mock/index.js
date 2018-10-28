@@ -23,6 +23,10 @@ const login = {
     userid: 2,
     password: 'awsomeness'
   },
+  adminLogin: {
+    userid: 3,
+    password: 'awsomeness'
+  },
   invalidLogin: {
     userid: 0,
     password: 'err'
@@ -47,12 +51,26 @@ const signUp = {
     name: 'Big Man',
     password: 'awsomeness',
     role: 'Attendant'
+  },
+  validNewAdmin: {
+    name: 'Big Man',
+    password: 'awsomeness',
+    role: 'Admin'
+  }
+};
+
+const modifyUser = {
+  validUpdateInfo: {
+    name: 'Updated Attendant',
+    password: 'awsomeness',
+    role: 'Attendant'
   }
 };
 
 export default {
   login,
   signUp,
+  modifyUser,
   invalidProductEntry,
   validProductEntry
 };

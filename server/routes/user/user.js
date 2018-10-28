@@ -19,5 +19,13 @@ auth.post(
 );
 
 users.get('/', authMiddleware.verifyToken, authMiddleware.adminOnly, UserController.getAllUsers);
+users.put(
+  '/:userid',
+  authMiddleware.verifyToken,
+  authMiddleware.adminOnly,
+  validations.validateUserUpdate,
+  validations.validationHandler,
+  UserController.updateUser
+);
 
 export { auth, users };

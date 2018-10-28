@@ -85,6 +85,38 @@ class AuthHelper {
       return error;
     }
   }
+
+  /**
+   *
+   * @description Helper method that creates a new user in the store
+   * @static
+   * @param {object} user User registration information
+   * @returns {object} the created user or an error object
+   * @memberof UserHelper
+   */
+  static async updateUser(user) {
+    try {
+      const { userid, name, password, role, userRole } = user;
+
+      const { rows } = await pool.query(query.findUser(userid));
+
+      if (rows.length < 1) {
+        errorHandler(404, 'User not found');
+      }
+
+      const foundUser = rows[0];
+
+      if (userRole === 'Admin' && foundUser.role === 'Owner') {
+        errorHandler(403, 'Admin cant update owner account');
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const updatedUser = await pool.query(query.updateUser(name, hashedPassword, role, userid));
+      return updatedUser.rows[0];
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 export default AuthHelper;

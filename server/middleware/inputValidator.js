@@ -24,6 +24,19 @@ const validateSignup = [
     .withMessage('User can either be an Admin or Attendant')
 ];
 
+const validateUserUpdate = [
+  param('userid')
+    .isInt({ min: 1 })
+    .withMessage('User ID must be a positve integer from 1'),
+  validateSignup[0],
+  validateSignup[1],
+  validateSignup[2],
+  validateSignup[3],
+  body('role')
+    .isIn(['Admin', 'Attendant', 'Owner'])
+    .withMessage('User can either be an Admin, an Attendant or Owner')
+];
+
 const validateProductId = [
   param('id')
     .isInt({ min: 1 })
@@ -106,6 +119,7 @@ const validationHandler = (req, res, next) => {
 const validations = {
   validateLogin,
   validateSignup,
+  validateUserUpdate,
   validateSaleId,
   validateNewSale,
   validateProductUpdate,
