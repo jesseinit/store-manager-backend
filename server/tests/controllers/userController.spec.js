@@ -288,4 +288,73 @@ describe('User', () => {
       userHelperStub.restore();
     });
   });
+
+  describe('Delete User', () => {
+    it('Store owner should not be able to delete his/her account', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/users/1')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(response.status).to.equal(403);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+      expect(response.body.message).to.equal('You cant perform this action. Owner account Only');
+    });
+
+    it('It should return a not found when trying to delete a non-existing account', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/users/10')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(404);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+      expect(response.body.message).to.equal('User not found');
+    });
+
+    it('Store owner should not be able to delete his/her account', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/users/1')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(403);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+      expect(response.body.message).to.equal('Store owner account cant be deleted');
+    });
+
+    it('Store owner should be able to delete other accounts', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/users/3')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+      expect(response.body).to.have.property('result');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(true);
+      expect(response.body.result).to.equal(true);
+    });
+
+    it('It should handle error from database failure when deleting a user', async () => {
+      const userHelperStub = sinon.stub(UserHelper, 'deleteUser').returns(new Error());
+      const resonse = await chai
+        .request(app)
+        .del('/api/v1/users/2')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(resonse.status).to.equal(500);
+      userHelperStub.restore();
+    });
+  });
 });

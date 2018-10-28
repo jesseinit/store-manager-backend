@@ -26,4 +26,11 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-export default { verifyToken, adminOnly };
+const ownerOnly = (req, res, next) => {
+  if (req.user.role === 'Attendant' || req.user.role === 'Admin') {
+    errorHandler(403, 'You cant perform this action. Owner account Only');
+  }
+  next();
+};
+
+export default { verifyToken, adminOnly, ownerOnly };

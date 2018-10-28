@@ -12,6 +12,10 @@ const query = {
   updateUser: (name, password, role, userid) => ({
     text: `UPDATE users SET name = $1, password = $2, role = $3 WHERE userid = $4 RETURNING *`,
     values: [name, password, role, userid]
+  }),
+  deleteUser: id => ({
+    text: `DELETE FROM users WHERE userId = $1`,
+    values: [id]
   })
 };
 

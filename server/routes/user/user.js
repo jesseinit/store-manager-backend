@@ -19,6 +19,7 @@ auth.post(
 );
 
 users.get('/', authMiddleware.verifyToken, authMiddleware.adminOnly, UserController.getAllUsers);
+
 users.put(
   '/:userid',
   authMiddleware.verifyToken,
@@ -26,6 +27,15 @@ users.put(
   validations.validateUserUpdate,
   validations.validationHandler,
   UserController.updateUser
+);
+
+users.delete(
+  '/:userid',
+  authMiddleware.verifyToken,
+  authMiddleware.ownerOnly,
+  validations.validateUserDelete,
+  validations.validationHandler,
+  UserController.deleteUser
 );
 
 export { auth, users };
