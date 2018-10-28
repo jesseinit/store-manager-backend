@@ -37,6 +37,8 @@ const validateUserUpdate = [
     .withMessage('User can either be an Admin, an Attendant or Owner')
 ];
 
+const validateUserDelete = [validateUserUpdate[0]];
+
 const validateProductId = [
   param('id')
     .isInt({ min: 1 })
@@ -120,6 +122,7 @@ const validations = {
   validateLogin,
   validateSignup,
   validateUserUpdate,
+  validateUserDelete,
   validateSaleId,
   validateNewSale,
   validateProductUpdate,

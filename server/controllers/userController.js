@@ -86,6 +86,26 @@ class UserController {
     }
     res.status(200).json({ status: true, result });
   }
+
+  /**
+   *
+   * @description Deletes a  user's account
+   * @static
+   * @param {object} req Request Object
+   * @param {object} res Response Object
+   * @param {object} next calls the next middleware in the request-response cycle
+   * @returns {boolean} Result of the operation
+   * @memberof UserController
+   */
+  static async deleteUser(req, res, next) {
+    const { userid } = req.params;
+    const result = await UserHelper.deleteUser(userid);
+    if (result instanceof Error) {
+      next(result);
+      return;
+    }
+    res.status(200).json({ status: true, result });
+  }
 }
 
 export default UserController;
