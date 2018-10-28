@@ -16,6 +16,15 @@ const query = {
   deleteUser: id => ({
     text: `DELETE FROM users WHERE userId = $1`,
     values: [id]
+  }),
+  /* Categories */
+  findCategory: name => ({
+    text: `SELECT * FROM category WHERE categoryname = $1`,
+    values: [name]
+  }),
+  createCategory: name => ({
+    text: `INSERT INTO category (categoryname) VALUES ($1) RETURNING *`,
+    values: [name]
   })
 };
 

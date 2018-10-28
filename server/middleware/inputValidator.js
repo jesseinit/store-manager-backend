@@ -39,6 +39,17 @@ const validateUserUpdate = [
 
 const validateUserDelete = [validateUserUpdate[0]];
 
+const validateNewCategory = [
+  sanitizeBody('name').customSanitizer(value => {
+    let sanitizedValue = value.replace(/\s\s+/g, ' ').trim();
+    sanitizedValue = sanitizedValue[0].toUpperCase() + sanitizedValue.slice(1);
+    return sanitizedValue;
+  }),
+  body('name')
+    .isLength({ min: 2 })
+    .withMessage('Caregory name must be atleast 2 letters long')
+];
+
 const validateProductId = [
   param('id')
     .isInt({ min: 1 })
@@ -123,6 +134,7 @@ const validations = {
   validateSignup,
   validateUserUpdate,
   validateUserDelete,
+  validateNewCategory,
   validateSaleId,
   validateNewSale,
   validateProductUpdate,
