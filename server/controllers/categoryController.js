@@ -47,6 +47,25 @@ class CategoryController {
     }
     res.status(200).json({ status: true, result });
   }
+
+  /**
+   *
+   * @description Retrieves all product categories in the store
+   * @static
+   * @param {object} req Request Object
+   * @param {object} res Response Object
+   * @param {object} next calls the next middleware in the request-response cycle
+   * @returns {array} List of all product categories
+   * @memberof CategoryController
+   */
+  static async getAllCategories(req, res, next) {
+    const result = await CategoryHelper.getAllCategories();
+    if (result instanceof Error) {
+      next(result);
+      return;
+    }
+    res.status(200).json({ status: true, result });
+  }
 }
 
 export default CategoryController;

@@ -26,7 +26,7 @@ const query = {
     text: `SELECT * FROM category WHERE categoryid = $1`,
     values: [id]
   }),
-  getAllCategories: () => `SELECT * FROM category`,
+  getAllCategories: () => `SELECT DISTINCT categoryid, categoryname from category`,
   createCategory: name => ({
     text: `INSERT INTO category (categoryname) VALUES ($1) RETURNING *`,
     values: [name]

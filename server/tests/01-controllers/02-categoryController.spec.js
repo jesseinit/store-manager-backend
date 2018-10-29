@@ -172,5 +172,79 @@ describe('Category', () => {
       expect(response.body).to.have.property('result');
       expect(response.body.result).to.have.keys(['categoryid', 'categoryname']);
     });
+
+    it('It should handle error from database failure when updating a category', async () => {
+      const userHelperStub = sinon.stub(CategoryHelper, 'updateCategory').returns(new Error());
+      const resonse = await chai
+        .request(app)
+        .put('/api/v1/category/1')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.category.validCategoryName);
+
+      expect(resonse.status).to.equal(500);
+      userHelperStub.restore();
+    });
+  });
+
+  describe('Get All Categories', () => {
+    it('Should return an authentication error when authorization headers are not present', async () => {
+      const response = await chai.request(app).get('/api/v1/category/');
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Should return an authentication error when an invalid token is passed', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/category/')
+        .set('Authorization', `Bearer WrongToken`);
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Admin should be get a message when there are no created categories', async () => {
+      const userHelperStub = sinon
+        .stub(CategoryHelper, 'getAllCategories')
+        .returns('You have no product category yet.');
+
+      const response = await chai
+        .request(app)
+        .get('/api/v1/category/')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+      expect(response.body).to.have.property('result');
+      userHelperStub.restore();
+    });
+
+    it('Admin should be able to see all categories', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/category/')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+      expect(response.body).to.have.property('result');
+    });
+
+    it('It should handle error from database failure when getting all categories', async () => {
+      const userHelperStub = sinon.stub(CategoryHelper, 'getAllCategories').returns(new Error());
+      const resonse = await chai
+        .request(app)
+        .get('/api/v1/category/')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.category.validCategoryName);
+
+      expect(resonse.status).to.equal(500);
+      userHelperStub.restore();
+    });
   });
 });

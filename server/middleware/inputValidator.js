@@ -40,11 +40,17 @@ const validateUserUpdate = [
 const validateUserDelete = [validateUserUpdate[0]];
 
 const validateNewCategory = [
-  sanitizeBody('name').customSanitizer(value => {
-    let sanitizedValue = value.replace(/\s\s+/g, ' ').trim();
-    sanitizedValue = sanitizedValue[0].toUpperCase() + sanitizedValue.slice(1);
-    return sanitizedValue;
-  }),
+  sanitizeBody('name').customSanitizer(value =>
+    value
+      .toLowerCase()
+      .split(' ')
+      .map(s => s[0].toUpperCase() + s.substring(1))
+      .join(' ')
+      .replace(/([\W_\d])+([\s])/g, '')
+      .replace(/[0-9]/g, '')
+      .replace(/\s\s+/g, ' ')
+      .trim()
+  ),
   body('name')
     .isLength({ min: 2 })
     .withMessage('Category name must be atleast 2 letters long')

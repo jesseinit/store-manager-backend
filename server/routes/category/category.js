@@ -23,4 +23,11 @@ router.put(
   CategoryController.updateCategory
 );
 
+router.get(
+  '/',
+  authMiddleware.verifyToken,
+  authMiddleware.adminOnly,
+  CategoryController.getAllCategories
+);
+
 export default router;
