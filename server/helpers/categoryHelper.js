@@ -57,6 +57,25 @@ class CategoryHelper {
       return error;
     }
   }
+
+  /**
+   *
+   * @description Helper method that retrieves all product categories
+   * @static
+   * @returns {array} A list of product categories
+   * @memberof CategoryHelper
+   */
+  static async getAllCategories() {
+    try {
+      const allCategories = await pool.query(query.getAllCategories());
+      if (allCategories.rows.length < 1) {
+        return 'You have no product category yet.';
+      }
+      return allCategories.rows;
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 export default CategoryHelper;
