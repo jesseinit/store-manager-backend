@@ -47,7 +47,15 @@ const validateNewCategory = [
   }),
   body('name')
     .isLength({ min: 2 })
-    .withMessage('Caregory name must be atleast 2 letters long')
+    .withMessage('Category name must be atleast 2 letters long')
+];
+
+const validateUpdateCategory = [
+  param('id')
+    .isInt({ min: 1 })
+    .withMessage('Category ID must be a positve integer from 1'),
+  validateNewCategory[0],
+  validateNewCategory[1]
 ];
 
 const validateProductId = [
@@ -135,6 +143,7 @@ const validations = {
   validateUserUpdate,
   validateUserDelete,
   validateNewCategory,
+  validateUpdateCategory,
   validateSaleId,
   validateNewSale,
   validateProductUpdate,
