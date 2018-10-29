@@ -113,4 +113,64 @@ describe('Category', () => {
       userHelperStub.restore();
     });
   });
+
+  describe('Modify Category', () => {
+    it('Should return an authentication error when authorization headers are not present', async () => {
+      const response = await chai.request(app).put('/api/v1/category/1');
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Should return an authentication error when an invalid token is passed', async () => {
+      const response = await chai
+        .request(app)
+        .put('/api/v1/category/1')
+        .set('Authorization', `Bearer WrongToken`)
+        .send(mockData.category.validUpdateName);
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Admin should not be able to update a category with non-existing id', async () => {
+      const response = await chai
+        .request(app)
+        .put('/api/v1/category/10')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.category.validUpdateName);
+
+      expect(response.status).to.equal(404);
+      expect(response.body.message).to.equal('The category not found.');
+    });
+
+    it('Admin should not be able to update a category with an existing category name', async () => {
+      const response = await chai
+        .request(app)
+        .put('/api/v1/category/1')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.category.existingCategoryName);
+
+      expect(response.status).to.equal(400);
+      expect(response.body.message).to.equal('The category name already exists.');
+    });
+
+    it('Admin should be able to update a category', async () => {
+      const response = await chai
+        .request(app)
+        .put('/api/v1/category/1')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.category.validUpdateName);
+
+      expect(response.status).to.equal(200);
+      expect(response.body).to.have.property('result');
+      expect(response.body.result).to.have.keys(['categoryid', 'categoryname']);
+    });
+  });
 });

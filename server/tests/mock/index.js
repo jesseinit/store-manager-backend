@@ -71,8 +71,14 @@ const category = {
   validCategoryName: {
     name: 'Electronics'
   },
+  existingCategoryName: {
+    name: 'Electronics'
+  },
   invalidCategoryName: {
     name: 'E'
+  },
+  validUpdateName: {
+    name: 'Mobile Phones'
   }
 };
 

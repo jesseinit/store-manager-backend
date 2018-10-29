@@ -22,9 +22,18 @@ const query = {
     text: `SELECT * FROM category WHERE categoryname = $1`,
     values: [name]
   }),
+  findCategoryById: id => ({
+    text: `SELECT * FROM category WHERE categoryid = $1`,
+    values: [id]
+  }),
+  getAllCategories: () => `SELECT * FROM category`,
   createCategory: name => ({
     text: `INSERT INTO category (categoryname) VALUES ($1) RETURNING *`,
     values: [name]
+  }),
+  updateCategory: (id, name) => ({
+    text: `UPDATE category SET categoryname = $1 WHERE categoryid = $2 RETURNING *`,
+    values: [name, id]
   })
 };
 

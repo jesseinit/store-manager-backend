@@ -14,4 +14,13 @@ router.post(
   CategoryController.createCategory
 );
 
+router.put(
+  '/:id',
+  authMiddleware.verifyToken,
+  authMiddleware.adminOnly,
+  validtor.validateUpdateCategory,
+  validtor.validationHandler,
+  CategoryController.updateCategory
+);
+
 export default router;
