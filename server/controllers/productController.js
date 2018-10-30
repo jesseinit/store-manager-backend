@@ -46,13 +46,13 @@ class ProductController {
    * @param {object} res - Response Object
    * @memberof ProductController
    */
-  static createProduct(req, res) {
-    const newProduct = ProductHelper.createProduct(req.body);
-    if (isEmptyObject(newProduct)) {
-      res.status(400).json({ status: false, message: 'Duplicate product name not allowed' });
+  static async createProduct(req, res, next) {
+    const result = await ProductHelper.createProduct(req.body);
+    if (result instanceof Error) {
+      next(result);
       return;
     }
-    res.status(201).json({ status: true, result: newProduct });
+    res.status(201).json({ status: true, result });
   }
 
   /**

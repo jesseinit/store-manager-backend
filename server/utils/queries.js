@@ -38,6 +38,19 @@ const query = {
   deleteCategory: id => ({
     text: `DELETE FROM category WHERE categoryid = $1`,
     values: [id]
+  }),
+  /* Products */
+  getAllProducts: () =>
+    `SELECT p.*, COALESCE (c.categoryname, 'Not Set') as categoryname FROM products p FULL JOIN category c ON c.categoryid = p.categoryid`,
+  createProduct: productsInfo => ({
+    text: `INSERT INTO products (imageurl,name,categoryId,price,qty) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+    values: [
+      productsInfo.imgUrl,
+      productsInfo.name,
+      productsInfo.categoryid,
+      Number.parseFloat(productsInfo.price).toFixed(2),
+      productsInfo.qty
+    ]
   })
 };
 
