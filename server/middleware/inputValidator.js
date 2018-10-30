@@ -100,37 +100,16 @@ const validateNewProduct = [
 ];
 
 const validateProductUpdate = [
-  param('id')
-    .isInt({ min: 1 })
-    .withMessage('Product ID must be a positve number from 1'),
-  body('imgUrl')
-    .custom(imageUrl => {
-      const checkUrl = /(http(s?):(\/){2})([^/])([/.\w\s-])*\.(?:jpg|gif|png)/g;
-      return checkUrl.test(imageUrl);
-    })
-    .withMessage('Image Input should be a valid image url'),
-  body('name')
-    .isString()
-    .withMessage('Product name must be a string')
-    .isLength({ min: 2 })
-    .withMessage('Product name must be atlease 2 letters long'),
-  body('category')
-    .isString()
-    .withMessage('Product category must be a string')
-    .isLength({ min: 2 })
-    .withMessage('Product name must be atlease 2 letters long'),
-  body('price')
-    .isInt({ min: 1 })
-    .withMessage('Product price must be decimal number of 1 or more'),
-  body('qty')
-    .isInt({ min: 1 })
-    .withMessage('Product qty must be a positive number from 1')
+  validateProductId[0],
+  validateNewProduct[0],
+  validateNewProduct[2],
+  validateNewProduct[3],
+  validateNewProduct[4],
+  validateNewProduct[5]
 ];
 
 const validateNewSale = [
-  body('id')
-    .isInt({ min: 1 })
-    .withMessage('Product ID must be a positve number from 1'),
+  validateProductId[0],
   body('qty')
     .isInt({ min: 1 })
     .withMessage('Order qty must be a positive number from 1')

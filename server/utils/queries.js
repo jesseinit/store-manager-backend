@@ -42,6 +42,10 @@ const query = {
   /* Products */
   getAllProducts: () =>
     `SELECT p.*, COALESCE (c.categoryname, 'Not Set') as categoryname FROM products p FULL JOIN category c ON c.categoryid = p.categoryid`,
+  getProductById: id => ({
+    text: `SELECT p.*, COALESCE (c.categoryname, 'Not Set') as categoryname FROM products p FULL JOIN category c ON c.categoryid = p.categoryid WHERE p.id = $1`,
+    values: [id]
+  }),
   createProduct: productsInfo => ({
     text: `INSERT INTO products (imageurl,name,categoryId,price,qty) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
     values: [

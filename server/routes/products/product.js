@@ -9,6 +9,7 @@ const router = Router();
 router.get('/', authMiddleware.verifyToken, ProductController.getAllProducts);
 router.get(
   '/:id',
+  authMiddleware.verifyToken,
   validtor.validateProductId,
   validtor.validationHandler,
   ProductController.getSingleProduct
