@@ -17,8 +17,12 @@ class ProductHelper {
    * @returns {array} An array of products objects
    * @memberof ProductHelper
    */
-  static allProducts() {
-    return products;
+  static async allProducts() {
+    const allProducts = await pool.query(query.getAllProducts());
+    if (allProducts.rowCount < 1) {
+      return 'No product created yet.';
+    }
+    return allProducts.rows;
   }
 
   /**

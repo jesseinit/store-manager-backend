@@ -15,8 +15,8 @@ class ProductController {
    * @param {object} res - Response Object
    * @memberof ProductController
    */
-  static getAllProducts(req, res) {
-    const products = ProductHelper.allProducts();
+  static async getAllProducts(req, res) {
+    const products = await ProductHelper.allProducts();
     res.status(200).json({ status: true, result: products });
   }
 
