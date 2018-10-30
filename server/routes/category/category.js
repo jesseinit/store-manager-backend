@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import validtor from '../../middleware/inputValidator';
+import validator from '../../middleware/inputValidator';
 import CategoryController from '../../controllers/categoryController';
 import authMiddleware from '../../middleware/auth';
 
@@ -9,8 +9,8 @@ router.post(
   '/',
   authMiddleware.verifyToken,
   authMiddleware.adminOnly,
-  validtor.validateNewCategory,
-  validtor.validationHandler,
+  validator.validateNewCategory,
+  validator.validationHandler,
   CategoryController.createCategory
 );
 
@@ -18,8 +18,8 @@ router.put(
   '/:id',
   authMiddleware.verifyToken,
   authMiddleware.adminOnly,
-  validtor.validateUpdateCategory,
-  validtor.validationHandler,
+  validator.validateUpdateCategory,
+  validator.validationHandler,
   CategoryController.updateCategory
 );
 
@@ -28,6 +28,15 @@ router.get(
   authMiddleware.verifyToken,
   authMiddleware.adminOnly,
   CategoryController.getAllCategories
+);
+
+router.delete(
+  '/:id',
+  authMiddleware.verifyToken,
+  authMiddleware.adminOnly,
+  validator.validateCategoryId,
+  validator.validationHandler,
+  CategoryController.deleteCategory
 );
 
 export default router;

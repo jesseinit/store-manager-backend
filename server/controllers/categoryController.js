@@ -66,6 +66,26 @@ class CategoryController {
     }
     res.status(200).json({ status: true, result });
   }
+
+  /**
+   *
+   * @description Deletes a product categories in the store
+   * @static
+   * @param {object} req Request Object
+   * @param {object} res Response Object
+   * @param {object} next calls the next middleware in the request-response cycle
+   * @returns {boolean} Result of the operation
+   * @memberof CategoryController
+   */
+  static async deleteCategory(req, res, next) {
+    const { id } = req.params;
+    const result = await CategoryHelper.deleteCategory(id);
+    if (result instanceof Error) {
+      next(result);
+      return;
+    }
+    res.status(200).json({ status: true, result });
+  }
 }
 
 export default CategoryController;

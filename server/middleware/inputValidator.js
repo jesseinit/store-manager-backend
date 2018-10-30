@@ -46,7 +46,6 @@ const validateNewCategory = [
       .split(' ')
       .map(s => s[0].toUpperCase() + s.substring(1))
       .join(' ')
-      .replace(/([\W_\d])+([\s])/g, '')
       .replace(/[0-9]/g, '')
       .replace(/\s\s+/g, ' ')
       .trim()
@@ -63,6 +62,8 @@ const validateUpdateCategory = [
   validateNewCategory[0],
   validateNewCategory[1]
 ];
+
+const validateCategoryId = [validateUpdateCategory[0]];
 
 const validateProductId = [
   param('id')
@@ -150,6 +151,7 @@ const validations = {
   validateUserDelete,
   validateNewCategory,
   validateUpdateCategory,
+  validateCategoryId,
   validateSaleId,
   validateNewSale,
   validateProductUpdate,
