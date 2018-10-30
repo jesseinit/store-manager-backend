@@ -16,12 +16,12 @@ const usersTable = `CREATE TABLE IF NOT EXISTS users (
 );`;
 
 const productsTable = `CREATE TABLE IF NOT EXISTS products (
-  productId  SERIAL PRIMARY KEY NOT NULL,
-  productName varchar(200) UNIQUE NOT NULL,
+  id SERIAL PRIMARY KEY NOT NULL,
+  imageurl text NOT NULL,
+  name varchar(200) UNIQUE NOT NULL,
   categoryId int NOT NULL,
-  categoryName varchar(50) NOT NULL,
-  productPrice float NOT NULL,
-  productQty int NOT NULL
+  price float NOT NULL,
+  qty int NOT NULL
 );`;
 
 const categoryTable = `CREATE TABLE IF NOT EXISTS category (

@@ -3,8 +3,8 @@ import chaiHttp from 'chai-http';
 import sinon from 'sinon';
 import app from '../..';
 import mockData from '../mock';
-import pool from '../../utils/connection';
 import CategoryHelper from '../../helpers/categoryHelper';
+import pool from '../../utils/connection';
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -30,7 +30,7 @@ describe('Category', () => {
   });
 
   after(async () => {
-    await pool.query('TRUNCATE TABLE users,category RESTART IDENTITY');
+    await pool.query('TRUNCATE TABLE category RESTART IDENTITY');
   });
 
   describe('Create Category', () => {

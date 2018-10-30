@@ -44,10 +44,10 @@ const validateNewCategory = [
     value
       .toLowerCase()
       .split(' ')
-      .map(s => s[0].toUpperCase() + s.substring(1))
+      .map(s => s.charAt(0).toUpperCase() + s.substring(1))
       .join(' ')
-      .replace(/[0-9]/g, '')
-      .replace(/\s\s+/g, ' ')
+      .replace(/([^a-zA-z\s])/g, '')
+      .replace(/\s{2,}/g, ' ')
       .trim()
   ),
   body('name')
@@ -80,19 +80,17 @@ const validateSaleId = [
 const validateNewProduct = [
   body('imgUrl')
     .custom(imageUrl => {
-      const checkUrl = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/g;
+      const checkUrl = /(http(s?):(\/){2})([^/])([/.\w\s-])*\.(?:jpg|gif|png)/g;
       return checkUrl.test(imageUrl);
     })
-    .withMessage('Image Input should be a valid image url'),
+    .withMessage('Product image input should be a valid image url'),
+  validateNewCategory[0],
   body('name')
-    .isString()
     .isLength({ min: 2 })
     .withMessage('Product name must be atlease 2 letters long'),
-  body('category')
-    .isString()
-    .withMessage('Product category must be a string')
-    .isLength({ min: 2 })
-    .withMessage('Product name must be atlease 2 letters long'),
+  body('categoryid')
+    .isInt({ min: 1 })
+    .withMessage('Category ID must be a positive number from 1'),
   body('price')
     .isFloat({ min: 1.0 })
     .withMessage('Product price must be decimal number of 1.0 or more'),
@@ -106,7 +104,10 @@ const validateProductUpdate = [
     .isInt({ min: 1 })
     .withMessage('Product ID must be a positve number from 1'),
   body('imgUrl')
-    .custom(imageUrl => /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/g.test(imageUrl))
+    .custom(imageUrl => {
+      const checkUrl = /(http(s?):(\/){2})([^/])([/.\w\s-])*\.(?:jpg|gif|png)/g;
+      return checkUrl.test(imageUrl);
+    })
     .withMessage('Image Input should be a valid image url'),
   body('name')
     .isString()

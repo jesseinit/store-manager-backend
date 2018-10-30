@@ -1,5 +1,8 @@
 import products from '../models/products';
 import isEmptyObject from '../utils/isEmptyObject';
+import pool from '../utils/connection';
+import query from '../utils/queries';
+import errorHandler from '../utils/errorHandler';
 
 /**
  *
@@ -42,21 +45,25 @@ class ProductHelper {
    * @returns {object}
    * @memberof ProductHelper
    */
-  static createProduct(newProduct) {
-    const isExists = products.some(product => product.name === newProduct.name);
-    if (isExists) {
-      return {};
+  static async createProduct(newProduct) {
+    try {
+      const foundCategory = await pool.query(query.findCategoryById(newProduct.categoryid));
+      if (foundCategory.rowCount < 1) {
+        errorHandler(400, 'The category does not exit');
+      }
+
+      const allProducts = await pool.query(query.getAllProducts());
+      const isExists = allProducts.rows.some(product => product.name === newProduct.name);
+
+      if (isExists) {
+        errorHandler(400, 'The provided product name already exists.');
+      }
+
+      const createdProduct = await pool.query(query.createProduct(newProduct));
+      return createdProduct.rows[0];
+    } catch (error) {
+      return error;
     }
-    const createdProduct = {
-      id: products[products.length - 1].id + 1,
-      imgUrl: newProduct.imgUrl,
-      name: newProduct.name,
-      category: newProduct.category,
-      price: parseFloat(newProduct.price),
-      qty: parseInt(newProduct.qty, 10)
-    };
-    products.push(createdProduct);
-    return createdProduct;
   }
 
   /**

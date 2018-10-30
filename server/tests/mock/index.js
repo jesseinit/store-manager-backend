@@ -82,11 +82,36 @@ const category = {
   }
 };
 
+const products = {
+  invalidProductInfo: {
+    imgUrl: 'http://example.com/photo.jpg',
+    name: 'Router',
+    categoryid: 0,
+    price: 0,
+    qty: 0
+  },
+  validProductInfo: {
+    imgUrl: 'http://example.com/photo.jpg',
+    name: 'Router',
+    categoryid: 1,
+    price: 10.01,
+    qty: 10
+  },
+  NonExistingCategoryId: {
+    imgUrl: 'http://example.com/photo.jpg',
+    name: 'Router',
+    categoryid: 10,
+    price: 10,
+    qty: 10
+  }
+};
+
 export default {
   login,
   signUp,
   modifyUser,
   category,
+  products,
   invalidProductEntry,
   validProductEntry
 };

@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import ProductController from '../../controllers/productController';
 import validtor from '../../middleware/inputValidator';
+import authMiddleware from '../../middleware/auth';
 
 const router = Router();
 
@@ -14,6 +15,8 @@ router.get(
 );
 router.post(
   '/',
+  authMiddleware.verifyToken,
+  authMiddleware.adminOnly,
   validtor.validateNewProduct,
   validtor.validationHandler,
   ProductController.createProduct

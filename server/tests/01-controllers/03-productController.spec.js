@@ -2,18 +2,100 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../../index';
 import mockData from '../mock';
-// import { pool } from '../../utils/connection';
-
-const { invalidProductEntry, validProductEntry } = mockData;
+import pool from '../../utils/connection';
 
 const { expect } = chai;
 chai.use(chaiHttp);
 
-after(() => {
-  // pool.query(`TRUNCATE TABLE users RESTART IDENTITY;`);
-});
+let ownerToken;
 
 describe('Products', () => {
+  before(async () => {
+    const response = await chai
+      .request(app)
+      .post('/api/v1/auth/login')
+      .send(mockData.login.ownerLogin);
+    ownerToken = response.body.token;
+
+    /* Create a new product category */
+    await chai
+      .request(app)
+      .post('/api/v1/category/')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send(mockData.category.validCategoryName);
+  });
+
+  after(async () => {
+    await pool.query('TRUNCATE TABLE users,category,products RESTART IDENTITY');
+  });
+
+  describe('Create Products', () => {
+    it('Should return an authentication error when authorization headers are not present', async () => {
+      const response = await chai.request(app).post('/api/v1/products');
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Should return an authentication error when an invalid token is passed', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/products')
+        .set('Authorization', `Bearer WrongToken`);
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Invalid product information should return an unprocessable entity error', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/products')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.products.invalidProductInfo);
+
+      expect(response.status).to.equal(422);
+      expect(response.body).to.have.property('error');
+    });
+
+    it('Should not create a product when non-existing category id is passed', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/products')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.products.NonExistingCategoryId);
+
+      expect(response.status).to.equal(400);
+      expect(response.body.message).to.equal('The category does not exit');
+    });
+
+    it('Admin should be able to create a product', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/products')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.products.validProductInfo);
+
+      expect(response.status).to.equal(201);
+    });
+
+    it('Admin should not be able to create a new product with the same name', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/products/')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.products.validProductInfo);
+      expect(response.status).to.equal(400);
+      expect(response.body.message).to.equal('The provided product name already exists.');
+    });
+  });
+
   describe('GET /products', () => {
     it('Users should be able to get all product', done => {
       chai
@@ -70,48 +152,7 @@ describe('Products', () => {
     });
   });
 
-  describe('POST /products', () => {
-    it('Invalid product id should return an unprocessable input error', done => {
-      chai
-        .request(app)
-        .post('/api/v1/products')
-        .send(invalidProductEntry)
-        .end((err, res) => {
-          expect(res.status).to.equal(422);
-          expect(res.body).to.have.property('error');
-          done(err);
-        });
-    });
-
-    it('Admin should be able to create a product', done => {
-      chai
-        .request(app)
-        .post('/api/v1/products')
-        .send(validProductEntry)
-        .end((err, res) => {
-          expect(res.status).to.equal(201);
-          expect(res.body).to.have.property('result');
-          expect(res.body.result).to.be.an('object');
-          expect(res.body.result).to.have.all.keys('id', 'imgUrl', 'name', 'category', 'price', 'qty');
-          done(err);
-        });
-    });
-
-    it('Admin should be able to create a product with the same product name', done => {
-      chai
-        .request(app)
-        .post('/api/v1/products')
-        .send(validProductEntry)
-        .end((err, res) => {
-          expect(res.status).to.equal(400);
-          expect(res.body.status).to.be.a('boolean');
-          expect(res.body.status).to.equal(false);
-          done(err);
-        });
-    });
-  });
-
-  describe('PUT /products/:id', () => {
+  /* describe('PUT /products/:id', () => {
     it('Invalid product details information should return an unprocessable input error during product update', done => {
       chai
         .request(app)
@@ -176,5 +217,5 @@ describe('Products', () => {
           done(err);
         });
     });
-  });
+  }); */
 });
