@@ -275,7 +275,7 @@ a {
 #site-main .main .products .in-stock::before {
   position: absolute;
   content: 'Available';
-  padding: 2px;
+  padding: 4px;
   border-radius: 2px;
   font-size: 0.7rem;
   background: #54ea8e;
@@ -285,7 +285,7 @@ a {
   position: absolute;
   content: 'Out of Stock';
   z-index: 2;
-  padding: 2px;
+  padding: 4px;
   border-radius: 2px 3px;
   font-size: 0.7rem;
   color: #fff;
@@ -293,7 +293,7 @@ a {
 }
 
 #site-main .main .products .out-stock button:disabled {
-  background: #000;
+  background: #dedbdb;
   cursor: not-allowed;
   margin-top: 20px;
 }

@@ -52,6 +52,83 @@
           <input type="submit" class="search__submit" value="Search">
         </form>
       </section>
+      <h3 class="no-result"></h3>
+      <section class="products">
+        <div class="product out-stock">
+          <img class="product__image" src="./img/phone.jpg" alt="product-image">
+          <div class="product__details">
+            <a class="product__name" href="./view-product.html">Xiaomi Redmi S2 3GB 32GB Snapdragon 625 Octa Core 5.99"
+              18:9 Full Screen
+              Dual Camera 12MP+5MP Smartphone</a>
+            <p class="product__price"><span class="currency">₦</span>89,999.99</p>
+            <div class="product__stkInfo">
+              <p class="product__cat">Phones</p>
+              <p class="product__stock">0</p>
+            </div>
+            <div class="amt">
+              <span class="amt-decrease">-</span><input class="product__qty" type="text" value="0" maxlength="4" /><span
+                class="amt-increase">+</span>
+            </div>
+          </div>
+          <button disabled class="product__addCart">Out of Stock</button>
+        </div>
+        <div class="product in-stock">
+          <img class="product__image" src="./img/laptop.jpg" alt="product-image">
+          <div class="product__details">
+            <a class="product__name" href="./view-product.html">Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan
+              Laptop</a>
+            <p class="product__price"><span class="currency">₦</span>249,999.99</p>
+            <div class="product__stkInfo">
+              <p class="product__cat">Computers</p>
+              <p class="product__stock">37</p>
+            </div>
+            <div class="amt">
+              <button class="amt-decrease">-</button><input class="product__qty" type="text" value="1" maxlength="4" /><button
+                class="amt-increase">+</button>
+            </div>
+          </div>
+          <button class="product__addCart">Add to Cart</button>
+        </div>
+        <div class="product out-stock">
+          <img class="product__image" src="./img/memcard.jpg" alt="product-image">
+          <div class="product__details">
+            <a class="product__name" href="#">100% Original Sandisk Micro SD card Class10 TF card16gb 32gb 64gb 128gb
+              80Mb/s memory card for samrtphone and table PC
+            </a>
+            <p class="product__price"><span class="currency">₦</span>6,999.99</p>
+            <div class="product__stkInfo">
+              <p class="product__cat">Storage Devices</p>
+              <p class="product__stock">0</p>
+            </div>
+            <div class="amt">
+              <span class="amt-decrease">-</span><input class="product__qty" type="text" value="0" maxlength="4" /><span
+                class="amt-increase">+</span>
+            </div>
+          </div>
+          <button disabled class="product__addCart">Out of Stock</button>
+        </div>
+        <div class="product in-stock">
+          <img class="product__image" src="./img/watch.jpg" alt="product-image">
+          <div class="product__details">
+            <a class="product__name" href="#">Xiaomi Huami Amazfit Bip Smart Watch GPS Gloness Smartwatch Smart-watch
+              Watchs 45 Days Standby for Phone MI8 IOS</a>
+            <p class="product__price"><span class="currency">₦</span>49,999.99</p>
+            <div class="product__stkInfo">
+              <p class="product__cat">Phones</p>
+              <p class="product__stock">37</p>
+            </div>
+            <div class="amt">
+              <button class="amt-decrease">-</button><input class="product__qty" type="text" value="1" maxlength="4" /><button
+                class="amt-increase">+</button>
+            </div>
+          </div>
+          <button class="product__addCart">Add to Cart</button>
+        </div>
+      </section>
+      <section class="pagination">
+        <button class="pagination__prev">Previous Page</button>
+        <button class="pagination__next">Next Page</button>
+      </section>
     </section>
   </main>
   <footer id="site-footer">
