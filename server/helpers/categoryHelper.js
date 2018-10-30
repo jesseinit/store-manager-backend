@@ -76,6 +76,27 @@ class CategoryHelper {
       return error;
     }
   }
+
+  /**
+   *
+   * @description Deletes a product category
+   * @static
+   * @param {number} categoryId Category Id to be deleted
+   * @returns {boolean} Result of the operation
+   * @memberof CategoryHelper
+   */
+  static async deleteCategory(categoryId) {
+    try {
+      const foundCategory = await pool.query(query.findCategoryById(categoryId));
+      if (foundCategory.rows.length < 1) {
+        errorHandler(404, 'Category not found');
+      }
+      await pool.query(query.deleteCategory(categoryId));
+      return true;
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 export default CategoryHelper;

@@ -34,6 +34,10 @@ const query = {
   updateCategory: (id, name) => ({
     text: `UPDATE category SET categoryname = $1 WHERE categoryid = $2 RETURNING *`,
     values: [name, id]
+  }),
+  deleteCategory: id => ({
+    text: `DELETE FROM category WHERE categoryid = $1`,
+    values: [id]
   })
 };
 

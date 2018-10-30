@@ -210,7 +210,7 @@ describe('Category', () => {
       expect(response.body.status).to.equal(false);
     });
 
-    it('Admin should be get a message when there are no created categories', async () => {
+    it('Admin should get a message when there are no created categories', async () => {
       const userHelperStub = sinon
         .stub(CategoryHelper, 'getAllCategories')
         .returns('You have no product category yet.');
@@ -245,6 +245,52 @@ describe('Category', () => {
 
       expect(resonse.status).to.equal(500);
       userHelperStub.restore();
+    });
+  });
+
+  describe('Delete Category', () => {
+    it('Should return an authentication error when authorization headers are not present', async () => {
+      const response = await chai.request(app).del('/api/v1/category/1');
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Should return an authentication error when an invalid token is passed', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/category/1')
+        .set('Authorization', `Bearer WrongToken`);
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('It should not be able to delete a non-existing category', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/category/10')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(404);
+      expect(response.body.message).to.equal('Category not found');
+    });
+
+    it('Admin should be able to delete a category', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/category/1')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+      expect(response.body).to.have.property('result');
+      expect(response.body.result).to.equal(true);
     });
   });
 });
