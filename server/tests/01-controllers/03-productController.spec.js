@@ -1,8 +1,10 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import sinon from 'sinon';
 import app from '../../index';
 import mockData from '../mock';
 import pool from '../../utils/connection';
+import ProductHelper from '../../helpers/productHelper';
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -27,6 +29,59 @@ describe('Products', () => {
 
   after(async () => {
     await pool.query('TRUNCATE TABLE users,category,products RESTART IDENTITY');
+  });
+
+  describe('Get All Products', () => {
+    it('Should return an authentication error when authorization headers are not present', async () => {
+      const response = await chai.request(app).get('/api/v1/products');
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Should return an authentication error when an invalid token is passed', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/products')
+        .set('Authorization', `Bearer WrongToken`);
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('It should return a message when there are no created products yet.', async () => {
+      const productHelperStub = sinon
+        .stub(ProductHelper, 'allProducts')
+        .returns('No product created yet.');
+
+      const response = await chai
+        .request(app)
+        .get('/api/v1/products')
+        .set('Authorization', `Bearer ${ownerToken}`);
+      expect(response.status).to.equal(200);
+      expect(response.body.result).to.be.a('string');
+      expect(response.body.result).to.equal('No product created yet.');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(true);
+      productHelperStub.restore();
+    });
+
+    it('Authenticated users should be able to view all product', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/products')
+        .set('Authorization', `Bearer ${ownerToken}`);
+      expect(response.status).to.equal(200);
+      expect(response.body.result).is.to.be.an('array');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(true);
+    });
   });
 
   describe('Create Products', () => {
@@ -93,18 +148,6 @@ describe('Products', () => {
         .send(mockData.products.validProductInfo);
       expect(response.status).to.equal(400);
       expect(response.body.message).to.equal('The provided product name already exists.');
-    });
-  });
-
-  describe('GET /products', () => {
-    it('Users should be able to get all product', done => {
-      chai
-        .request(app)
-        .get('/api/v1/products/')
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          done(err);
-        });
     });
   });
 

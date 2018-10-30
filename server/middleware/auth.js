@@ -20,14 +20,16 @@ const verifyToken = (req, res, next) => {
 };
 
 const adminOnly = (req, res, next) => {
-  if (req.user.role === 'Attendant') {
+  const { role } = req.user;
+  if (role === 'Attendant') {
     errorHandler(403, 'You cant perform this action. Admins Only');
   }
   next();
 };
 
 const ownerOnly = (req, res, next) => {
-  if (req.user.role === 'Attendant' || req.user.role === 'Admin') {
+  const { role } = req.user;
+  if (role === 'Attendant' || role === 'Admin') {
     errorHandler(403, 'You cant perform this action. Owner account Only');
   }
   next();
