@@ -28,14 +28,13 @@ class ProductController {
    * @param {object} res - Response Object
    * @memberof ProductController
    */
-  static getSingleProduct(req, res) {
-    const productId = parseInt(req.params.id, 10);
-    const product = ProductHelper.getSingleProduct(productId);
-    if (isEmptyObject(product)) {
-      res.status(404).json({ status: false, message: 'Product not found' });
+  static async getSingleProduct(req, res, next) {
+    const result = await ProductHelper.getSingleProduct(req.params.id);
+    if (result instanceof Error) {
+      next(result);
       return;
     }
-    res.status(200).json({ status: true, result: product });
+    res.status(200).json({ status: true, result });
   }
 
   /**

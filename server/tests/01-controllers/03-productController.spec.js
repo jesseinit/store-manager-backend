@@ -151,47 +151,74 @@ describe('Products', () => {
     });
   });
 
-  describe('GET /products/:id', () => {
-    it('Invalid product id should return an unprocessable input error', done => {
-      chai
-        .request(app)
-        .get('/api/v1/products/*')
-        .end((err, res) => {
-          expect(res.status).to.equal(422);
-          expect(res.body).to.have.property('error');
-          done(err);
-        });
+  describe('Get Single Product', () => {
+    it('Should return an authentication error when authorization headers are not present', async () => {
+      const response = await chai.request(app).get('/api/v1/products/1');
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
     });
 
-    it('Non-existing product id should return a not found error when fetching product', done => {
-      chai
-        .request(app)
-        .get('/api/v1/products/5')
-        .end((err, res) => {
-          expect(res.status).to.equal(404);
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('message');
-          expect(res.body.message).to.equal('Product not found');
-          expect(res.body.status).to.be.a('boolean');
-          expect(res.body.status).to.equal(false);
-          expect(res.body).to.not.have.property('result');
-          done(err);
-        });
-    });
-
-    it('Valid product id should return the matching product', done => {
-      chai
+    it('Should return an authentication error when an invalid token is passed', async () => {
+      const response = await chai
         .request(app)
         .get('/api/v1/products/1')
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.body).to.have.property('result');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(true);
-          expect(res.body.result).to.be.an('object');
-          expect(res.body.result).to.have.keys(['id', 'imgUrl', 'name', 'category', 'price', 'qty']);
-          done(err);
-        });
+        .set('Authorization', `Bearer WrongToken`);
+
+      expect(response.status).to.equal(401);
+      expect(response.body).to.have.property('message');
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(false);
+    });
+
+    it('Invalid product id should return an unprocessable input error', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/products/*')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(422);
+      expect(response.body).to.have.property('error');
+      expect(response.body.error).is.to.be.an('array');
+    });
+
+    it('Non-existing product id should return a not found error when fetching product', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/products/10')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(404);
+      expect(response.body).to.have.property('status');
+      expect(response.body.status).to.equal(false);
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.equal('Product not found');
+    });
+
+    it('Valid product id should return the matching product', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/products/1')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+      expect(response.body.result).is.to.be.an('object');
+      expect(response.body.status).to.be.a('boolean');
+      expect(response.body.status).to.equal(true);
+      expect(response.body.result).to.have.keys([
+        'id',
+        'imageurl',
+        'name',
+        'categoryid',
+        'price',
+        'qty',
+        'categoryname'
+      ]);
     });
   });
 

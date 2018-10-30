@@ -27,18 +27,22 @@ class ProductHelper {
 
   /**
    *
-   * @description Helper method that gets a single product's represenation from the data structure
+   * @description Helper method that gets a single product's represenation
    * @static
    * @returns {object} An object of the found product or empty object if not found
    * @param {number} prodId Id of the product to be retrieved
    * @memberof ProductHelper
    */
-  static getSingleProduct(prodId) {
-    const foundProduct = products.find(product => product.id === prodId);
-    if (!foundProduct) {
-      return {};
+  static async getSingleProduct(prodId) {
+    try {
+      const foundProduct = await pool.query(query.getProductById(prodId));
+      if (foundProduct.rowCount < 1) {
+        errorHandler(404, 'Product not found');
+      }
+      return foundProduct.rows[0];
+    } catch (error) {
+      return error;
     }
-    return foundProduct;
   }
 
   /**
