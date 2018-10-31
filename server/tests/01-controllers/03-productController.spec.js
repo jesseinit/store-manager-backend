@@ -290,4 +290,31 @@ describe('Products', () => {
       expect(response.status).to.equal(200);
     });
   });
+
+  describe('Delete Product', () => {
+    it('Attendants should not be able to delete a product', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/products/1')
+        .set('Authorization', `Bearer ${attendantToken}`);
+      expect(response.status).to.equal(403);
+      expect(response.body.message).to.equal('You cant perform this action. Admins Only');
+    });
+
+    it('It should return not found when trying to delete non-existing products', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/products/10')
+        .set('Authorization', `Bearer ${ownerToken}`);
+      expect(response.status).to.equal(404);
+    });
+
+    it('Admins only should be able to delete a product', async () => {
+      const response = await chai
+        .request(app)
+        .del('/api/v1/products/1')
+        .set('Authorization', `Bearer ${ownerToken}`);
+      expect(response.status).to.equal(204);
+    });
+  });
 });

@@ -71,14 +71,11 @@ class ProductController {
    * @param {object} res - Response Object
    * @memberof ProductController
    */
-  static deleteProduct(req, res) {
+  static async deleteProduct(req, res, next) {
     const productId = parseInt(req.params.id, 10);
-    const isDeleted = ProductHelper.deleteProduct(productId);
-    if (!isDeleted) {
-      res.status(404).json({ status: false, message: 'Product not found' });
-      return;
-    }
-    res.status(200).json({ status: true, message: 'Product deleted' });
+    const result = await ProductHelper.deleteProduct(productId);
+
+    handleResponse(result, next, res, 204);
   }
 }
 
