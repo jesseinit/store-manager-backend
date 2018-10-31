@@ -14,6 +14,7 @@ router.get(
   validator.validationHandler,
   ProductController.getProductById
 );
+
 router.post(
   '/',
   authMiddleware.verifyToken,
@@ -22,6 +23,7 @@ router.post(
   validator.validationHandler,
   ProductController.createProduct
 );
+
 router.put(
   '/:id',
   authMiddleware.verifyToken,
@@ -30,8 +32,11 @@ router.put(
   validator.validationHandler,
   ProductController.updateProduct
 );
+
 router.delete(
   '/:id',
+  authMiddleware.verifyToken,
+  authMiddleware.adminOnly,
   validator.validateProductId,
   validator.validationHandler,
   ProductController.deleteProduct

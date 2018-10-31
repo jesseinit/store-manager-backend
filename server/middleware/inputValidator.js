@@ -95,7 +95,22 @@ const validateNewProduct = [
     .withMessage('Product price must be decimal number of 1.0 or more'),
   body('qty')
     .isNumeric({ min: 1 })
-    .withMessage('Product qty must be a positive number from 1')
+    .withMessage('Product qty must be a positive number from 1'),
+  body('imgUrl')
+    .exists()
+    .withMessage('Product Image must be provided.'),
+  body('name')
+    .exists()
+    .withMessage('Product name must be provided.'),
+  body('categoryid')
+    .exists()
+    .withMessage('Category Id must be provided.'),
+  body('price')
+    .exists()
+    .withMessage('Product price must  be provided.'),
+  body('qty')
+    .exists()
+    .withMessage('Product quantity must be provided.')
 ];
 
 const validateProductUpdate = [

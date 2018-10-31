@@ -76,6 +76,10 @@ const query = {
       updateInfo.qty,
       id
     ]
+  }),
+  deleteProduct: id => ({
+    text: `DELETE FROM products WHERE id = $1`,
+    values: [id]
   })
 };
 

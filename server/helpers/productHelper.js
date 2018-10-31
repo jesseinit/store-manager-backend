@@ -1,4 +1,3 @@
-import products from '../models/products';
 import isEmptyObject from '../utils/isEmptyObject';
 import pool from '../utils/connection';
 import query from '../utils/queries';
@@ -108,13 +107,6 @@ class ProductHelper {
     } catch (error) {
       return error;
     }
-
-    /* const productUpdateName = productArg.name.replace(/\s\s+/g, ' ').trim();
-    foundProduct.imgUrl = productArg.imgUrl;
-    foundProduct.name = productUpdateName;
-    foundProduct.category = productArg.category;
-    foundProduct.price = parseFloat(productArg.price);
-    foundProduct.qty = parseInt(productArg.qty, 10); */
   }
 
   /**
@@ -125,14 +117,17 @@ class ProductHelper {
    * @returns {boolean} Boolean to confirm product deletion or failure
    * @memberof ProductHelper
    */
-  static deleteProduct(prodId) {
-    const foundProduct = products.find(product => product.id === prodId);
-    if (!foundProduct) {
-      return false;
+  static async deleteProduct(productid) {
+    try {
+      const result = await this.getProductById(productid);
+      if (result instanceof Error) {
+        return result;
+      }
+      await pool.query(query.deleteProduct(productid));
+      return true;
+    } catch (error) {
+      return error;
     }
-    const foundProductIndex = products.indexOf(foundProduct);
-    products.splice(foundProductIndex, 1);
-    return true;
   }
 
   /**
