@@ -33,7 +33,7 @@ class ProductHelper {
    * @param {number} prodId Id of the product to be retrieved
    * @memberof ProductHelper
    */
-  static async getSingleProduct(prodId) {
+  static async getProductById(prodId) {
     try {
       const foundProduct = await pool.query(query.getProductById(prodId));
       if (foundProduct.rowCount < 1) {
@@ -82,18 +82,39 @@ class ProductHelper {
    * @returns {object} An object with an object reporesenting the updated product
    * @memberof ProductHelper
    */
-  static updateProduct(productArg) {
-    const foundProduct = products.find(product => product.id === productArg.id);
-    if (!foundProduct) {
-      return {};
+  static async updateProduct(productInfo) {
+    try {
+      const result = await this.getProductById(productInfo.id);
+      if (result instanceof Error) {
+        return result;
+      }
+
+      const allProducts = await this.allProducts();
+
+      const isExists = allProducts.some(product => product.name === productInfo.body.name);
+      if (isExists) {
+        errorHandler(400, 'The provided product name already exists.');
+      }
+
+      const foundCategory = await pool.query(query.findCategoryById(productInfo.body.categoryid));
+
+      if (foundCategory.rowCount < 1) {
+        errorHandler(400, 'The category does not exist.');
+      }
+
+      const updatedProduct = await pool.query(query.updateProduct(productInfo.id, productInfo.body));
+
+      return updatedProduct.rows[0];
+    } catch (error) {
+      return error;
     }
-    const productUpdateName = productArg.name.replace(/\s\s+/g, ' ').trim();
+
+    /* const productUpdateName = productArg.name.replace(/\s\s+/g, ' ').trim();
     foundProduct.imgUrl = productArg.imgUrl;
     foundProduct.name = productUpdateName;
     foundProduct.category = productArg.category;
     foundProduct.price = parseFloat(productArg.price);
-    foundProduct.qty = parseInt(productArg.qty, 10);
-    return foundProduct;
+    foundProduct.qty = parseInt(productArg.qty, 10); */
   }
 
   /**

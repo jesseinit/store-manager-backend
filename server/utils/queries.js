@@ -41,9 +41,13 @@ const query = {
   }),
   /* Products */
   getAllProducts: () =>
-    `SELECT p.*, COALESCE (c.categoryname, 'Not Set') as categoryname FROM products p FULL JOIN category c ON c.categoryid = p.categoryid`,
+    `SELECT p.*, COALESCE (c.categoryname, 'Not Set') as categoryname 
+    FROM products p JOIN category c 
+    ON c.categoryid = p.categoryid`,
   getProductById: id => ({
-    text: `SELECT p.*, COALESCE (c.categoryname, 'Not Set') as categoryname FROM products p FULL JOIN category c ON c.categoryid = p.categoryid WHERE p.id = $1`,
+    text: `SELECT p.*, COALESCE (c.categoryname, 'Not Set') as categoryname 
+          FROM products p FULL JOIN category c ON c.categoryid = p.categoryid 
+          WHERE p.id = $1`,
     values: [id]
   }),
   createProduct: productsInfo => ({
@@ -54,6 +58,23 @@ const query = {
       productsInfo.categoryid,
       Number.parseFloat(productsInfo.price).toFixed(2),
       productsInfo.qty
+    ]
+  }),
+  updateProduct: (id, updateInfo) => ({
+    text: `UPDATE products SET 
+          imageurl = COALESCE ($1, imageurl), 
+          name = COALESCE ($2, name), 
+          categoryid = COALESCE($3, categoryid), 
+          price = COALESCE($4, price), 
+          qty = COALESCE($5, qty) 
+          WHERE id = $6 RETURNING *`,
+    values: [
+      updateInfo.imgUrl,
+      updateInfo.name,
+      updateInfo.categoryid,
+      Number.parseFloat(updateInfo.price).toFixed(2),
+      updateInfo.qty,
+      id
     ]
   })
 };
