@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import ProductController from '../../controllers/productController';
-import validtor from '../../middleware/inputValidator';
+import validator from '../../middleware/inputValidator';
 import authMiddleware from '../../middleware/auth';
 
 const router = Router();
@@ -10,28 +10,30 @@ router.get('/', authMiddleware.verifyToken, ProductController.getAllProducts);
 router.get(
   '/:id',
   authMiddleware.verifyToken,
-  validtor.validateProductId,
-  validtor.validationHandler,
-  ProductController.getSingleProduct
+  validator.validateProductId,
+  validator.validationHandler,
+  ProductController.getProductById
 );
 router.post(
   '/',
   authMiddleware.verifyToken,
   authMiddleware.adminOnly,
-  validtor.validateNewProduct,
-  validtor.validationHandler,
+  validator.validateNewProduct,
+  validator.validationHandler,
   ProductController.createProduct
 );
 router.put(
   '/:id',
-  validtor.validateProductUpdate,
-  validtor.validationHandler,
+  authMiddleware.verifyToken,
+  authMiddleware.adminOnly,
+  validator.validateProductUpdate,
+  validator.validationHandler,
   ProductController.updateProduct
 );
 router.delete(
   '/:id',
-  validtor.validateProductId,
-  validtor.validationHandler,
+  validator.validateProductId,
+  validator.validationHandler,
   ProductController.deleteProduct
 );
 

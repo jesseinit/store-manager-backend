@@ -84,7 +84,6 @@ const validateNewProduct = [
       return checkUrl.test(imageUrl);
     })
     .withMessage('Product image input should be a valid image url'),
-  validateNewCategory[0],
   body('name')
     .isLength({ min: 2 })
     .withMessage('Product name must be atlease 2 letters long'),
@@ -101,11 +100,11 @@ const validateNewProduct = [
 
 const validateProductUpdate = [
   validateProductId[0],
-  validateNewProduct[0],
-  validateNewProduct[2],
-  validateNewProduct[3],
-  validateNewProduct[4],
-  validateNewProduct[5]
+  validateNewProduct[0].optional(),
+  validateNewProduct[1].optional(),
+  validateNewProduct[2].optional(),
+  validateNewProduct[3].optional(),
+  validateNewProduct[4].optional()
 ];
 
 const validateNewSale = [

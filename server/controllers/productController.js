@@ -1,5 +1,5 @@
 import ProductHelper from '../helpers/productHelper';
-import isEmptyObject from '../utils/isEmptyObject';
+import handleResponse from '../utils/responseHandler';
 
 /**
  *
@@ -28,13 +28,9 @@ class ProductController {
    * @param {object} res - Response Object
    * @memberof ProductController
    */
-  static async getSingleProduct(req, res, next) {
-    const result = await ProductHelper.getSingleProduct(req.params.id);
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(200).json({ status: true, result });
+  static async getProductById(req, res, next) {
+    const result = await ProductHelper.getProductById(req.params.id);
+    handleResponse(result, next, res);
   }
 
   /**
@@ -47,11 +43,7 @@ class ProductController {
    */
   static async createProduct(req, res, next) {
     const result = await ProductHelper.createProduct(req.body);
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(201).json({ status: true, result });
+    handleResponse(result, next, res, 201);
   }
 
   /**
@@ -62,22 +54,13 @@ class ProductController {
    * @param {object} res - Response Object
    * @memberof ProductController
    */
-  static updateProduct(req, res) {
+  static async updateProduct(req, res, next) {
     const id = parseInt(req.params.id, 10);
-    const { imgUrl, name, category, price, qty } = req.body;
-    const updatedProduct = ProductHelper.updateProduct({
+    const result = await ProductHelper.updateProduct({
       id,
-      imgUrl,
-      name,
-      category,
-      price,
-      qty
+      body: req.body
     });
-    if (isEmptyObject(updatedProduct)) {
-      res.status(404).json({ status: false, message: 'Product not found' });
-      return;
-    }
-    res.status(200).json({ status: true, result: updatedProduct });
+    handleResponse(result, next, res);
   }
 
   /**

@@ -10,6 +10,7 @@ const { expect } = chai;
 chai.use(chaiHttp);
 
 let ownerToken;
+let attendantToken;
 
 describe('Products', () => {
   before(async () => {
@@ -18,6 +19,12 @@ describe('Products', () => {
       .post('/api/v1/auth/login')
       .send(mockData.login.ownerLogin);
     ownerToken = response.body.token;
+
+    const attendantResponse = await chai
+      .request(app)
+      .post('/api/v1/auth/login')
+      .send(mockData.login.attendantLogin);
+    attendantToken = attendantResponse.body.token;
 
     /* Create a new product category */
     await chai
@@ -73,10 +80,23 @@ describe('Products', () => {
     });
 
     it('Authenticated users should be able to view all product', async () => {
+      await chai
+        .request(app)
+        .post('/api/v1/products')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({
+          imgUrl: 'http://example.com/photo.jpg',
+          name: 'Router 2',
+          categoryid: 1,
+          price: 10.01,
+          qty: 10
+        });
+
       const response = await chai
         .request(app)
         .get('/api/v1/products')
         .set('Authorization', `Bearer ${ownerToken}`);
+
       expect(response.status).to.equal(200);
       expect(response.body.result).is.to.be.an('array');
       expect(response.body.status).to.be.a('boolean');
@@ -136,8 +156,16 @@ describe('Products', () => {
         .post('/api/v1/products')
         .set('Authorization', `Bearer ${ownerToken}`)
         .send(mockData.products.validProductInfo);
-
       expect(response.status).to.equal(201);
+      expect(response.body.result).to.be.an('object');
+      expect(response.body.result).to.have.all.keys([
+        'id',
+        'imageurl',
+        'name',
+        'categoryid',
+        'price',
+        'qty'
+      ]);
     });
 
     it('Admin should not be able to create a new product with the same name', async () => {
@@ -222,70 +250,44 @@ describe('Products', () => {
     });
   });
 
-  /* describe('PUT /products/:id', () => {
-    it('Invalid product details information should return an unprocessable input error during product update', done => {
-      chai
+  describe('Update Product', () => {
+    it('Attendant should not be able to update a product', async () => {
+      const response = await chai
         .request(app)
-        .put('/api/v1/products/5')
-        .send(invalidProductEntry)
-        .end((err, res) => {
-          expect(res.status).to.equal(422);
-          expect(res.body).to.have.property('error');
-          done(err);
-        });
+        .put('/api/v1/products/1')
+        .set('Authorization', `Bearer ${attendantToken}`)
+        .send(mockData.products.validProductInfo);
+      expect(response.status).to.equal(403);
+      expect(response.body.message).to.equal('You cant perform this action. Admins Only');
     });
 
-    it('Non-existing product id should return NOT FOUND error during product update', done => {
-      chai
+    it('Admin should not be able to update a product with a product name that exists', async () => {
+      const response = await chai
         .request(app)
-        .put('/api/v1/products/10')
-        .send(validProductEntry)
-        .end((err, res) => {
-          expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('Product not found');
-          expect(res.body.status).to.be.a('boolean');
-          expect(res.body.status).to.equal(false);
-          done(err);
-        });
+        .put('/api/v1/products/1')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.products.validProductInfo);
+      expect(response.status).to.equal(400);
+      expect(response.body.message).to.equal('The provided product name already exists.');
     });
 
-    it('Product should update with same product details when there are no input errors', done => {
-      chai
+    it('Admin should not be able to update a product with a category id does not exist', async () => {
+      const response = await chai
         .request(app)
-        .put('/api/v1/products/5')
-        .send(validProductEntry)
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          done(err);
-        });
+        .put('/api/v1/products/1')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.products.NonExistingCategoryIdProductUpdateInfo);
+      expect(response.status).to.equal(400);
+      expect(response.body.message).to.equal('The category does not exist.');
+    });
+
+    it('Admin should be able to update a product', async () => {
+      const response = await chai
+        .request(app)
+        .put('/api/v1/products/1')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(mockData.products.validProductUpdateInfo);
+      expect(response.status).to.equal(200);
     });
   });
-
-  describe('DELETE /products/:id', () => {
-    it('Non-existing product id should return a not found error when trying to delete a proudct', done => {
-      chai
-        .request(app)
-        .del('/api/v1/products/10')
-        .end((err, res) => {
-          expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('Product not found');
-          expect(res.body.status).to.be.a('boolean');
-          expect(res.body.status).to.equal(false);
-          done(err);
-        });
-    });
-
-    it('Admin should be able to delete a product after passing a product id that exist', done => {
-      chai
-        .request(app)
-        .del('/api/v1/products/1')
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.body.message).to.equal('Product deleted');
-          expect(res.body.status).to.be.a('boolean');
-          expect(res.body.status).to.equal(true);
-          done(err);
-        });
-    });
-  }); */
 });

@@ -97,6 +97,16 @@ const products = {
     price: 10.01,
     qty: 10
   },
+  validProductUpdateInfo: {
+    imgUrl: 'http://example.com/photo.jpg',
+    name: 'RJ 45 Plugs',
+    categoryid: 1,
+    price: 10.01,
+    qty: 10
+  },
+  NonExistingCategoryIdProductUpdateInfo: {
+    categoryid: 10
+  },
   NonExistingCategoryId: {
     imgUrl: 'http://example.com/photo.jpg',
     name: 'Router',
