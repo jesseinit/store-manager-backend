@@ -12,6 +12,13 @@ let ownerToken;
 let attendantToken;
 let adminToken;
 
+describe('Store Manager', () => {
+  it('It should be able to catch all undefined routes', async () => {
+    const response = await chai.request(app).get('/undefined');
+    expect(response.status).to.equal(404);
+  });
+});
+
 describe('User', () => {
   describe('Login User', () => {
     it('Invalid User ID should return an error', async () => {
@@ -130,7 +137,6 @@ describe('User', () => {
         .set('Authorization', `Bearer ${attendantToken}`)
         .send(mockData.signUp.validNewUser);
       expect(signupResponse.status).to.equal(403);
-      expect(signupResponse.body.message).to.equal('You cant perform this action. Admins Only');
     });
 
     it('It should handle error from database when a creating user', async () => {
@@ -163,7 +169,6 @@ describe('User', () => {
         .set('Authorization', `Bearer ${attendantToken}`);
 
       expect(response.status).to.equal(403);
-      expect(response.body.message).to.equal('You cant perform this action. Admins Only');
     });
 
     it('Store admin/owner should be able to retrieve all users', async () => {
@@ -296,7 +301,6 @@ describe('User', () => {
       expect(response.body).to.have.property('status');
       expect(response.body.status).to.be.a('boolean');
       expect(response.body.status).to.equal(false);
-      expect(response.body.message).to.equal('You cant perform this action. Owner account Only');
     });
 
     it('It should return a not found error when trying to delete a non-existing account', async () => {
@@ -338,7 +342,7 @@ describe('User', () => {
       expect(response.body).to.have.property('status');
       expect(response.body.status).to.be.a('boolean');
       expect(response.body.status).to.equal(true);
-      expect(response.body.result).to.equal(true);
+      expect(response.body.result).to.equal('User has been deleted successfully');
     });
 
     it('It should handle error from database failure when deleting a user', async () => {

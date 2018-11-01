@@ -25,13 +25,13 @@ const attendantOnly = (req, res, next) => {
     next();
     return;
   }
-  errorHandler(403, 'You cant perform this action. Attendants Only');
+  errorHandler(403, 'Unauthorized Access. For attendants accounts only.');
 };
 
 const adminOnly = (req, res, next) => {
   const { role } = req.user;
   if (role === 'Attendant') {
-    errorHandler(403, 'You cant perform this action. Admins Only');
+    errorHandler(403, 'Unauthorized Access. For admins/owner accounts only');
   }
   next();
 };
@@ -39,7 +39,7 @@ const adminOnly = (req, res, next) => {
 const ownerOnly = (req, res, next) => {
   const { role } = req.user;
   if (role === 'Attendant' || role === 'Admin') {
-    errorHandler(403, 'You cant perform this action. Owner account Only');
+    errorHandler(403, 'Unauthorized Access. For owner account only');
   }
   next();
 };

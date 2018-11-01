@@ -93,7 +93,8 @@ const query = {
   thisSale: saleId => ({
     text: `SELECT * FROM productSales as ps JOIN sales as s ON ps.sale_id = s.sale_id WHERE ps.sale_id = $1`,
     values: [saleId]
-  })
+  }),
+  getAllSales: () => `SELECT * FROM sales as s join productSales as ps on s.sale_id = ps.sale_id`
 };
 
 export default query;

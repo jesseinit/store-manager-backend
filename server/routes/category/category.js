@@ -23,12 +23,7 @@ router.put(
   CategoryController.updateCategory
 );
 
-router.get(
-  '/',
-  authMiddleware.verifyToken,
-  authMiddleware.adminOnly,
-  CategoryController.getAllCategories
-);
+router.get('/', authMiddleware.verifyToken, CategoryController.getAllCategories);
 
 router.delete(
   '/:id',

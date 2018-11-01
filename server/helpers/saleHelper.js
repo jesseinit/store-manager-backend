@@ -15,7 +15,10 @@ class SalesHelper {
    * @returns {array} An array of sales records objects
    * @memberof SalesHelper
    */
-  static getAllSales() {}
+  static async getAllSales() {
+    const allSales = await pool.query(query.getAllSales());
+    return allSales.rows;
+  }
 
   /**
    *
@@ -49,7 +52,6 @@ class SalesHelper {
 
         await pool.query(query.createProductSales(product.id, saleId, totalPerProduct, product.qty));
 
-        // Update the product in each iteration
         await pool.query(
           query.updateProduct(product.id, { price: foundRecord.price, qty: newProductQty })
         );

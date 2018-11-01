@@ -76,7 +76,6 @@ describe('Category', () => {
         .send(mockData.category.validCategoryName);
 
       expect(response.status).to.equal(403);
-      expect(response.body.message).to.equal('You cant perform this action. Admins Only');
     });
 
     it('Admin should be able to create a new product category', async () => {

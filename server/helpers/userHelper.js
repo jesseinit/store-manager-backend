@@ -110,8 +110,6 @@ class AuthHelper {
         errorHandler(403, 'Admin cant update owner account');
       }
 
-      /* TODO - Owner should not be able to update his role - Use a || operator on role */
-
       const hashedPassword = await bcrypt.hash(password, 10);
       const updatedUser = await pool.query(query.updateUser(name, hashedPassword, role, userid));
       return updatedUser.rows[0];
@@ -139,7 +137,7 @@ class AuthHelper {
         errorHandler(403, 'Store owner account cant be deleted');
       }
       await pool.query(query.deleteUser(foundUser.userid));
-      return true;
+      return 'User has been deleted successfully';
     } catch (error) {
       return error;
     }

@@ -226,7 +226,6 @@ describe('Products', () => {
         .set('Authorization', `Bearer ${attendantToken}`)
         .send(mockData.products.validProductInfo);
       expect(response.status).to.equal(403);
-      expect(response.body.message).to.equal('You cant perform this action. Admins Only');
     });
 
     it('Admin should not be able to update a product with a product name that exists', async () => {
@@ -266,7 +265,6 @@ describe('Products', () => {
         .del('/api/v1/products/1')
         .set('Authorization', `Bearer ${attendantToken}`);
       expect(response.status).to.equal(403);
-      expect(response.body.message).to.equal('You cant perform this action. Admins Only');
     });
 
     it('It should return not found when trying to delete non-existing products', async () => {

@@ -17,9 +17,9 @@ class SalesController {
    * @param {object} res - Response Object
    * @memberof Sales
    */
-  static getAllSales(req, res) {
-    const sales = SalesHelper.getAllSales();
-    res.status(200).json({ status: true, result: sales });
+  static async getAllSales(req, res, next) {
+    const result = await SalesHelper.getAllSales();
+    handleResponse(result, next, res);
   }
 
   /**
