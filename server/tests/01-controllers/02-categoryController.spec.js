@@ -169,8 +169,6 @@ describe('Category', () => {
         .send(mockData.category.validUpdateName);
 
       expect(response.status).to.equal(200);
-      expect(response.body).to.have.property('result');
-      expect(response.body.result).to.have.keys(['categoryid', 'categoryname']);
     });
 
     it('It should handle error from database failure when updating a category', async () => {
@@ -221,7 +219,7 @@ describe('Category', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(response.status).to.equal(200);
-      expect(response.body).to.have.property('result');
+
       userHelperStub.restore();
     });
 
@@ -232,7 +230,6 @@ describe('Category', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(response.status).to.equal(200);
-      expect(response.body).to.have.property('result');
     });
 
     it('It should handle error from database failure when getting all categories', async () => {
@@ -289,8 +286,6 @@ describe('Category', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(response.status).to.equal(200);
-      expect(response.body).to.have.property('result');
-      expect(response.body.result).to.equal(true);
     });
   });
 });

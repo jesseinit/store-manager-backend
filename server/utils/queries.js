@@ -80,6 +80,19 @@ const query = {
   deleteProduct: id => ({
     text: `DELETE FROM products WHERE id = $1`,
     values: [id]
+  }),
+  /* Sales */
+  createSale: (userid, totals) => ({
+    text: `INSERT INTO sales (user_id, totals) VALUES ($1, $2) RETURNING *`,
+    values: [userid, totals]
+  }),
+  createProductSales: (productId, saleId, productPrice, productQty) => ({
+    text: `INSERT INTO productSales (product_id, sale_id, product_price, product_qty) VALUES ($1,$2,$3,$4) RETURNING *`,
+    values: [productId, saleId, productPrice, productQty]
+  }),
+  thisSale: saleId => ({
+    text: `SELECT * FROM productSales as ps JOIN sales as s ON ps.sale_id = s.sale_id WHERE ps.sale_id = $1`,
+    values: [saleId]
   })
 };
 

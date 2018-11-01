@@ -3,7 +3,6 @@ import chaiHttp from 'chai-http';
 import sinon from 'sinon';
 import app from '../../index';
 import mockData from '../mock';
-import pool from '../../utils/connection';
 import ProductHelper from '../../helpers/productHelper';
 
 const { expect } = chai;
@@ -32,10 +31,6 @@ describe('Products', () => {
       .post('/api/v1/category/')
       .set('Authorization', `Bearer ${ownerToken}`)
       .send(mockData.category.validCategoryName);
-  });
-
-  after(async () => {
-    await pool.query('TRUNCATE TABLE users,category,products RESTART IDENTITY');
   });
 
   describe('Get All Products', () => {
@@ -72,10 +67,6 @@ describe('Products', () => {
         .get('/api/v1/products')
         .set('Authorization', `Bearer ${ownerToken}`);
       expect(response.status).to.equal(200);
-      expect(response.body.result).to.be.a('string');
-      expect(response.body.result).to.equal('No product created yet.');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(true);
       productHelperStub.restore();
     });
 
@@ -98,9 +89,6 @@ describe('Products', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(response.status).to.equal(200);
-      expect(response.body.result).is.to.be.an('array');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(true);
     });
   });
 
@@ -156,16 +144,8 @@ describe('Products', () => {
         .post('/api/v1/products')
         .set('Authorization', `Bearer ${ownerToken}`)
         .send(mockData.products.validProductInfo);
+
       expect(response.status).to.equal(201);
-      expect(response.body.result).to.be.an('object');
-      expect(response.body.result).to.have.all.keys([
-        'id',
-        'imageurl',
-        'name',
-        'categoryid',
-        'price',
-        'qty'
-      ]);
     });
 
     it('Admin should not be able to create a new product with the same name', async () => {
@@ -235,18 +215,6 @@ describe('Products', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(response.status).to.equal(200);
-      expect(response.body.result).is.to.be.an('object');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(true);
-      expect(response.body.result).to.have.keys([
-        'id',
-        'imageurl',
-        'name',
-        'categoryid',
-        'price',
-        'qty',
-        'categoryname'
-      ]);
     });
   });
 
@@ -314,7 +282,7 @@ describe('Products', () => {
         .request(app)
         .del('/api/v1/products/1')
         .set('Authorization', `Bearer ${ownerToken}`);
-      expect(response.status).to.equal(204);
+      expect(response.status).to.equal(200);
     });
   });
 });

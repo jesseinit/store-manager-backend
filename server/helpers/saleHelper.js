@@ -1,5 +1,6 @@
-import sales from '../models/sales';
 import ProductHelper from './productHelper';
+import pool from '../utils/connection';
+import query from '../utils/queries';
 
 /**
  *
@@ -14,9 +15,7 @@ class SalesHelper {
    * @returns {array} An array of sales records objects
    * @memberof SalesHelper
    */
-  static getAllSales() {
-    return sales;
-  }
+  static getAllSales() {}
 
   /**
    *
@@ -26,15 +25,7 @@ class SalesHelper {
    * @returns {object} An object of the found sales record or empty object if not found
    * @memberof SalesHelper
    */
-  static getSingleSale(saleId) {
-    let foundRecord = {};
-    sales.forEach(sale => {
-      if (sale.id === saleId) {
-        foundRecord = sale;
-      }
-    });
-    return foundRecord;
-  }
+  static getSingleSale(/* saleId */) {}
 
   /**
    * @description Helper method that creates a sales record
@@ -43,20 +34,33 @@ class SalesHelper {
    * @param {object} - sales record object to be created
    * @memberof SalesHelper
    */
-  static createSalesRecord(newSale) {
-    const foundProduct = ProductHelper.getSingleProduct(newSale.id);
-    const newSaleRecord = {
-      id: sales[sales.length - 1].id + 1,
-      date: Date.now(),
-      productName: foundProduct.name,
-      price: foundProduct.price,
-      qty: newSale.qty,
-      get total() {
-        return this.qty * this.price;
-      }
-    };
-    sales.push(newSaleRecord);
-    return newSaleRecord;
+  static async createNewSale(newSale) {
+    try {
+      const { userid, total, products } = newSale;
+
+      const { rows } = await pool.query(query.createSale(userid, total));
+      const saleId = rows[0].sale_id;
+
+      products.forEach(async product => {
+        const foundRecord = await ProductHelper.getProductById(product.id);
+
+        const totalPerProduct = foundRecord.price * product.qty;
+        const newProductQty = foundRecord.qty - product.qty;
+
+        await pool.query(query.createProductSales(product.id, saleId, totalPerProduct, product.qty));
+
+        // Update the product in each iteration
+        await pool.query(
+          query.updateProduct(product.id, { price: foundRecord.price, qty: newProductQty })
+        );
+      });
+
+      // Crreate new sale
+      const thisSale = await pool.query(query.thisSale(saleId));
+      return thisSale.rows;
+    } catch (error) {
+      return error;
+    }
   }
 }
 

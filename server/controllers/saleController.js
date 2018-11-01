@@ -1,6 +1,6 @@
 import SalesHelper from '../helpers/saleHelper';
-import ProductHelper from '../helpers/productHelper';
 import isEmptyObject from '../utils/isEmptyObject';
+import handleResponse from '../utils/responseHandler';
 
 /**
  *
@@ -50,16 +50,12 @@ class SalesController {
    * @param {*} res
    * @memberof SalesController
    */
-  static createNewSale(req, res) {
-    const { id, qty } = req.body;
-    const inStock = ProductHelper.inStock({ id, qty });
-    if (inStock === false) {
-      res.status(400).send({ status: false, message: 'Product or stock not available' });
-      return;
-    }
-    const newSale = SalesHelper.createSalesRecord({ id, qty });
-    ProductHelper.updateStock({ id, qty });
-    res.status(201).send({ status: true, result: newSale });
+  static async createNewSale(req, res, next) {
+    const userid = req.user.id;
+    const { products } = req.body;
+    const { total } = req;
+    const result = await SalesHelper.createNewSale({ userid, total, products });
+    handleResponse(result, next, res, 201);
   }
 }
 export default SalesController;

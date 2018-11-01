@@ -97,6 +97,13 @@ const products = {
     price: 10.01,
     qty: 10
   },
+  validProductInfoForSale: {
+    imgUrl: 'http://example.com/photo.jpg',
+    name: 'Router 2',
+    categoryid: 1,
+    price: 10.01,
+    qty: 10
+  },
   validProductUpdateInfo: {
     imgUrl: 'http://example.com/photo.jpg',
     name: 'RJ 45 Plugs',
@@ -116,12 +123,22 @@ const products = {
   }
 };
 
+const newSale = {
+  valid: {
+    products: [{ id: 3, qty: 1 }]
+  },
+  nonexisting: {
+    products: [{ id: 10, qty: 1 }]
+  }
+};
+
 export default {
   login,
   signUp,
   modifyUser,
   category,
   products,
+  newSale,
   invalidProductEntry,
   validProductEntry
 };
