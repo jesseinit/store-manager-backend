@@ -1,5 +1,6 @@
 import 'babel-polyfill';
 import CategoryHelper from '../helpers/categoryHelper';
+import handleResponse from '../utils/responseHandler';
 
 /**
  *
@@ -41,11 +42,7 @@ class CategoryController {
     const { name } = req.body;
 
     const result = await CategoryHelper.updateCategory({ id, name });
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(200).json({ status: true, result });
+    handleResponse(result, next, res);
   }
 
   /**
@@ -64,7 +61,7 @@ class CategoryController {
       next(result);
       return;
     }
-    res.status(200).json({ status: true, result });
+    res.status(200).json({ status: true, message: result });
   }
 
   /**
@@ -84,7 +81,7 @@ class CategoryController {
       next(result);
       return;
     }
-    res.status(200).json({ status: true, result });
+    res.status(200).json({ status: true, message: result });
   }
 }
 

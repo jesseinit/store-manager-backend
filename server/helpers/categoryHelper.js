@@ -92,7 +92,7 @@ class CategoryHelper {
         errorHandler(404, 'Category not found');
       }
       await pool.query(query.deleteCategory(categoryId));
-      return true;
+      return 'Category Deleted';
     } catch (error) {
       return error;
     }

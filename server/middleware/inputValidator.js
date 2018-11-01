@@ -3,9 +3,13 @@ import { sanitizeBody } from 'express-validator/filter';
 
 const validateLogin = [
   body('userid')
+    .exists()
+    .withMessage('User ID must be provided.')
     .isInt({ min: 1 })
     .withMessage('User ID must be a positve number from 1'),
   body('password')
+    .exists()
+    .withMessage('User password must be provided.')
     .isLength({ min: 5 })
     .withMessage('Password should be atleast 5 characters')
 ];
@@ -99,6 +103,7 @@ const validateNewProduct = [
   body('imgUrl')
     .exists()
     .withMessage('Product Image must be provided.'),
+  sanitizeBody('name').customSanitizer(value => value.replace(/\s{2,}/g, ' ').trim()),
   body('name')
     .exists()
     .withMessage('Product name must be provided.'),
@@ -117,16 +122,17 @@ const validateProductUpdate = [
   validateProductId[0],
   validateNewProduct[0].optional(),
   validateNewProduct[1].optional(),
-  validateNewProduct[2].optional(),
+  validateNewProduct[2].exists().withMessage('Category ID must be provided.'),
   validateNewProduct[3].optional(),
   validateNewProduct[4].optional()
 ];
 
 const validateNewSale = [
-  validateProductId[0],
-  body('qty')
-    .isInt({ min: 1 })
-    .withMessage('Order qty must be a positive number from 1')
+  body('products', 'Products must exists').exists(),
+  body('products', 'Products must be specified in the right format').isArray(),
+  body('products', 'Should contain atleast 1 product entry').isLength({ min: 1 }),
+  body('products.*.id', 'Product Id must be a a number from 1').isInt({ min: 1 }),
+  body('products.*.qty', 'Product Qty must be a number from 1').isInt({ min: 1 })
 ];
 
 const validationHandler = (req, res, next) => {

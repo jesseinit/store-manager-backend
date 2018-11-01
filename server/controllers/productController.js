@@ -16,8 +16,8 @@ class ProductController {
    * @memberof ProductController
    */
   static async getAllProducts(req, res) {
-    const products = await ProductHelper.allProducts();
-    res.status(200).json({ status: true, result: products });
+    const result = await ProductHelper.allProducts();
+    res.status(200).json({ status: true, message: result });
   }
 
   /**
@@ -75,7 +75,7 @@ class ProductController {
     const productId = parseInt(req.params.id, 10);
     const result = await ProductHelper.deleteProduct(productId);
 
-    handleResponse(result, next, res, 204);
+    handleResponse(result, next, res);
   }
 }
 

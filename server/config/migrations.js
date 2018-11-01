@@ -30,17 +30,23 @@ const categoryTable = `CREATE TABLE IF NOT EXISTS category (
 );`;
 
 const salesTable = `CREATE TABLE IF NOT EXISTS sales (
-  id SERIAL NOT NULL,
-  saleId SERIAL PRIMARY KEY NOT NULL,
-  saleDate DATE DEFAULT CURRENT_DATE NOT NULL,
-  productID int NOT NULL,
-  productQty int NOT NULL,
-  saleTotal float NOT NULL,
-  userID int NOT NULL
+  sale_id SERIAL PRIMARY KEY NOT NULL,
+  user_id int NOT NULL,
+  sale_date DATE DEFAULT CURRENT_DATE NOT NULL,
+  totals float NOT NULL
 );`;
 
+const productSales = `CREATE TABLE IF NOT EXISTS productSales (
+  id SERIAL PRIMARY KEY NOT NULL,
+  product_id int NOT NULL,
+  sale_id int NOT NULL,
+  product_price float NOT NULL,
+  product_qty int NOT NULL,
+  sale_date DATE DEFAULT CURRENT_DATE NOT NULL
+)`;
+
 (async () => {
-  console.time('Seding Completed in');
+  console.time('Seeding Completed in');
   const ownerPassword = 'owner';
   const hashedPassword = await bcrypt.hash(ownerPassword, 10);
   await pool.query(`${usersTable}`);
@@ -52,5 +58,6 @@ const salesTable = `CREATE TABLE IF NOT EXISTS sales (
   await pool.query(`${productsTable}`);
   await pool.query(`${categoryTable}`);
   await pool.query(`${salesTable}`);
-  console.timeEnd('Seding Completed in');
+  await pool.query(`${productSales}`);
+  console.timeEnd('Seeding Completed in');
 })();

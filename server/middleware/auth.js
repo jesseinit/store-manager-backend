@@ -19,6 +19,15 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+const attendantOnly = (req, res, next) => {
+  const { role } = req.user;
+  if (role === 'Attendant') {
+    next();
+    return;
+  }
+  errorHandler(403, 'You cant perform this action. Attendants Only');
+};
+
 const adminOnly = (req, res, next) => {
   const { role } = req.user;
   if (role === 'Attendant') {
@@ -35,4 +44,4 @@ const ownerOnly = (req, res, next) => {
   next();
 };
 
-export default { verifyToken, adminOnly, ownerOnly };
+export default { verifyToken, adminOnly, attendantOnly, ownerOnly };

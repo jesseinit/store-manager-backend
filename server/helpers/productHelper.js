@@ -1,4 +1,3 @@
-import isEmptyObject from '../utils/isEmptyObject';
 import pool from '../utils/connection';
 import query from '../utils/queries';
 import errorHandler from '../utils/errorHandler';
@@ -124,38 +123,10 @@ class ProductHelper {
         return result;
       }
       await pool.query(query.deleteProduct(productid));
-      return true;
+      return 'Product deleted';
     } catch (error) {
       return error;
     }
-  }
-
-  /**
-   *
-   * @description Helper method that checks if a product is available and has stock
-   * @static
-   * @param {object} product Product whose stock check is to be carried on
-   * @returns {boolean} Boolean that shows stock availability
-   * @memberof ProductHelper
-   */
-  static inStock(product) {
-    const retrievedProduct = this.getSingleProduct(product.id);
-    if (isEmptyObject(retrievedProduct) || product.qty > retrievedProduct.qty) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   *
-   * @description Helper method that updates the product stock details
-   * @static
-   * @param {object} product Product to whose stock is to be updated
-   * @memberof ProductHelper
-   */
-  static updateStock(product) {
-    const retrievedProduct = this.getSingleProduct(product.id);
-    retrievedProduct.qty -= product.qty;
   }
 }
 
