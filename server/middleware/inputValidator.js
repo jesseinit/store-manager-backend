@@ -37,8 +37,8 @@ const validateUserUpdate = [
   validateSignup[2],
   validateSignup[3],
   body('role')
-    .isIn(['Admin', 'Attendant', 'Owner'])
-    .withMessage('User can either be an Admin, an Attendant or Owner')
+    .isIn(['Admin', 'Attendant'])
+    .withMessage('User can either be an Admin or Attendant')
 ];
 
 const validateUserDelete = [validateUserUpdate[0]];
@@ -55,6 +55,8 @@ const validateNewCategory = [
       .trim()
   ),
   body('name')
+    .isString()
+    .withMessage('Category name should contain alphabets only')
     .isLength({ min: 2 })
     .withMessage('Category name must be atleast 2 letters long')
 ];

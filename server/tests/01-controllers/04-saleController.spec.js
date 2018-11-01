@@ -19,22 +19,17 @@ describe('Sales', () => {
 
     ownerToken = response.body.token;
 
-    console.log('Owner Token: ', ownerToken);
-
     const attendantResponse = await chai
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.attendantLogin);
     attendantToken = attendantResponse.body.token;
 
-    console.log('Attendant Token: ', attendantToken);
-
-    const newProduct = await chai
+    await chai
       .request(app)
       .post('/api/v1/products')
       .set('Authorization', `Bearer ${ownerToken}`)
       .send(mockData.products.validProductInfoForSale);
-    console.log('New Product ', newProduct.body);
   });
 
   after(async () => {
@@ -42,7 +37,7 @@ describe('Sales', () => {
   });
 
   describe('Create Sale', () => {
-    it('Admin should not be able to create a sale record', async () => {
+    it('Store Admin/Owner should not be able to create a sale record', async () => {
       const response = await chai
         .request(app)
         .post('/api/v1/sales')
@@ -78,6 +73,26 @@ describe('Sales', () => {
         .set('Authorization', `Bearer ${attendantToken}`)
         .send({ products: [{ id: 3, qty: 1000 }] });
       expect(response.status).to.equal(400);
+    });
+  });
+
+  describe('Get All Sales', () => {
+    it('Admin should be able to view all sale records', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/sales')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
+    it('Attendants should not be able to view all sale records', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/sales')
+        .set('Authorization', `Bearer ${attendantToken}`);
+
+      expect(response.status).to.equal(403);
     });
   });
 });
