@@ -1,6 +1,7 @@
 import ProductHelper from './productHelper';
 import pool from '../utils/connection';
 import query from '../utils/queries';
+import errorHandler from '../utils/errorHandler';
 
 /**
  *
@@ -17,6 +18,9 @@ class SalesHelper {
    */
   static async getAllSales() {
     const allSales = await pool.query(query.getAllSales());
+    if (allSales.rowCount < 1) {
+      return 'No sales has been made yet.';
+    }
     return allSales.rows;
   }
 
@@ -25,10 +29,27 @@ class SalesHelper {
    * @description Retirves a single sale record with the passed id
    * @static
    * @param {number} saleId Sale Id to be retrieved
+   * @param {string} role User Role
    * @returns {object} An object of the found sales record or empty object if not found
    * @memberof SalesHelper
    */
-  static getSingleSale(/* saleId */) {}
+  static async getSingleSale(saleId, userInfo) {
+    try {
+      const foundSale = await pool.query(query.getSingleSaleAdmin(saleId));
+      if (foundSale.rowCount < 1) {
+        errorHandler(404, 'Sale record not found');
+      }
+
+      if (userInfo.role === 'Attendant') {
+        const attendantSale = await pool.query(query.getSingleSaleUser(saleId, userInfo.userid));
+        return attendantSale.rows[0];
+      }
+
+      return foundSale.rows[0];
+    } catch (error) {
+      return error;
+    }
+  }
 
   /**
    * @description Helper method that creates a sales record

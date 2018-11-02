@@ -8,7 +8,13 @@ import stockCheck from '../../utils/handleStockCheck';
 const router = Router();
 
 router.get('/', authMiddleware.verifyToken, authMiddleware.adminOnly, SalesController.getAllSales);
-router.get('/:id', validator.validateSaleId, validator.validationHandler, SalesController.getSingleSale);
+router.get(
+  '/:id',
+  authMiddleware.verifyToken,
+  validator.validateSaleId,
+  validator.validationHandler,
+  SalesController.getSingleSale
+);
 router.post(
   '/',
   authMiddleware.verifyToken,

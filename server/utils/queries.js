@@ -94,7 +94,15 @@ const query = {
     text: `SELECT * FROM productSales as ps JOIN sales as s ON ps.sale_id = s.sale_id WHERE ps.sale_id = $1`,
     values: [saleId]
   }),
-  getAllSales: () => `SELECT * FROM sales as s join productSales as ps on s.sale_id = ps.sale_id`
+  getAllSales: () => `SELECT * FROM sales as s join productSales as ps on s.sale_id = ps.sale_id`,
+  getSingleSaleUser: (saleId, userId) => ({
+    text: `SELECT * FROM sales as s join productSales as ps on s.sale_id = ps.sale_id WHERE s.user_id = $1 AND ps.sale_id = $2`,
+    values: [saleId, userId]
+  }),
+  getSingleSaleAdmin: saleId => ({
+    text: `SELECT * FROM sales as s join productSales as ps on s.sale_id = ps.sale_id WHERE ps.sale_id = $1`,
+    values: [saleId]
+  })
 };
 
 export default query;

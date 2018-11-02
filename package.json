@@ -64,6 +64,7 @@
   "nyc": {
     "exclude": [
       "**/*.spec.js",
+      "**/**/handleStockCheck.js",
       "**/tests"
     ]
   }
