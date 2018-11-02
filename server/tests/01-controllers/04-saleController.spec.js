@@ -65,7 +65,7 @@ describe('Sales', () => {
       expect(response.status).to.equal(400);
     });
 
-    it('It should return non found on a product that is non-exisiting', async () => {
+    it('It should return not found on a product that is non-exisiting', async () => {
       const response = await chai
         .request(app)
         .post('/api/v1/sales')
@@ -104,7 +104,7 @@ describe('Sales', () => {
         .send({ products: [{ id: 3, qty: 1 }] })
     );
 
-    it('It should should return not found when fetching with a non-existing sale id', async () => {
+    it('It should should return a not found error when fetching with a non-existing sale id', async () => {
       const response = await chai
         .request(app)
         .get('/api/v1/sales/10')

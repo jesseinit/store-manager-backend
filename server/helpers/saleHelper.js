@@ -41,7 +41,7 @@ class SalesHelper {
       }
 
       if (userInfo.role === 'Attendant') {
-        const attendantSale = await pool.query(query.getSingleSaleUser(saleId, userInfo.userid));
+        const attendantSale = await pool.query(query.getSingleSaleUser(userInfo.id, saleId));
         return attendantSale.rows[0];
       }
 
