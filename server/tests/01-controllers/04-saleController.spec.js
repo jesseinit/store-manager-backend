@@ -53,11 +53,10 @@ describe('Sales', () => {
         .post('/api/v1/sales')
         .set('Authorization', `Bearer ${attendantToken}`)
         .send({ products: [{ id: 3, qty: 1 }] });
-
       expect(response.status).to.equal(201);
     });
 
-    it('It should return not found error on a product that is non-exisiting', async () => {
+    it('It should return not found error on a product id that is non-exisiting', async () => {
       const response = await chai
         .request(app)
         .post('/api/v1/sales')
@@ -93,6 +92,43 @@ describe('Sales', () => {
         .set('Authorization', `Bearer ${attendantToken}`);
 
       expect(response.status).to.equal(403);
+    });
+  });
+
+  describe('Get Single Sale', () => {
+    before(() =>
+      chai
+        .request(app)
+        .post('/api/v1/sales')
+        .set('Authorization', `Bearer ${attendantToken}`)
+        .send({ products: [{ id: 3, qty: 1 }] })
+    );
+
+    it('It should should return not found when fetching with a non-existing sale id', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/sales/10')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(404);
+    });
+
+    it('Admin should be able to view a sale record', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/sales/1')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
+    it('Attendants should be able to view a sale record', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/sales/2')
+        .set('Authorization', `Bearer ${attendantToken}`);
+
+      expect(response.status).to.equal(200);
     });
   });
 });

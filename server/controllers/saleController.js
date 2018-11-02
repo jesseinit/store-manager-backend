@@ -1,5 +1,4 @@
 import SalesHelper from '../helpers/saleHelper';
-import isEmptyObject from '../utils/isEmptyObject';
 import handleResponse from '../utils/responseHandler';
 
 /**
@@ -31,14 +30,10 @@ class SalesController {
    * @param {object} res - Response Object
    * @memberof Sales
    */
-  static getSingleSale(req, res) {
+  static async getSingleSale(req, res, next) {
     const saleId = parseInt(req.params.id, 10);
-    const sale = SalesHelper.getSingleSale(saleId);
-    if (isEmptyObject(sale)) {
-      res.status(404).json({ status: false, message: 'Sale Record not found' });
-      return;
-    }
-    res.status(200).json({ status: true, result: sale });
+    const result = await SalesHelper.getSingleSale(saleId, req.user);
+    handleResponse(result, next, res);
   }
 
   /**
