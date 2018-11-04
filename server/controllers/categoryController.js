@@ -20,11 +20,7 @@ class CategoryController {
    */
   static async createCategory(req, res, next) {
     const result = await CategoryHelper.createCategory(req.body.name);
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(201).json({ status: true, result });
+    handleResponse(result, next, res, 201, 'success', 'Category created successfully.');
   }
 
   /**
@@ -42,7 +38,7 @@ class CategoryController {
     const { name } = req.body;
 
     const result = await CategoryHelper.updateCategory({ id, name });
-    handleResponse(result, next, res);
+    handleResponse(result, next, res, 200, 'success', 'Category updated successfully.');
   }
 
   /**
@@ -57,11 +53,7 @@ class CategoryController {
    */
   static async getAllCategories(req, res, next) {
     const result = await CategoryHelper.getAllCategories();
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(200).json({ status: true, message: result });
+    handleResponse(result, next, res, 200, 'success', 'Categories retrieved successfully.');
   }
 
   /**
@@ -77,11 +69,7 @@ class CategoryController {
   static async deleteCategory(req, res, next) {
     const { id } = req.params;
     const result = await CategoryHelper.deleteCategory(id);
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(200).json({ status: true, message: result });
+    handleResponse(undefined, next, res, 200, 'success', result);
   }
 }
 

@@ -53,17 +53,19 @@ const validateUserDelete = [validateUserUpdate[0]];
 const validateNewCategory = [
   sanitizeBody('name').customSanitizer(value =>
     value
+      .replace(/([^a-zA-z\s])/g, '')
       .toLowerCase()
       .split(' ')
       .map(s => s.charAt(0).toUpperCase() + s.substring(1))
       .join(' ')
-      .replace(/([^a-zA-z\s])/g, '')
       .replace(/\s{2,}/g, ' ')
       .trim()
   ),
   body('name')
+    .exists()
+    .withMessage('Please provide a category name')
     .isString()
-    .withMessage('Category name should contain alphabets only')
+    .withMessage('Please provide a category name.')
     .isLength({ min: 2 })
     .withMessage('Category name must be atleast 2 letters long')
 ];
@@ -71,7 +73,7 @@ const validateNewCategory = [
 const validateUpdateCategory = [
   param('id')
     .isInt({ min: 1 })
-    .withMessage('Category ID must be a positve integer from 1'),
+    .withMessage('Category ID must be a positve number from 1'),
   validateNewCategory[0],
   validateNewCategory[1]
 ];

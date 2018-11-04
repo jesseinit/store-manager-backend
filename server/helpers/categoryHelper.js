@@ -19,11 +19,14 @@ class CategoryHelper {
    */
   static async createCategory(categoryName) {
     try {
-      const foundCategory = await pool.query(query.findCategory(categoryName));
-      if (foundCategory.rows.length > 0) {
+      const foundCategory = await pool.query(query.findCategoryByName(categoryName));
+
+      if (foundCategory.rowCount > 0) {
         errorHandler(400, 'A category with that name exists.');
       }
+
       const createdCategory = await pool.query(query.createCategory(categoryName));
+
       return createdCategory.rows[0];
     } catch (error) {
       return error;
@@ -41,15 +44,21 @@ class CategoryHelper {
   static async updateCategory(categoryInfo) {
     try {
       const foundCategory = await pool.query(query.findCategoryById(categoryInfo.id));
+
       if (foundCategory.rows.length < 1) {
         errorHandler(404, 'The category not found.');
       }
+
       const allCategories = await pool.query(query.getAllCategories());
-      const isCategoryExists = allCategories.rows.some(category => category.categoryname === categoryInfo.name);
+
+      const isCategoryExists = allCategories.rows.some(category => category.category_name === categoryInfo.name);
+
       if (isCategoryExists) {
         errorHandler(400, 'The category name already exists.');
       }
+
       const createdCategory = await pool.query(query.updateCategory(categoryInfo.id, categoryInfo.name));
+
       return createdCategory.rows[0];
     } catch (error) {
       return error;
@@ -67,7 +76,7 @@ class CategoryHelper {
     try {
       const allCategories = await pool.query(query.getAllCategories());
       if (allCategories.rows.length < 1) {
-        return 'You have no product category yet.';
+        errorHandler(200, 'You have no product category yet.');
       }
       return allCategories.rows;
     } catch (error) {
@@ -90,7 +99,7 @@ class CategoryHelper {
         errorHandler(404, 'Category not found');
       }
       await pool.query(query.deleteCategory(categoryId));
-      return 'Category Deleted';
+      return 'Category deleted successfully.';
     } catch (error) {
       return error;
     }

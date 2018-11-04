@@ -25,25 +25,25 @@ const query = {
     values: [id]
   }),
   /* Categories */
-  findCategory: name => ({
-    text: `SELECT * FROM category WHERE categoryname = $1`,
+  findCategoryByName: name => ({
+    text: `SELECT * FROM category WHERE category_name = $1`,
     values: [name]
   }),
   findCategoryById: id => ({
-    text: `SELECT * FROM category WHERE categoryid = $1`,
+    text: `SELECT * FROM category WHERE category_id = $1`,
     values: [id]
   }),
-  getAllCategories: () => `SELECT DISTINCT categoryid, categoryname from category`,
+  getAllCategories: () => `SELECT * from category`,
   createCategory: name => ({
-    text: `INSERT INTO category (categoryname) VALUES ($1) RETURNING *`,
+    text: `INSERT INTO category (category_name) VALUES ($1) RETURNING *`,
     values: [name]
   }),
   updateCategory: (id, name) => ({
-    text: `UPDATE category SET categoryname = $1 WHERE categoryid = $2 RETURNING *`,
+    text: `UPDATE category SET category_name = $1 WHERE category_id = $2 RETURNING *`,
     values: [name, id]
   }),
   deleteCategory: id => ({
-    text: `DELETE FROM category WHERE categoryid = $1`,
+    text: `DELETE FROM category WHERE category_id = $1`,
     values: [id]
   }),
   /* Products */
