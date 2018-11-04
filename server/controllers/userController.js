@@ -1,5 +1,6 @@
 import 'babel-polyfill';
 import UserHelper from '../helpers/userHelper';
+import handleResponse from '../utils/responseHandler';
 
 /**
  *
@@ -18,13 +19,8 @@ class UserController {
    * @memberof UserController
    */
   static async loginUser(req, res, next) {
-    const { userid, password } = req.body;
-    const result = await UserHelper.loginUser({ userid, password });
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(200).json({ status: true, token: result });
+    const result = await UserHelper.loginUser(req.body);
+    handleResponse(result, next, res, 200, 'success', 'Login successfully');
   }
 
   /**
@@ -39,11 +35,7 @@ class UserController {
    */
   static async createUser(req, res, next) {
     const result = await UserHelper.createUser(req.body);
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(201).json({ status: true, result });
+    handleResponse(result, next, res, 201, 'success', 'User created successfully');
   }
 
   /**
@@ -58,11 +50,7 @@ class UserController {
    */
   static async getAllUsers(req, res, next) {
     const result = await UserHelper.getAllUsers();
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(200).json({ status: true, result });
+    handleResponse(result, next, res, 200, 'success', 'Users retrieved successfully');
   }
 
   /**
@@ -80,11 +68,7 @@ class UserController {
     const { userid } = req.params;
     const { name, password, role } = req.body;
     const result = await UserHelper.updateUser({ userid, name, password, role, userRole });
-    if (result instanceof Error) {
-      next(result);
-      return;
-    }
-    res.status(200).json({ status: true, result });
+    handleResponse(result, next, res, 200, 'success', 'User updated successfully');
   }
 
   /**
@@ -104,7 +88,7 @@ class UserController {
       next(result);
       return;
     }
-    res.status(200).json({ status: true, result });
+    handleResponse(undefined, next, res, 200, 'success', result);
   }
 }
 

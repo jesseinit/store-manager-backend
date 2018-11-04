@@ -9,41 +9,46 @@ dotenv.config();
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
 const usersTable = `CREATE TABLE IF NOT EXISTS users (
-  userId SERIAL PRIMARY KEY NOT NULL,
-  name VARCHAR(200) NOT NULL,
-  password VARCHAR(200) NOT NULL,
-  role VARCHAR(20) NOT NULL
-);`;
-
-const productsTable = `CREATE TABLE IF NOT EXISTS products (
-  id SERIAL PRIMARY KEY NOT NULL,
-  imageurl text NOT NULL,
-  name varchar(200) UNIQUE NOT NULL,
-  categoryId int NOT NULL,
-  price float NOT NULL,
-  qty int NOT NULL
+  user_id serial NOT NULL PRIMARY KEY,
+  name text NOT NULL,
+  email text UNIQUE NOT NULL,
+  password varchar(200) NOT NULL,
+  role varchar(20) NOT NULL
 );`;
 
 const categoryTable = `CREATE TABLE IF NOT EXISTS category (
-  categoryID SERIAL PRIMARY KEY NOT NULL,
-  categoryName varchar(200) UNIQUE NOT NULL
+  category_id serial NOT NULL PRIMARY KEY,
+  category_name varchar(30) UNIQUE NOT NULL
+);`;
+
+const productsTable = `CREATE TABLE IF NOT EXISTS products (
+  product_id serial NOT NULL PRIMARY KEY,
+  product_image text NOT NULL,
+  product_name text UNIQUE NOT NULL,
+  product_price float NOT NULL,
+  product_qty int NOT NULL,
+  category_id int NOT NULL,
+  FOREIGN KEY (category_id) REFERENCES category (category_id)
 );`;
 
 const salesTable = `CREATE TABLE IF NOT EXISTS sales (
-  sale_id SERIAL PRIMARY KEY NOT NULL,
+  sale_id serial NOT NULL PRIMARY KEY,
   user_id int NOT NULL,
-  sale_date DATE DEFAULT CURRENT_DATE NOT NULL,
-  totals float NOT NULL
+  sale_date date DEFAULT CURRENT_DATE NOT NULL,
+  sale_total float NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (user_id)
 );`;
 
-const productSales = `CREATE TABLE IF NOT EXISTS productSales (
-  id SERIAL PRIMARY KEY NOT NULL,
+const productSales = `CREATE TABLE IF NOT EXISTS productsales (
+  id serial NOT NULL PRIMARY KEY,
   product_id int NOT NULL,
   sale_id int NOT NULL,
-  product_price float NOT NULL,
+  product_worth float NOT NULL,
   product_qty int NOT NULL,
-  sale_date DATE DEFAULT CURRENT_DATE NOT NULL
-)`;
+  sale_date date DEFAULT CURRENT_DATE NOT NULL,
+  FOREIGN KEY (product_id) REFERENCES products (product_id),
+  FOREIGN KEY (sale_id) REFERENCES sales (sale_id)
+);`;
 
 (async () => {
   console.time('Seeding Completed in');
@@ -52,11 +57,11 @@ const productSales = `CREATE TABLE IF NOT EXISTS productSales (
   await pool.query(`${usersTable}`);
   await pool.query(`Select * from users where role = $1`, ['Owner']).then(result => {
     if (result.rowCount < 1) {
-      pool.query(query.regUser('Store Owner', hashedPassword, 'Owner'));
+      pool.query(query.regUser('Store Owner', 'owner@storemanager.com', hashedPassword, 'Owner'));
     }
   });
-  await pool.query(`${productsTable}`);
   await pool.query(`${categoryTable}`);
+  await pool.query(`${productsTable}`);
   await pool.query(`${salesTable}`);
   await pool.query(`${productSales}`);
   console.timeEnd('Seeding Completed in');

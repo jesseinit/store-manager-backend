@@ -45,9 +45,7 @@ class CategoryHelper {
         errorHandler(404, 'The category not found.');
       }
       const allCategories = await pool.query(query.getAllCategories());
-      const isCategoryExists = allCategories.rows.some(
-        category => category.categoryname === categoryInfo.name
-      );
+      const isCategoryExists = allCategories.rows.some(category => category.categoryname === categoryInfo.name);
       if (isCategoryExists) {
         errorHandler(400, 'The category name already exists.');
       }

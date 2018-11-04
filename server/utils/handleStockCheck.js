@@ -1,35 +1,41 @@
 import pool from './connection';
-// import errorHandler from './errorHandler';
+import responseHandler from './responseHandler';
 
 const stockCheck = (req, res, next) => {
-  let cartLength = 0;
-  const totalProds = req.body.products.length;
+  const _ = undefined;
+  let totalProds = 0;
   let totalSaleAmt = 0;
+  const cartLength = req.body.products.length;
+
+  const isUniqueProductList = req.body.products
+    .map(product => product.id)
+    .every((value, index, array) => array.lastIndexOf(value) === index);
+
+  if (isUniqueProductList === false) {
+    responseHandler(_, _, res, 400, 'failure', 'Products can only appear once in the cart');
+    return;
+  }
 
   req.body.products.forEach(async product => {
-    const productFound = await pool.query('Select name,price from products where id = $1', [product.id]);
+    const productInfo = await pool.query('Select name,price,qty from products where id = $1', [product.id]);
 
-    if (productFound.rowCount < 1) {
-      res.status(400).json({ status: false, message: `Product with id ${product.id} is not found` });
+    if (productInfo.rowCount < 1) {
+      responseHandler(_, _, res, 400, 'failure', `Product with id ${product.id} is not found`);
       return;
     }
 
-    const totalPerProduct = productFound.rows[0].price * product.qty;
-    const productInfo = await pool.query('Select qty,name from products where id = $1', [product.id]);
+    const productWorth = productInfo.rows[0].price * product.qty;
 
     if (product.qty > productInfo.rows[0].qty) {
-      res.status(400).json({
-        status: false,
-        message: `${productInfo.rows[0].name} does not have the request quantity in stock`
-      });
+      responseHandler(_, _, res, 400, 'failure', `Cant process the requested quantity on ${productInfo.rows[0].name}`);
     } else {
-      cartLength += 1;
-      totalSaleAmt += totalPerProduct;
+      totalProds += 1;
+      totalSaleAmt += productWorth;
+    }
 
-      if (cartLength === totalProds) {
-        req.total = totalSaleAmt;
-        next();
-      }
+    if (cartLength === totalProds) {
+      req.total = totalSaleAmt;
+      next();
     }
   });
 };

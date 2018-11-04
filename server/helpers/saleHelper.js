@@ -62,10 +62,12 @@ class SalesHelper {
     try {
       const { userid, total, products } = newSale;
 
-      const { rows } = await pool.query(query.createSale(userid, total));
-      const saleId = rows[0].sale_id;
+      console.log(products);
 
-      products.forEach(async product => {
+      // const { rows } = await pool.query(query.createSale(userid, total));
+      // const saleId = rows[0].sale_id;
+
+      /* products.forEach(async product => {
         const foundRecord = await ProductHelper.getProductById(product.id);
 
         const totalPerProduct = foundRecord.price * product.qty;
@@ -73,14 +75,13 @@ class SalesHelper {
 
         await pool.query(query.createProductSales(product.id, saleId, totalPerProduct, product.qty));
 
-        await pool.query(
-          query.updateProduct(product.id, { price: foundRecord.price, qty: newProductQty })
-        );
-      });
+        await pool.query(query.updateProduct(product.id, { price: foundRecord.price, qty: newProductQty }));
+      }); */
 
       // Crreate new sale
-      const thisSale = await pool.query(query.thisSale(saleId));
-      return thisSale.rows;
+      // const thisSale = await pool.query(query.thisSale(saleId));
+      // return thisSale.rows;
+      return 'Hello';
     } catch (error) {
       return error;
     }

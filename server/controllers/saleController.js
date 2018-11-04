@@ -50,7 +50,7 @@ class SalesController {
     const { products } = req.body;
     const { total } = req;
     const result = await SalesHelper.createNewSale({ userid, total, products });
-    handleResponse(result, next, res, 201);
+    handleResponse(result, next, res, 201, 'success', 'Sale created successfully');
   }
 }
 export default SalesController;

@@ -25,25 +25,19 @@ class AuthHelper {
    */
   static async loginUser(user) {
     try {
-      const foundUser = await pool.query(query.findUser(user.userid));
+      const { email, password } = user;
 
-      if (foundUser.rows.length < 1) {
-        errorHandler(404, 'User not found');
-      }
+      const foundUser = await pool.query(query.findUser(email));
 
-      const isPasswordValid = await bcrypt.compare(user.password, foundUser.rows[0].password);
-      if (!isPasswordValid) {
-        errorHandler(401, 'Authenication Failed');
-      }
+      if (foundUser.rowCount < 1) errorHandler(401, 'Email address or password is incorrect');
 
-      const token = jwt.sign(
-        {
-          id: foundUser.rows[0].userid,
-          name: foundUser.rows[0].name,
-          role: foundUser.rows[0].role
-        },
-        SECRET_KEY
-      );
+      const isPasswordValid = await bcrypt.compare(password, foundUser.rows[0].password);
+
+      if (!isPasswordValid) errorHandler(401, 'Email address or password is incorrect');
+
+      const { userid, name, role } = foundUser.rows[0];
+
+      const token = jwt.sign({ id: userid, email, name, role }, SECRET_KEY, { expiresIn: '12h' });
 
       return token;
     } catch (error) {
@@ -61,9 +55,16 @@ class AuthHelper {
    */
   static async createUser(user) {
     try {
-      const { name, password, role } = user;
+      const { name, email, password, role } = user;
+
+      const foundUser = await pool.query(query.findUserByEmail(email));
+
+      if (foundUser.rowCount > 0) return errorHandler(409, 'Email address has been used');
+
       const hashedPassword = await bcrypt.hash(password, 10);
-      const createdUser = await pool.query(query.regUser(name, hashedPassword, role));
+
+      const createdUser = await pool.query(query.regUser(name, email, hashedPassword, role));
+
       return createdUser.rows[0];
     } catch (error) {
       return error;
@@ -98,7 +99,7 @@ class AuthHelper {
     try {
       const { userid, name, password, role, userRole } = user;
 
-      const { rows } = await pool.query(query.findUser(userid));
+      const { rows } = await pool.query(query.findUserById(userid));
 
       if (rows.length < 1) {
         errorHandler(404, 'User not found');
@@ -110,8 +111,15 @@ class AuthHelper {
         errorHandler(403, 'Admin cant update owner account');
       }
 
+      if (!password) {
+        const updatedUser = await pool.query(query.updateUser(name, null, role, userid));
+        return updatedUser.rows[0];
+      }
+
       const hashedPassword = await bcrypt.hash(password, 10);
+
       const updatedUser = await pool.query(query.updateUser(name, hashedPassword, role, userid));
+
       return updatedUser.rows[0];
     } catch (error) {
       return error;
@@ -128,7 +136,7 @@ class AuthHelper {
    */
   static async deleteUser(userid) {
     try {
-      const { rows } = await pool.query(query.findUser(userid));
+      const { rows } = await pool.query(query.findUserById(userid));
       if (rows.length < 1) {
         errorHandler(404, 'User not found');
       }
@@ -136,8 +144,8 @@ class AuthHelper {
       if (foundUser.role === 'Owner') {
         errorHandler(403, 'Store owner account cant be deleted');
       }
-      await pool.query(query.deleteUser(foundUser.userid));
-      return 'User has been deleted successfully';
+      await pool.query(query.deleteUser(userid));
+      return `${foundUser.name} has been deleted successfully`;
     } catch (error) {
       return error;
     }

@@ -2,11 +2,12 @@ import { body, param, validationResult } from 'express-validator/check';
 import { sanitizeBody } from 'express-validator/filter';
 
 const validateLogin = [
-  body('userid')
+  body('email')
+    .normalizeEmail({ all_lowercase: true })
+    .custom(email => /(^[A-Za-z]+)(\.[a-zA-Z]+)?@storemanager.com$/.test(email))
+    .withMessage('Invalid email address entered')
     .exists()
-    .withMessage('User ID must be provided.')
-    .isInt({ min: 1 })
-    .withMessage('User ID must be a positve number from 1'),
+    .withMessage('A valid email must be provided.'),
   body('password')
     .exists()
     .withMessage('User password must be provided.')
@@ -15,28 +16,34 @@ const validateLogin = [
 ];
 
 const validateSignup = [
+  validateLogin[0],
+  validateLogin[1],
   sanitizeBody('name').customSanitizer(value => value.replace(/\s\s+/g, ' ').trim()),
   body('name')
     .isLength({ min: 2 })
-    .withMessage('Staff name must be atleast 2 letters long'),
-  body('password')
-    .isLength({ min: 5 })
-    .withMessage('Staff password should have atleast 5 characters'),
-  sanitizeBody('role').customSanitizer(value => value[0].toUpperCase() + value.slice(1)),
+    .withMessage('Name must be atleast 2 characters long'),
+  sanitizeBody('role').customSanitizer(value => value.charAt(0).toUpperCase() + value.slice(1)),
   body('role')
     .isIn(['Admin', 'Attendant'])
-    .withMessage('User can either be an Admin or Attendant')
+    .withMessage('User can either be an Admin or Attendant'),
+  body('name')
+    .exists()
+    .withMessage('Please provide a name')
 ];
 
 const validateUserUpdate = [
   param('userid')
     .isInt({ min: 1 })
     .withMessage('User ID must be a positve integer from 1'),
-  validateSignup[0],
-  validateSignup[1],
+  body('password')
+    .optional()
+    .isLength({ min: 5 })
+    .withMessage('Password should be atleast 5 characters'),
   validateSignup[2],
-  validateSignup[3],
+  validateSignup[3].optional(),
+  validateSignup[4],
   body('role')
+    .optional()
     .isIn(['Admin', 'Attendant'])
     .withMessage('User can either be an Admin or Attendant')
 ];

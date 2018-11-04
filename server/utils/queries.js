@@ -1,20 +1,27 @@
 const query = {
   /* Users */
-  findUser: id => ({
-    text: `SELECT * FROM users WHERE userId = $1`,
-    values: [id]
+  findUserByEmail: email => ({
+    text: `SELECT * FROM users WHERE email = $1`,
+    values: [email]
   }),
-  regUser: (name, password, role) => ({
-    text: `INSERT INTO users (name,password,role) VALUES ( $1, $2, $3) RETURNING *`,
-    values: [name, password, role]
+  findUserById: userid => ({
+    text: `SELECT * FROM users WHERE user_id = $1`,
+    values: [userid]
+  }),
+  regUser: (name, email, password, role) => ({
+    text: `INSERT INTO users (name,email,password,role) VALUES ($1, $2, $3, $4) RETURNING *`,
+    values: [name, email, password, role]
   }),
   getAllUsers: () => `Select * FROM users`,
   updateUser: (name, password, role, userid) => ({
-    text: `UPDATE users SET name = $1, password = $2, role = $3 WHERE userid = $4 RETURNING *`,
+    text: `UPDATE users SET 
+          name = COALESCE($1,name), password = COALESCE($2,password), 
+          role = COALESCE($3,role), email = COALESCE(email) 
+          WHERE user_id = $4 RETURNING *`,
     values: [name, password, role, userid]
   }),
   deleteUser: id => ({
-    text: `DELETE FROM users WHERE userId = $1`,
+    text: `DELETE FROM users WHERE user_id = $1`,
     values: [id]
   }),
   /* Categories */
