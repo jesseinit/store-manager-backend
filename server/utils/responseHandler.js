@@ -1,8 +1,8 @@
-const handleResponse = (result, nextCb, response, statusCode = 200) => {
+const handleResponse = (result, nextCb, response, statusCode = 200, statusMessage, message) => {
   if (result instanceof Error) {
     nextCb(result);
   } else {
-    response.status(statusCode).json({ status: true, message: result });
+    response.status(statusCode).json({ status: statusMessage, message, data: result });
   }
 };
 

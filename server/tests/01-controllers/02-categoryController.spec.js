@@ -1,9 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import sinon from 'sinon';
 import app from '../..';
 import mockData from '../mock';
-import CategoryHelper from '../../helpers/categoryHelper';
 import pool from '../../utils/connection';
 
 const { expect } = chai;
@@ -18,7 +16,7 @@ describe('Category', () => {
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.ownerLogin);
-    ownerToken = response.body.token;
+    ownerToken = response.body.data;
   });
 
   before(async () => {
@@ -26,7 +24,7 @@ describe('Category', () => {
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.attendantLogin);
-    attendantToken = response.body.token;
+    attendantToken = response.body.data;
   });
 
   after(async () => {
@@ -38,10 +36,6 @@ describe('Category', () => {
       const response = await chai.request(app).post('/api/v1/category/');
 
       expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
     });
 
     it('Should return an authentication error when an invalid token is passed', async () => {
@@ -51,10 +45,6 @@ describe('Category', () => {
         .set('Authorization', `Bearer WrongToken`);
 
       expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
     });
 
     it('Should return a validation error when an invalid product name is provided', async () => {
@@ -86,8 +76,8 @@ describe('Category', () => {
         .send(mockData.category.validCategoryName);
 
       expect(response.status).to.equal(201);
-      expect(response.body).to.have.property('result');
-      expect(response.body.result).to.have.keys(['categoryid', 'categoryname']);
+      expect(response.body).to.have.property('data');
+      expect(response.body.data).to.have.keys(['category_id', 'category_name']);
     });
 
     it('Admin should not be able to create a new product category with the same name', async () => {
@@ -96,20 +86,19 @@ describe('Category', () => {
         .post('/api/v1/category/')
         .set('Authorization', `Bearer ${ownerToken}`)
         .send(mockData.category.validCategoryName);
+
       expect(response.status).to.equal(400);
-      expect(response.body.message).to.equal('A category with that name exists.');
     });
+  });
 
-    it('It should handle error from database failure when creating a category', async () => {
-      const userHelperStub = sinon.stub(CategoryHelper, 'createCategory').returns(new Error());
-      const resonse = await chai
+  describe('Get All Categories', () => {
+    it('Admin should be able to see all categories', async () => {
+      const response = await chai
         .request(app)
-        .post('/api/v1/category/')
-        .set('Authorization', `Bearer ${ownerToken}`)
-        .send(mockData.category.validCategoryName);
+        .get('/api/v1/category/')
+        .set('Authorization', `Bearer ${ownerToken}`);
 
-      expect(resonse.status).to.equal(500);
-      userHelperStub.restore();
+      expect(response.status).to.equal(200);
     });
   });
 
@@ -118,10 +107,6 @@ describe('Category', () => {
       const response = await chai.request(app).put('/api/v1/category/1');
 
       expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
     });
 
     it('Should return an authentication error when an invalid token is passed', async () => {
@@ -132,10 +117,6 @@ describe('Category', () => {
         .send(mockData.category.validUpdateName);
 
       expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
     });
 
     it('Admin should not be able to update a category with non-existing id', async () => {
@@ -146,7 +127,6 @@ describe('Category', () => {
         .send(mockData.category.validUpdateName);
 
       expect(response.status).to.equal(404);
-      expect(response.body.message).to.equal('The category not found.');
     });
 
     it('Admin should not be able to update a category with an existing category name', async () => {
@@ -169,79 +149,6 @@ describe('Category', () => {
 
       expect(response.status).to.equal(200);
     });
-
-    it('It should handle error from database failure when updating a category', async () => {
-      const userHelperStub = sinon.stub(CategoryHelper, 'updateCategory').returns(new Error());
-      const resonse = await chai
-        .request(app)
-        .put('/api/v1/category/1')
-        .set('Authorization', `Bearer ${ownerToken}`)
-        .send(mockData.category.validCategoryName);
-
-      expect(resonse.status).to.equal(500);
-      userHelperStub.restore();
-    });
-  });
-
-  describe('Get All Categories', () => {
-    it('Should return an authentication error when authorization headers are not present', async () => {
-      const response = await chai.request(app).get('/api/v1/category/');
-
-      expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
-    });
-
-    it('Should return an authentication error when an invalid token is passed', async () => {
-      const response = await chai
-        .request(app)
-        .get('/api/v1/category/')
-        .set('Authorization', `Bearer WrongToken`);
-
-      expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
-    });
-
-    it('Admin should get a message when there are no created categories', async () => {
-      const userHelperStub = sinon
-        .stub(CategoryHelper, 'getAllCategories')
-        .returns('You have no product category yet.');
-
-      const response = await chai
-        .request(app)
-        .get('/api/v1/category/')
-        .set('Authorization', `Bearer ${ownerToken}`);
-
-      expect(response.status).to.equal(200);
-
-      userHelperStub.restore();
-    });
-
-    it('Admin should be able to see all categories', async () => {
-      const response = await chai
-        .request(app)
-        .get('/api/v1/category/')
-        .set('Authorization', `Bearer ${ownerToken}`);
-
-      expect(response.status).to.equal(200);
-    });
-
-    it('It should handle error from database failure when getting all categories', async () => {
-      const userHelperStub = sinon.stub(CategoryHelper, 'getAllCategories').returns(new Error());
-      const resonse = await chai
-        .request(app)
-        .get('/api/v1/category/')
-        .set('Authorization', `Bearer ${ownerToken}`)
-        .send(mockData.category.validCategoryName);
-
-      expect(resonse.status).to.equal(500);
-      userHelperStub.restore();
-    });
   });
 
   describe('Delete Category', () => {
@@ -249,10 +156,6 @@ describe('Category', () => {
       const response = await chai.request(app).del('/api/v1/category/1');
 
       expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
     });
 
     it('Should return an authentication error when an invalid token is passed', async () => {
@@ -262,10 +165,6 @@ describe('Category', () => {
         .set('Authorization', `Bearer WrongToken`);
 
       expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
     });
 
     it('It should not be able to delete a non-existing category', async () => {
@@ -275,7 +174,6 @@ describe('Category', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(response.status).to.equal(404);
-      expect(response.body.message).to.equal('Category not found');
     });
 
     it('Admin should be able to delete a category', async () => {

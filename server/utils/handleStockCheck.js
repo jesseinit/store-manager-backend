@@ -1,35 +1,52 @@
 import pool from './connection';
-// import errorHandler from './errorHandler';
+import responseHandler from './responseHandler';
 
 const stockCheck = (req, res, next) => {
-  let cartLength = 0;
-  const totalProds = req.body.products.length;
+  const _ = undefined;
+  let totalProds = 0;
   let totalSaleAmt = 0;
+  const cartProducts = req.body.products;
+  const cartLength = req.body.products.length;
 
-  req.body.products.forEach(async product => {
-    const productFound = await pool.query('Select name,price from products where id = $1', [product.id]);
+  const isUniqueProductList = cartProducts
+    .map(product => product.id)
+    .every((value, index, array) => array.lastIndexOf(value) === index);
 
-    if (productFound.rowCount < 1) {
-      res.status(400).json({ status: false, message: `Product with id ${product.id} is not found` });
+  if (isUniqueProductList === false) {
+    responseHandler(_, _, res, 400, 'failure', 'Products can only appear once in the cart');
+    return;
+  }
+
+  cartProducts.forEach(async product => {
+    const productInfo = await pool.query(
+      'Select product_name,product_price,product_qty from products where product_id = $1',
+      [product.id]
+    );
+
+    if (productInfo.rowCount < 1) {
+      responseHandler(_, _, res, 400, 'failure', `Product with id ${product.id} is not found`);
       return;
     }
 
-    const totalPerProduct = productFound.rows[0].price * product.qty;
-    const productInfo = await pool.query('Select qty,name from products where id = $1', [product.id]);
+    const productWorth = productInfo.rows[0].product_price * product.qty;
 
-    if (product.qty > productInfo.rows[0].qty) {
-      res.status(400).json({
-        status: false,
-        message: `${productInfo.rows[0].name} does not have the request quantity in stock`
-      });
+    if (product.qty > productInfo.rows[0].product_qty) {
+      responseHandler(
+        _,
+        _,
+        res,
+        400,
+        'failure',
+        `Cant process the requested quantity on ${productInfo.rows[0].product_name}`
+      );
     } else {
-      cartLength += 1;
-      totalSaleAmt += totalPerProduct;
+      totalProds += 1;
+      totalSaleAmt += productWorth;
+    }
 
-      if (cartLength === totalProds) {
-        req.total = totalSaleAmt;
-        next();
-      }
+    if (cartLength === totalProds) {
+      req.total = totalSaleAmt;
+      next();
     }
   });
 };

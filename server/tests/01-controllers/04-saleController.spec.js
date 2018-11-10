@@ -17,13 +17,13 @@ describe('Sales', () => {
       .post('/api/v1/auth/login')
       .send(mockData.login.ownerLogin);
 
-    ownerToken = response.body.token;
+    ownerToken = response.body.data;
 
     const attendantResponse = await chai
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.attendantLogin);
-    attendantToken = attendantResponse.body.token;
+    attendantToken = attendantResponse.body.data;
 
     await chai
       .request(app)
@@ -33,7 +33,7 @@ describe('Sales', () => {
   });
 
   after(async () => {
-    await pool.query('TRUNCATE TABLE users,category,products,sales,productSales RESTART IDENTITY');
+    await pool.query('TRUNCATE TABLE users,category,products,sales,productsales RESTART IDENTITY');
   });
 
   describe('Create Sale', () => {
@@ -45,6 +45,15 @@ describe('Sales', () => {
         .send({ products: [{ id: 3, qty: 1 }] });
 
       expect(response.status).to.equal(403);
+    });
+
+    it('It should return an error for duplicated product in cart', async () => {
+      const response = await chai
+        .request(app)
+        .post('/api/v1/sales')
+        .set('Authorization', `Bearer ${attendantToken}`)
+        .send({ products: [{ id: 3, qty: 1 }, { id: 3, qty: 1 }] });
+      expect(response.status).to.equal(400);
     });
 
     it('Attendants only should be able to create a sale record', async () => {
@@ -85,6 +94,39 @@ describe('Sales', () => {
       expect(response.status).to.equal(200);
     });
 
+    it('Admin should be able to view dashboard misc information', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/sales?misc=true')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
+    it('Admin should be able to view all sale records sorted by data range', async () => {
+      const day = new Date().getDate();
+      const month = new Date().getMonth() + 1;
+      const year = new Date().getFullYear();
+      const today = `${year}-${month}-${day}`;
+      const yesterday = `${year}-${month}-${day - 1}`;
+
+      const response = await chai
+        .request(app)
+        .get(`/api/v1/sales?fdate=${yesterday}&tdate=${today}`)
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
+    it('Admin should be able to view all sale records sorted by attendant', async () => {
+      const response = await chai
+        .request(app)
+        .get(`/api/v1/sales?userid=2`)
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
     it('Attendants should not be able to view all sale records', async () => {
       const response = await chai
         .request(app)
@@ -92,6 +134,39 @@ describe('Sales', () => {
         .set('Authorization', `Bearer ${attendantToken}`);
 
       expect(response.status).to.equal(403);
+    });
+
+    it('Attendants should be able to view their misc information', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/sales/attendants?misc=true')
+        .set('Authorization', `Bearer ${attendantToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
+    it('Attendants should be able to view their sales made within a period', async () => {
+      const day = new Date().getDate();
+      const month = new Date().getMonth() + 1;
+      const year = new Date().getFullYear();
+      const today = `${year}-${month}-${day}`;
+      const yesterday = `${year}-${month}-${day - 1}`;
+
+      const response = await chai
+        .request(app)
+        .get(`/api/v1/sales/attendants?fdate=${yesterday}&tdate=${today}`)
+        .set('Authorization', `Bearer ${attendantToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
+    it('Attendants should be able to view their sales records', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/sales/attendants')
+        .set('Authorization', `Bearer ${attendantToken}`);
+
+      expect(response.status).to.equal(200);
     });
   });
 
@@ -129,6 +204,33 @@ describe('Sales', () => {
         .set('Authorization', `Bearer ${attendantToken}`);
 
       expect(response.status).to.equal(200);
+    });
+
+    it('Attendants should NOT be able to view a sale record made by another attendant', async () => {
+      await chai
+        .request(app)
+        .post('/api/v1/auth/signup')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({
+          name: 'Attendant 2',
+          email: 'attendant.two@storemanager.com',
+          password: 'inflames',
+          role: 'Attendant'
+        });
+
+      const attendantResponse = await chai
+        .request(app)
+        .post('/api/v1/auth/login')
+        .send({ email: 'attendant.two@storemanager.com', password: 'inflames' });
+
+      const attendantToken2 = attendantResponse.body.data;
+
+      const response = await chai
+        .request(app)
+        .get('/api/v1/sales/2')
+        .set('Authorization', `Bearer ${attendantToken2}`);
+
+      expect(response.status).to.equal(404);
     });
   });
 });

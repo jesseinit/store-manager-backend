@@ -6,7 +6,14 @@ import authMiddleware from '../../middleware/auth';
 
 const router = Router();
 
-router.get('/', authMiddleware.verifyToken, ProductController.getAllProducts);
+router.get(
+  '/',
+  authMiddleware.verifyToken,
+  validator.valaidateGetProducts,
+  validator.validationHandler,
+  ProductController.getAllProducts
+);
+
 router.get(
   '/:id',
   authMiddleware.verifyToken,
