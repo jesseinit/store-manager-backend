@@ -9,16 +9,63 @@ import handleResponse from '../utils/responseHandler';
 class SalesController {
   /**
    *
-   * @description Retrieves all the sales from the data source
+   * @description Retrieves all the sales from the database - Admins Only
    * @returns {array} Returns all sales records as an array
    * @static
    * @param {object} req - Request Object
    * @param {object} res - Response Object
    * @memberof Sales
    */
-  static async getAllSales(req, res, next) {
-    const result = await SalesHelper.getAllSales();
-    handleResponse(result, next, res);
+  static async getAllSales(req, res) {
+    if (req.query.misc === 'true') {
+      const result = await SalesHelper.getMisc();
+      res.send(result);
+      return;
+    }
+
+    if (req.query.fdate && req.query.tdate) {
+      const result = await SalesHelper.getAllSalesByDate(req.query);
+      res.send(result);
+      return;
+    }
+
+    if (req.query.userid) {
+      const result = await SalesHelper.getAllSalesByAttendant(req.query);
+      res.send(result);
+      return;
+    }
+
+    const result = await SalesHelper.getAllSales(req.query);
+    res.send(result);
+  }
+
+  /**
+   *
+   * @description Retrieves all the sales made by a user - Attendants Only
+   * @returns {array} Returns all sales records as an array
+   * @static
+   * @param {object} req - Request Object
+   * @param {object} res - Response Object
+   * @memberof Sales
+   */
+  static async getAllSalesUser(req, res) {
+    const { id } = req.user;
+    req.query.userid = id;
+
+    if (req.query.misc === 'true') {
+      const result = await SalesHelper.getMiscForAttendant(id);
+      res.send(result);
+      return;
+    }
+
+    if (req.query.fdate && req.query.tdate) {
+      const result = await SalesHelper.getAllSalesByDate(req.query);
+      res.send(result);
+      return;
+    }
+
+    const result = await SalesHelper.getAllSalesByAttendant(req.query);
+    res.send(result);
   }
 
   /**
@@ -33,7 +80,7 @@ class SalesController {
   static async getSingleSale(req, res, next) {
     const saleId = parseInt(req.params.id, 10);
     const result = await SalesHelper.getSingleSale(saleId, req.user);
-    handleResponse(result, next, res);
+    handleResponse(result, next, res, 200, 'success', 'Record retrieved successfully');
   }
 
   /**
@@ -50,7 +97,7 @@ class SalesController {
     const { products } = req.body;
     const { total } = req;
     const result = await SalesHelper.createNewSale({ userid, total, products });
-    handleResponse(result, next, res, 201, 'success', 'Sale created successfully');
+    handleResponse(result, next, res, 201, 'success', 'Checkout completed successfully');
   }
 }
 export default SalesController;

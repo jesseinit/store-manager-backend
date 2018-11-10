@@ -1,4 +1,4 @@
-import { body, param, validationResult } from 'express-validator/check';
+import { body, param, query, validationResult } from 'express-validator/check';
 import { sanitizeBody } from 'express-validator/filter';
 
 const validateLogin = [
@@ -65,7 +65,7 @@ const validateNewCategory = [
     .exists()
     .withMessage('Please provide a category name')
     .isString()
-    .withMessage('Please provide a category name.')
+    .withMessage('Category name should be a string.')
     .isLength({ min: 2 })
     .withMessage('Category name must be atleast 2 letters long')
 ];
@@ -138,6 +138,25 @@ const validateProductUpdate = [
   validateNewProduct[4].optional()
 ];
 
+const valaidateGetProducts = [
+  query('limit')
+    .optional()
+    .isInt({ gt: 0 })
+    .withMessage('Limit must be from 1 and above'),
+  query('page')
+    .optional()
+    .isInt({ gt: 0 })
+    .withMessage('Page must be from 1 and above'),
+  query('catId')
+    .optional()
+    .isInt({ gt: 0 })
+    .withMessage('Category Id must be a number from 1 and above'),
+  query('stock')
+    .optional()
+    .isInt({ gt: 0 })
+    .withMessage('Quantity must be from a number 1 and above')
+];
+
 const validateNewSale = [
   body('products', 'Products must exists').exists(),
   body('products', 'Products must be specified in the right format').isArray(),
@@ -168,6 +187,7 @@ const validations = {
   validateProductUpdate,
   validateNewProduct,
   validateProductId,
+  valaidateGetProducts,
   validationHandler
 };
 export default validations;

@@ -1,9 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import sinon from 'sinon';
 import app from '../../index';
 import mockData from '../mock';
-import ProductHelper from '../../helpers/productHelper';
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -17,15 +15,14 @@ describe('Products', () => {
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.ownerLogin);
-    ownerToken = response.body.token;
+    ownerToken = response.body.data;
 
     const attendantResponse = await chai
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.attendantLogin);
-    attendantToken = attendantResponse.body.token;
+    attendantToken = attendantResponse.body.data;
 
-    /* Create a new product category */
     await chai
       .request(app)
       .post('/api/v1/category/')
@@ -34,40 +31,13 @@ describe('Products', () => {
   });
 
   describe('Get All Products', () => {
-    it('Should return an authentication error when authorization headers are not present', async () => {
-      const response = await chai.request(app).get('/api/v1/products');
-
-      expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
-    });
-
-    it('Should return an authentication error when an invalid token is passed', async () => {
-      const response = await chai
-        .request(app)
-        .get('/api/v1/products')
-        .set('Authorization', `Bearer WrongToken`);
-
-      expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
-    });
-
     it('It should return a message when there are no created products yet.', async () => {
-      const productHelperStub = sinon
-        .stub(ProductHelper, 'allProducts')
-        .returns('No product created yet.');
-
       const response = await chai
         .request(app)
         .get('/api/v1/products')
         .set('Authorization', `Bearer ${ownerToken}`);
+
       expect(response.status).to.equal(200);
-      productHelperStub.restore();
     });
 
     it('Authenticated users should be able to view all product', async () => {
@@ -83,11 +53,49 @@ describe('Products', () => {
           qty: 10
         });
 
+      await chai
+        .request(app)
+        .post('/api/v1/products')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({
+          imgUrl: 'http://example.com/photo.jpg',
+          name: 'Router 3',
+          categoryid: 1,
+          price: 10.01,
+          qty: 10
+        });
+
       const response = await chai
         .request(app)
-        .get('/api/v1/products')
+        .get('/api/v1/products?limit=1')
         .set('Authorization', `Bearer ${ownerToken}`);
 
+      expect(response.status).to.equal(200);
+    });
+
+    it('Authenticated users can search for a particular product by name', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/products?search=r')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
+    it('Authenticated users can search for a particular product by category', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/products?search=r&catid=1&page=2')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
+    it('Authenticated users can search for a particular product by remaining stock', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/products?stock=11')
+        .set('Authorization', `Bearer ${ownerToken}`);
       expect(response.status).to.equal(200);
     });
   });
@@ -97,10 +105,6 @@ describe('Products', () => {
       const response = await chai.request(app).post('/api/v1/products');
 
       expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
     });
 
     it('Should return an authentication error when an invalid token is passed', async () => {
@@ -110,10 +114,6 @@ describe('Products', () => {
         .set('Authorization', `Bearer WrongToken`);
 
       expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
     });
 
     it('Invalid product information should return an unprocessable entity error', async () => {
@@ -144,7 +144,6 @@ describe('Products', () => {
         .post('/api/v1/products')
         .set('Authorization', `Bearer ${ownerToken}`)
         .send(mockData.products.validProductInfo);
-
       expect(response.status).to.equal(201);
     });
 
@@ -155,34 +154,10 @@ describe('Products', () => {
         .set('Authorization', `Bearer ${ownerToken}`)
         .send(mockData.products.validProductInfo);
       expect(response.status).to.equal(400);
-      expect(response.body.message).to.equal('The provided product name already exists.');
     });
   });
 
   describe('Get Single Product', () => {
-    it('Should return an authentication error when authorization headers are not present', async () => {
-      const response = await chai.request(app).get('/api/v1/products/1');
-
-      expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
-    });
-
-    it('Should return an authentication error when an invalid token is passed', async () => {
-      const response = await chai
-        .request(app)
-        .get('/api/v1/products/1')
-        .set('Authorization', `Bearer WrongToken`);
-
-      expect(response.status).to.equal(401);
-      expect(response.body).to.have.property('message');
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body.status).to.equal(false);
-    });
-
     it('Invalid product id should return an unprocessable input error', async () => {
       const response = await chai
         .request(app)
@@ -190,8 +165,6 @@ describe('Products', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(response.status).to.equal(422);
-      expect(response.body).to.have.property('error');
-      expect(response.body.error).is.to.be.an('array');
     });
 
     it('Non-existing product id should return a not found error when fetching product', async () => {
@@ -201,11 +174,6 @@ describe('Products', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(response.status).to.equal(404);
-      expect(response.body).to.have.property('status');
-      expect(response.body.status).to.equal(false);
-      expect(response.body.status).to.be.a('boolean');
-      expect(response.body).to.have.property('message');
-      expect(response.body.message).to.equal('Product not found');
     });
 
     it('Valid product id should return the matching product', async () => {
@@ -225,6 +193,7 @@ describe('Products', () => {
         .put('/api/v1/products/1')
         .set('Authorization', `Bearer ${attendantToken}`)
         .send(mockData.products.validProductInfo);
+
       expect(response.status).to.equal(403);
     });
 
@@ -234,8 +203,8 @@ describe('Products', () => {
         .put('/api/v1/products/1')
         .set('Authorization', `Bearer ${ownerToken}`)
         .send(mockData.products.validProductInfo);
+
       expect(response.status).to.equal(400);
-      expect(response.body.message).to.equal('The provided product name already exists.');
     });
 
     it('Admin should not be able to update a product with a category id does not exist', async () => {
@@ -244,8 +213,8 @@ describe('Products', () => {
         .put('/api/v1/products/1')
         .set('Authorization', `Bearer ${ownerToken}`)
         .send(mockData.products.NonExistingCategoryIdProductUpdateInfo);
+
       expect(response.status).to.equal(400);
-      expect(response.body.message).to.equal('The category does not exist.');
     });
 
     it('Admin should be able to update a product', async () => {
@@ -254,6 +223,7 @@ describe('Products', () => {
         .put('/api/v1/products/1')
         .set('Authorization', `Bearer ${ownerToken}`)
         .send(mockData.products.validProductUpdateInfo);
+
       expect(response.status).to.equal(200);
     });
   });
@@ -264,6 +234,7 @@ describe('Products', () => {
         .request(app)
         .del('/api/v1/products/1')
         .set('Authorization', `Bearer ${attendantToken}`);
+
       expect(response.status).to.equal(403);
     });
 
@@ -272,6 +243,7 @@ describe('Products', () => {
         .request(app)
         .del('/api/v1/products/10')
         .set('Authorization', `Bearer ${ownerToken}`);
+
       expect(response.status).to.equal(404);
     });
 

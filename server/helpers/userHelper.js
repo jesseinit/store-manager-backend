@@ -27,17 +27,17 @@ class AuthHelper {
     try {
       const { email, password } = user;
 
-      const foundUser = await pool.query(query.findUser(email));
+      const foundUser = await pool.query(query.findUserByEmail(email));
 
-      if (foundUser.rowCount < 1) errorHandler(401, 'Email address or password is incorrect');
+      if (foundUser.rowCount < 1) errorHandler(404, 'Email address or password is incorrect');
 
       const isPasswordValid = await bcrypt.compare(password, foundUser.rows[0].password);
 
       if (!isPasswordValid) errorHandler(401, 'Email address or password is incorrect');
 
-      const { userid, name, role } = foundUser.rows[0];
+      const { id, name, role } = foundUser.rows[0];
 
-      const token = jwt.sign({ id: userid, email, name, role }, SECRET_KEY, { expiresIn: '12h' });
+      const token = jwt.sign({ id, email, name, role }, SECRET_KEY, { expiresIn: '24h' });
 
       return token;
     } catch (error) {

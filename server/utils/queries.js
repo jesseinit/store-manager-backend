@@ -4,61 +4,140 @@ const query = {
     text: `SELECT * FROM users WHERE email = $1`,
     values: [email]
   }),
+
   findUserById: userid => ({
-    text: `SELECT * FROM users WHERE user_id = $1`,
+    text: `SELECT * FROM users WHERE id = $1`,
     values: [userid]
   }),
+
   regUser: (name, email, password, role) => ({
     text: `INSERT INTO users (name,email,password,role) VALUES ($1, $2, $3, $4) RETURNING *`,
     values: [name, email, password, role]
   }),
+
   getAllUsers: () => `Select * FROM users`,
+
   updateUser: (name, password, role, userid) => ({
     text: `UPDATE users SET 
           name = COALESCE($1,name), password = COALESCE($2,password), 
           role = COALESCE($3,role), email = COALESCE(email) 
-          WHERE user_id = $4 RETURNING *`,
+          WHERE id = $4 RETURNING *`,
     values: [name, password, role, userid]
   }),
+
   deleteUser: id => ({
-    text: `DELETE FROM users WHERE user_id = $1`,
+    text: `DELETE FROM users WHERE id = $1`,
     values: [id]
   }),
+
   /* Categories */
   findCategoryByName: name => ({
     text: `SELECT * FROM category WHERE category_name = $1`,
     values: [name]
   }),
+
   findCategoryById: id => ({
     text: `SELECT * FROM category WHERE category_id = $1`,
     values: [id]
   }),
+
   getAllCategories: () => `SELECT * from category`,
+
   createCategory: name => ({
     text: `INSERT INTO category (category_name) VALUES ($1) RETURNING *`,
     values: [name]
   }),
+
   updateCategory: (id, name) => ({
     text: `UPDATE category SET category_name = $1 WHERE category_id = $2 RETURNING *`,
     values: [name, id]
   }),
+
   deleteCategory: id => ({
     text: `DELETE FROM category WHERE category_id = $1`,
     values: [id]
   }),
+
   /* Products */
-  getAllProducts: () =>
-    `SELECT p.*, COALESCE (c.categoryname, 'Not Set') as categoryname 
-    FROM products p JOIN category c 
-    ON c.categoryid = p.categoryid`,
+  getAllProductsCount: () => ({
+    text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
+          FROM products p JOIN category c 
+          ON c.category_id = p.category_id 
+          ORDER BY p.product_id DESC `,
+    values: []
+  }),
+
+  getAllProducts: (limit, offset) => ({
+    text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
+          FROM products p FULL JOIN category c 
+          ON c.category_id = p.category_id 
+          ORDER BY p.product_id DESC 
+          LIMIT $1 OFFSET $2`,
+    values: [limit, offset]
+  }),
+
+  getAllProductsByCategoryCount: (categoryId, productName) => ({
+    text: `SELECT p.*, c.*, COALESCE (c.category_name, 'Not Set') as category_name 
+          FROM products p FULL JOIN category c 
+          ON c.category_id = p.category_id 
+          WHERE c.category_id = $1 AND p.product_name ILIKE $2`,
+    values: [categoryId, `%${productName}%`]
+  }),
+
+  getAllProductsByCategory: (categoryId, productName, offset) => ({
+    text: `SELECT p.*, c.*, COALESCE (c.category_name, 'Not Set') as category_name 
+          FROM products p FULL JOIN category c 
+          ON c.category_id = p.category_id 
+          WHERE c.category_id = $1 AND p.product_name ILIKE $2
+          LIMIT 10 OFFSET $3`,
+    values: [categoryId, `%${productName}%`, offset]
+  }),
+
+  getAllProductsByNameCount: productName => ({
+    text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
+          FROM products p FULL JOIN category c 
+          ON c.category_id = p.category_id 
+          WHERE p.product_name ILIKE $1`,
+    values: [`%${productName}%`]
+  }),
+
+  getAllProductsByName: (productName, offset) => ({
+    text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
+          FROM products p FULL JOIN category c 
+          ON c.category_id = p.category_id 
+          WHERE p.product_name ILIKE $1
+          LIMIT 10 OFFSET $2`,
+    values: [`%${productName}%`, offset]
+  }),
+
+  filterAllProductsByStockCount: stock => ({
+    text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
+          FROM products p FULL JOIN category c 
+          ON c.category_id = p.category_id 
+          WHERE p.product_qty < $1`,
+    values: [stock]
+  }),
+
+  filterAllProductsByStock: (stock, offset) => ({
+    text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
+          FROM products p FULL JOIN category c 
+          ON c.category_id = p.category_id 
+          WHERE p.product_qty < $1 ORDER BY p.product_id DESC OFFSET $2`,
+    values: [stock, offset]
+  }),
+
   getProductById: id => ({
-    text: `SELECT p.*, COALESCE (c.categoryname, 'Not Set') as categoryname 
-          FROM products p FULL JOIN category c ON c.categoryid = p.categoryid 
-          WHERE p.id = $1`,
+    text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
+          FROM products p FULL JOIN category c ON c.category_id = p.category_id 
+          WHERE p.product_id = $1`,
     values: [id]
   }),
+
   createProduct: productsInfo => ({
-    text: `INSERT INTO products (imageurl,name,categoryId,price,qty) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+    text: `INSERT INTO products 
+          (product_image,product_name,category_id,product_price,product_qty) 
+          VALUES 
+          ($1,$2,$3,$4,$5) RETURNING *`,
     values: [
       productsInfo.imgUrl,
       productsInfo.name,
@@ -67,14 +146,15 @@ const query = {
       productsInfo.qty
     ]
   }),
+
   updateProduct: (id, updateInfo) => ({
     text: `UPDATE products SET 
-          imageurl = COALESCE ($1, imageurl), 
-          name = COALESCE ($2, name), 
-          categoryid = COALESCE($3, categoryid), 
-          price = COALESCE($4, price), 
-          qty = COALESCE($5, qty) 
-          WHERE id = $6 RETURNING *`,
+          product_image = COALESCE ($1, product_image), 
+          product_name = COALESCE ($2, product_name), 
+          category_id = COALESCE($3, category_id), 
+          product_price = COALESCE($4, product_price), 
+          product_qty = COALESCE($5, product_qty) 
+          WHERE product_id = $6 RETURNING *`,
     values: [
       updateInfo.imgUrl,
       updateInfo.name,
@@ -84,30 +164,122 @@ const query = {
       id
     ]
   }),
+
   deleteProduct: id => ({
-    text: `DELETE FROM products WHERE id = $1`,
+    text: `DELETE FROM products WHERE product_id = $1`,
     values: [id]
   }),
+
   /* Sales */
   createSale: (userid, totals) => ({
-    text: `INSERT INTO sales (user_id, totals) VALUES ($1, $2) RETURNING *`,
+    text: `INSERT INTO sales (user_id, sale_total) VALUES ($1, $2) RETURNING *`,
     values: [userid, totals]
   }),
-  createProductSales: (productId, saleId, productPrice, productQty) => ({
-    text: `INSERT INTO productSales (product_id, sale_id, product_price, product_qty) VALUES ($1,$2,$3,$4) RETURNING *`,
-    values: [productId, saleId, productPrice, productQty]
+
+  createProductSales: (productId, saleId, productWorth, productQty) => ({
+    text: `INSERT INTO productSales (product_id, sale_id, product_worth, product_qty) VALUES ($1,$2,$3,$4) RETURNING *`,
+    values: [productId, saleId, productWorth, productQty]
   }),
+
   thisSale: saleId => ({
-    text: `SELECT * FROM productSales as ps JOIN sales as s ON ps.sale_id = s.sale_id WHERE ps.sale_id = $1`,
+    text: `SELECT * FROM productSales as ps 
+          JOIN sales as s ON ps.sale_id = s.sale_id 
+          JOIN products as p ON p.product_id = ps.product_id 
+          WHERE ps.sale_id = $1`,
     values: [saleId]
   }),
-  getAllSales: () => `SELECT * FROM sales as s join productSales as ps on s.sale_id = ps.sale_id`,
+
+  getAllSalesCount: () => `SELECT * FROM productSales`,
+
+  getAllSales: (limit, offset) => ({
+    text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date, p.product_name as s_description, ps.product_qty as s_qty,
+          p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
+          JOIN sales as s ON s.sale_id = ps.sale_id
+          JOIN products as p ON p.product_id = ps.product_id
+          ORDER BY ps.sale_id DESC
+          LIMIT $1 OFFSET $2`,
+    values: [limit, offset]
+  }),
+
+  getTotalProductSold: () => `SELECT sum (ps.product_qty) as total_products_sold FROM productSales as ps`,
+  getTotalProductSoldAttendant: userid => ({
+    text: `SELECT sum (ps.product_qty) as total_products_sold FROM productSales as ps 
+          JOIN sales as s ON s.sale_id = ps.sale_id WHERE s.user_id = $1`,
+    values: [userid]
+  }),
+
+  getTotalProdWorth: () => `SELECT sum (s.sale_total) as total_products_worth FROM sales as s`,
+  getTotalProdWorthAttendant: userid => ({
+    text: `SELECT sum (s.sale_total) as total_products_worth FROM sales as s 
+          WHERE s.user_id = $1`,
+    values: [userid]
+  }),
+
+  getTotalSaleOrders: () => `SELECT * FROM sales`,
+  getTotalSaleOrdersAttendant: userid => ({ text: `SELECT * FROM sales WHERE user_id = $1`, values: [userid] }),
+
+  getLastFiveSales: () => ({
+    text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date, p.product_name as s_description, ps.product_qty as s_qty,
+          p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
+          JOIN sales as s ON s.sale_id = ps.sale_id
+          JOIN products as p ON p.product_id = ps.product_id
+          ORDER BY s.sale_id DESC LIMIT 5`
+  }),
+
+  getAllSalesByDateCount: (fromDate, endDate) => ({
+    text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date,  p.product_name as s_description, ps.product_qty as s_qty,
+          p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
+          JOIN sales as s ON s.sale_id = ps.sale_id
+          JOIN products as p ON p.product_id = ps.product_id
+          WHERE ps.sale_date BETWEEN $1 AND $2
+          ORDER BY ps.sale_id DESC`,
+    values: [`'${fromDate}'`, `'${endDate}'`]
+  }),
+
+  getAllSalesByDate: (fromDate, endDate, limit, offset) => ({
+    text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date,  p.product_name as s_description, ps.product_qty as s_qty,
+          p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
+          JOIN sales as s ON s.sale_id = ps.sale_id
+          JOIN products as p ON p.product_id = ps.product_id
+          WHERE ps.sale_date BETWEEN $1 AND $2
+          ORDER BY ps.sale_id DESC
+          LIMIT $3 OFFSET $4`,
+    values: [`'${fromDate}'`, `'${endDate}'`, limit, offset]
+  }),
+
+  getAllSalesByAttendantCount: userid => ({
+    text: `SELECT * FROM productSales as ps 
+          JOIN sales as s ON s.sale_id = ps.sale_id
+          JOIN products as p ON p.product_id = ps.product_id
+          WHERE s.user_id = $1`,
+    values: [userid]
+  }),
+
+  getAllSalesByAttendant: (userid, limit, offset) => ({
+    text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date, p.product_name as s_description, ps.product_qty as s_qty,
+          p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
+          JOIN sales as s ON s.sale_id = ps.sale_id
+          JOIN products as p ON p.product_id = ps.product_id
+          WHERE s.user_id = $1
+          LIMIT $2 OFFSET $3`,
+    values: [userid, limit, offset]
+  }),
+
   getSingleSaleUser: (userId, saleId) => ({
-    text: `SELECT * FROM sales as s join productSales as ps on s.sale_id = ps.sale_id WHERE s.user_id = $1 AND ps.sale_id = $2`,
+    text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date, p.product_name as s_description, ps.product_qty as s_qty,
+          p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM sales as s 
+          JOIN productSales as ps ON s.sale_id = ps.sale_id
+          JOIN products as p ON p.product_id = ps.product_id 
+          WHERE s.user_id = $1 AND ps.sale_id = $2`,
     values: [userId, saleId]
   }),
+
   getSingleSaleAdmin: saleId => ({
-    text: `SELECT * FROM sales as s join productSales as ps on s.sale_id = ps.sale_id WHERE ps.sale_id = $1`,
+    text: `SELECT ps.sale_id as s_id,ps.sale_date as s_date,p.product_name as s_description,ps.product_qty as s_qty,
+          p.product_price as s_price,ps.product_worth as s_total,s.user_id as s_user FROM productSales as ps 
+          JOIN sales as s ON s.sale_id = ps.sale_id
+          JOIN products as p ON p.product_id = ps.product_id
+          WHERE ps.sale_id = $1`,
     values: [saleId]
   })
 };

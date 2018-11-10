@@ -84,7 +84,7 @@ class UserController {
   static async deleteUser(req, res, next) {
     const { userid } = req.params;
     const result = await UserHelper.deleteUser(userid);
-    handleResponse(undefined, next, res, 200, 'success', result);
+    handleResponse(result, next, res, 200, 'success', result);
   }
 }
 

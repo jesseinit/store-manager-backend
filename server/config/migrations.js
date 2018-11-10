@@ -9,7 +9,7 @@ dotenv.config();
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
 const usersTable = `CREATE TABLE IF NOT EXISTS users (
-  user_id serial NOT NULL PRIMARY KEY,
+  id serial NOT NULL PRIMARY KEY,
   name text NOT NULL,
   email text UNIQUE NOT NULL,
   password varchar(200) NOT NULL,
@@ -27,16 +27,14 @@ const productsTable = `CREATE TABLE IF NOT EXISTS products (
   product_name text UNIQUE NOT NULL,
   product_price float NOT NULL,
   product_qty int NOT NULL,
-  category_id int NOT NULL,
-  FOREIGN KEY (category_id) REFERENCES category (category_id)
+  category_id int NOT NULL
 );`;
 
 const salesTable = `CREATE TABLE IF NOT EXISTS sales (
   sale_id serial NOT NULL PRIMARY KEY,
   user_id int NOT NULL,
   sale_date date DEFAULT CURRENT_DATE NOT NULL,
-  sale_total float NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users (user_id)
+  sale_total float NOT NULL
 );`;
 
 const productSales = `CREATE TABLE IF NOT EXISTS productsales (
@@ -45,9 +43,7 @@ const productSales = `CREATE TABLE IF NOT EXISTS productsales (
   sale_id int NOT NULL,
   product_worth float NOT NULL,
   product_qty int NOT NULL,
-  sale_date date DEFAULT CURRENT_DATE NOT NULL,
-  FOREIGN KEY (product_id) REFERENCES products (product_id),
-  FOREIGN KEY (sale_id) REFERENCES sales (sale_id)
+  sale_date date DEFAULT CURRENT_DATE NOT NULL
 );`;
 
 (async () => {

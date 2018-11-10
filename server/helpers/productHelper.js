@@ -1,6 +1,7 @@
 import pool from '../utils/connection';
 import query from '../utils/queries';
 import errorHandler from '../utils/errorHandler';
+import { paginatedResult, paginateEmptyResult } from '../utils/paginateRecords';
 
 /**
  *
@@ -15,12 +16,132 @@ class ProductHelper {
    * @returns {array} An array of products objects
    * @memberof ProductHelper
    */
-  static async allProducts() {
-    const allProducts = await pool.query(query.getAllProducts());
-    if (allProducts.rowCount < 1) {
-      return 'No product created yet.';
+  static async allProducts(request) {
+    const { limit, page } = request;
+
+    const { rowCount } = await pool.query(query.getAllProductsCount());
+
+    if (!rowCount) {
+      return paginateEmptyResult('You have not created products yet.');
     }
-    return allProducts.rows;
+
+    const limitBy = Number(limit) || 10;
+
+    let currentPage = Number(page) || 1;
+
+    const totalPages = Math.ceil(rowCount / limitBy);
+
+    /* istanbul ignore next */
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
+
+    const offset = (currentPage - 1) * limitBy;
+
+    const { rows } = await pool.query(query.getAllProducts(limitBy, offset));
+
+    const result = paginatedResult(rows, totalPages, currentPage);
+    return result;
+  }
+
+  /**
+   *
+   * @description Helps to retrieve products based on their category
+   * @static
+   * @returns {array} An array of products objects
+   * @memberof ProductHelper
+   */
+  static async allProductsByCategory(request) {
+    const { search, catid, page } = request;
+
+    const { rowCount } = await pool.query(query.getAllProductsByCategoryCount(catid, search));
+
+    if (!rowCount) {
+      return paginateEmptyResult('No product matches your search.');
+    }
+
+    let currentPage = Number(page) || 1;
+
+    const totalPages = Math.ceil(rowCount / 10);
+
+    /* istanbul ignore next */
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
+
+    const offset = (currentPage - 1) * 10;
+
+    const { rows } = await pool.query(query.getAllProductsByCategory(catid, search, offset));
+
+    const result = paginatedResult(rows, totalPages, currentPage);
+
+    return result;
+  }
+
+  /**
+   *
+   * @description Helps to retrieve products based on their name
+   * @static
+   * @returns {array} An array of products objects
+   * @memberof ProductHelper
+   */
+  static async allProductsByName(request) {
+    const { search, page } = request;
+
+    const { rowCount } = await pool.query(query.getAllProductsByNameCount(search));
+
+    if (!rowCount) {
+      return paginateEmptyResult('No product matches your search.');
+    }
+
+    let currentPage = Number(page) || 1;
+
+    const totalPages = Math.ceil(rowCount / 10);
+
+    /* istanbul ignore next */
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
+
+    const offset = (currentPage - 1) * 10;
+
+    const { rows } = await pool.query(query.getAllProductsByName(search, offset));
+
+    const result = paginatedResult(rows, totalPages, currentPage);
+    return result;
+  }
+
+  /**
+   *
+   * @description Filter products by remaining stock
+   * @static
+   * @returns {array} An array of products objects
+   * @memberof ProductHelper
+   */
+  static async allProductsByStock(request) {
+    const { page, stock } = request;
+
+    const { rowCount } = await pool.query(query.filterAllProductsByStockCount(stock));
+
+    if (!rowCount) {
+      return paginateEmptyResult('No product matches your search.');
+    }
+
+    let currentPage = Number(page) || 1;
+
+    const totalPages = Math.ceil(rowCount / 10);
+
+    /* istanbul ignore next */
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
+
+    const offset = (currentPage - 1) * 10;
+
+    const { rows } = await pool.query(query.filterAllProductsByStock(stock, offset));
+
+    const result = paginatedResult(rows, totalPages, currentPage);
+    return result;
   }
 
   /**
@@ -59,7 +180,7 @@ class ProductHelper {
       }
 
       const allProducts = await pool.query(query.getAllProducts());
-      const isExists = allProducts.rows.some(product => product.name === newProduct.name);
+      const isExists = allProducts.rows.some(product => product.product_name === newProduct.name);
 
       if (isExists) {
         errorHandler(400, 'The provided product name already exists.');
@@ -87,9 +208,9 @@ class ProductHelper {
         return result;
       }
 
-      const allProducts = await this.allProducts();
+      const allProducts = await pool.query(query.getAllProductsCount());
 
-      const isExists = allProducts.some(product => product.name === productInfo.body.name);
+      const isExists = allProducts.rows.some(product => product.product_name === productInfo.body.name);
       if (isExists) {
         errorHandler(400, 'The provided product name already exists.');
       }

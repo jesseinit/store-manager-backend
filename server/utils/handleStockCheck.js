@@ -5,9 +5,10 @@ const stockCheck = (req, res, next) => {
   const _ = undefined;
   let totalProds = 0;
   let totalSaleAmt = 0;
+  const cartProducts = req.body.products;
   const cartLength = req.body.products.length;
 
-  const isUniqueProductList = req.body.products
+  const isUniqueProductList = cartProducts
     .map(product => product.id)
     .every((value, index, array) => array.lastIndexOf(value) === index);
 
@@ -16,18 +17,28 @@ const stockCheck = (req, res, next) => {
     return;
   }
 
-  req.body.products.forEach(async product => {
-    const productInfo = await pool.query('Select name,price,qty from products where id = $1', [product.id]);
+  cartProducts.forEach(async product => {
+    const productInfo = await pool.query(
+      'Select product_name,product_price,product_qty from products where product_id = $1',
+      [product.id]
+    );
 
     if (productInfo.rowCount < 1) {
       responseHandler(_, _, res, 400, 'failure', `Product with id ${product.id} is not found`);
       return;
     }
 
-    const productWorth = productInfo.rows[0].price * product.qty;
+    const productWorth = productInfo.rows[0].product_price * product.qty;
 
-    if (product.qty > productInfo.rows[0].qty) {
-      responseHandler(_, _, res, 400, 'failure', `Cant process the requested quantity on ${productInfo.rows[0].name}`);
+    if (product.qty > productInfo.rows[0].product_qty) {
+      responseHandler(
+        _,
+        _,
+        res,
+        400,
+        'failure',
+        `Cant process the requested quantity on ${productInfo.rows[0].product_name}`
+      );
     } else {
       totalProds += 1;
       totalSaleAmt += productWorth;

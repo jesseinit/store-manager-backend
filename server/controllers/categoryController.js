@@ -69,7 +69,7 @@ class CategoryController {
   static async deleteCategory(req, res, next) {
     const { id } = req.params;
     const result = await CategoryHelper.deleteCategory(id);
-    handleResponse(undefined, next, res, 200, 'success', result);
+    handleResponse(result, next, res, 200, 'success', undefined);
   }
 }
 

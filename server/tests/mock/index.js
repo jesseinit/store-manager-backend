@@ -16,45 +16,48 @@ const validProductEntry = {
 
 const login = {
   ownerLogin: {
-    userid: 1,
+    email: 'owner@storemanager.com',
     password: 'owner'
   },
   attendantLogin: {
-    userid: 2,
-    password: 'awsomeness'
+    email: 'attendant@storemanager.com',
+    password: 'inflames'
   },
   adminLogin: {
-    userid: 3,
-    password: 'awsomeness'
+    email: 'admin@storemanager.com',
+    password: 'inflames'
   },
   invalidLogin: {
-    userid: 0,
-    password: 'err'
+    email: 'blah@wrongdomain.com',
+    password: 'sad'
   },
   nonExistingLogin: {
-    userid: 10,
-    password: 'owner'
+    email: 'blah@storemanager.com',
+    password: 'inflames'
   },
   failedLogin: {
-    userid: 1,
-    password: 'wrongpassword'
+    email: 'owner@storemanager.com',
+    password: 'wrongPassword'
   }
 };
 
 const signUp = {
   invalidNewUser: {
     name: 'Big Man',
+    email: 'blah@wrongdomain.com',
     password: 'bad',
     role: 'Unsupported Role Type'
   },
-  validNewUser: {
-    name: 'Big Man',
-    password: 'awsomeness',
+  validNewAttendant: {
+    name: 'Attendant',
+    email: 'attendant@storemanager.com',
+    password: 'inflames',
     role: 'Attendant'
   },
   validNewAdmin: {
-    name: 'Big Man',
-    password: 'awsomeness',
+    name: 'Admin',
+    email: 'admin@storemanager.com',
+    password: 'inflames',
     role: 'Admin'
   }
 };
@@ -62,7 +65,7 @@ const signUp = {
 const modifyUser = {
   validUpdateInfo: {
     name: 'Updated Attendant',
-    password: 'awsomeness',
+    password: 'inflames',
     role: 'Attendant'
   }
 };

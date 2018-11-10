@@ -1,5 +1,7 @@
 import ProductHelper from '../helpers/productHelper';
 import handleResponse from '../utils/responseHandler';
+// import pool from '../utils/connection';
+// import query from '../utils/queries';
 
 /**
  *
@@ -16,8 +18,26 @@ class ProductController {
    * @memberof ProductController
    */
   static async getAllProducts(req, res) {
-    const result = await ProductHelper.allProducts();
-    res.status(200).json({ status: true, message: result });
+    if (req.query.search && req.query.catid) {
+      const result = await ProductHelper.allProductsByCategory(req.query);
+      res.send(result);
+      return;
+    }
+
+    if (req.query.search) {
+      const result = await ProductHelper.allProductsByName(req.query);
+      res.send(result);
+      return;
+    }
+
+    if (req.query.stock) {
+      const result = await ProductHelper.allProductsByStock(req.query);
+      res.send(result);
+      return;
+    }
+
+    const data = await ProductHelper.allProducts(req.query);
+    res.send(data);
   }
 
   /**
@@ -43,7 +63,7 @@ class ProductController {
    */
   static async createProduct(req, res, next) {
     const result = await ProductHelper.createProduct(req.body);
-    handleResponse(result, next, res, 201);
+    handleResponse(result, next, res, 201, 'success', 'Product created successfully.');
   }
 
   /**
@@ -56,11 +76,8 @@ class ProductController {
    */
   static async updateProduct(req, res, next) {
     const id = parseInt(req.params.id, 10);
-    const result = await ProductHelper.updateProduct({
-      id,
-      body: req.body
-    });
-    handleResponse(result, next, res);
+    const result = await ProductHelper.updateProduct({ id, body: req.body });
+    handleResponse(result, next, res, 200, 'success', 'Product updated successfully.');
   }
 
   /**

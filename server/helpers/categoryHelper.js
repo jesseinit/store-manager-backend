@@ -75,9 +75,6 @@ class CategoryHelper {
   static async getAllCategories() {
     try {
       const allCategories = await pool.query(query.getAllCategories());
-      if (allCategories.rows.length < 1) {
-        errorHandler(200, 'You have no product category yet.');
-      }
       return allCategories.rows;
     } catch (error) {
       return error;
