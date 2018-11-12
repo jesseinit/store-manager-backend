@@ -108,6 +108,16 @@ a {
   }
 }
 
+#site-main .error__container {
+  margin-bottom: 10px;
+  background: #ffe6e6;
+  padding: 5px;
+}
+
+#site-main .error__container li {
+  font-size: 0.8rem;
+}
+
 #site-main .aside {
   display: flex;
   margin-top: 20px;
@@ -691,7 +701,7 @@ a {
 
 #site-main .main .sales__table td,
 #site-main .main .sales__table th {
-  padding: 1rem;
+  padding: .6rem;
   text-align: center;
 }
 
@@ -914,16 +924,6 @@ a {
   #site-main .form__wrapper .form .btn {
     width: auto;
   }
-}
-
-#site-main .form__wrapper .form .error__container {
-  margin-bottom: 10px;
-  background: #ffe6e6;
-  padding: 5px;
-}
-
-#site-main .form__wrapper .form .error__container li {
-  font-size: 0.8rem;
 }
 
 #site-footer {

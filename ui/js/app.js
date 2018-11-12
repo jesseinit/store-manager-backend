@@ -1,6 +1,7 @@
 const _ = undefined;
 const basepath = `${window.location.origin}/api/v1`;
 const loginForm = document.querySelector('#login-form');
+const signupForm = document.querySelector('#signup-form');
 const logoutBtn = document.querySelector('#logout-btn');
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
@@ -63,6 +64,33 @@ const redirectHandler = role => {
   }
 };
 
+const populateUsersTable = async () => {
+  const usersTableBody = document.querySelector('#users-table tbody');
+  while (usersTableBody.firstChild) usersTableBody.removeChild(usersTableBody.firstChild);
+  const allUsersEndpoint = `${basepath}/users/`;
+  const response = await processRequest(allUsersEndpoint);
+  response.data.forEach(user => {
+    const tr = document.createElement('tr');
+    const userId = createNode('td', '', user.id);
+    const userName = createNode('td', '', user.name);
+    const userEmail = createNode('td', '', user.email);
+    const userRole = createNode('td', '', user.role);
+    const actions = document.createElement('td');
+    actions.setAttribute('data-id', user.id);
+    const editBtn = createNode('button', 'green', 'Edit');
+    const delBtn = createNode('button', 'red', 'Delete');
+    append(actions, editBtn);
+    append(actions, delBtn);
+    append(tr, userId);
+    append(tr, userName);
+    append(tr, userEmail);
+    append(tr, userRole);
+    append(tr, actions);
+    append(usersTableBody, tr);
+    // console.log(tr);
+  });
+};
+
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 /* Login */
@@ -94,8 +122,33 @@ const login = async e => {
   redirectHandler(role);
 };
 
+const signup = async e => {
+  e.preventDefault();
+  const name = document.querySelector('#staff-name').value;
+  const email = document.querySelector('#staff-email').value;
+  const password = document.querySelector('#staff-password').value;
+  const role = document.querySelector('#staff-role').value;
+
+  const signupUrl = `${basepath}/auth/signup`;
+  const signupInfo = { name, email, password, role };
+
+  const response = await processRequest(signupUrl, 'POST', signupInfo);
+
+  if (!response.data) {
+    handleInputErrors(response, '#signup-form');
+    return;
+  }
+  /* TODO: Totast Success Message Here */
+  signupForm.reset();
+  populateUsersTable();
+};
+
 if (loginForm) {
   loginForm.addEventListener('submit', login);
+}
+
+if (signupForm) {
+  signupForm.addEventListener('submit', signup);
 }
 
 if (logoutBtn) {
@@ -104,4 +157,26 @@ if (logoutBtn) {
     localStorage.clear();
     window.location.replace('./');
   });
+}
+
+switch (window.location.pathname) {
+  case '/ui/admin.html':
+    break;
+  case '/ui/product-settings.html':
+    break;
+  case '/ui/sale-records.html':
+    break;
+  case '/ui/staff-accounts.html':
+    populateUsersTable();
+    break;
+  case '/ui/make-sale.html':
+    break;
+  case '/ui/cart.html':
+    break;
+  case '/ui/my-sales.html':
+    break;
+  case '/ui/view-product.html':
+    break;
+  default:
+    break;
 }
