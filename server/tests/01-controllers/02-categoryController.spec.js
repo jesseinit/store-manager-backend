@@ -16,7 +16,7 @@ describe('Category', () => {
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.ownerLogin);
-    ownerToken = response.body.data;
+    ownerToken = response.body.data.token;
   });
 
   before(async () => {
@@ -24,7 +24,7 @@ describe('Category', () => {
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.attendantLogin);
-    attendantToken = response.body.data;
+    attendantToken = response.body.data.token;
   });
 
   after(async () => {

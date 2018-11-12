@@ -15,13 +15,13 @@ describe('Products', () => {
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.ownerLogin);
-    ownerToken = response.body.data;
+    ownerToken = response.body.data.token;
 
     const attendantResponse = await chai
       .request(app)
       .post('/api/v1/auth/login')
       .send(mockData.login.attendantLogin);
-    attendantToken = attendantResponse.body.data;
+    attendantToken = attendantResponse.body.data.token;
 
     await chai
       .request(app)
