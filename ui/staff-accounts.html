@@ -1,87 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <script src="./js/checks.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="css/app.css" />
+    <title>Staff Accounts - Store Manager</title>
+  </head>
 
-<head>
-  <script src="./js/checks.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="css/app.css">
-  <title>Staff Accounts - Store Manager</title>
-</head>
-
-<body>
-  <header id="site-header">
-    <a class="logo" href="./make-sale.html">Store Manager</a>
-    <nav class="top-nav">
-      <ul>
-        <li><a id="logout-btn" href="./">Logout</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main id="site-main" class="row">
-    <aside class="aside">
-      <nav class="aside__nav admin">
+  <body>
+    <header id="site-header">
+      <a class="logo" href="./make-sale.html">Store Manager</a>
+      <nav class="top-nav">
         <ul>
-          <li><a href="./admin.html">Admin Dashboard</a></li>
-          <li><a class="selected" href="./staff-accounts.html">Staff Accounts</a></li>
-          <li><a href="./product-settings.html">Products Settings</a></li>
-          <li><a href="./sale-records.html">Sale Records</a></li>
+          <li><a id="logout-btn" href="./">Logout</a></li>
         </ul>
       </nav>
-    </aside>
-    <section class="main">
-      <section class="sales">
-        <div class="sales__meta">
-          <h3 class="header">Store Employees</h3>
-          <div class="sort">
-            <form id="sort__date">
-              <fieldset>
-                <legend>Create New Staff Account</legend>
-                <input type="text" placeholder="Employee Name" required>
-                <input type="text" placeholder="Employee password" required>
-                <select name="" id="">
-                  <option value="">Attendant</option>
-                  <option value="">Admin</option>
-                </select>
-                <input type="submit" value="Create Account">
-              </fieldset>
-            </form>
+    </header>
+    <main id="site-main" class="row">
+      <aside class="aside">
+        <nav class="aside__nav admin">
+          <ul>
+            <li><a href="./admin.html">Admin Dashboard</a></li>
+            <li><a class="selected" href="./staff-accounts.html">Staff Accounts</a></li>
+            <li><a href="./product-settings.html">Products Settings</a></li>
+            <li><a href="./sale-records.html">Sale Records</a></li>
+          </ul>
+        </nav>
+      </aside>
+      <section class="main">
+        <section class="sales">
+          <div class="sales__meta">
+            <h3 class="header">Store Employees</h3>
+            <div class="sort">
+              <form id="signup-form">
+                <fieldset>
+                  <legend>Create New Staff Account</legend>
+                  <input type="text" id="staff-name" placeholder="Employee Name" required />
+                  <input
+                    type="email"
+                    id="staff-email"
+                    placeholder="Employee Email"
+                    required
+                    pattern="(^[A-Za-z]+)(\.[a-zA-Z]+)?@storemanager.com$"
+                  />
+                  <input type="password" id="staff-password" placeholder="Password" required />
+                  <select id="staff-role">
+                    <option value="Attendant">Attendant</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                  <input type="submit" value="Create Account" />
+                </fieldset>
+              </form>
+            </div>
           </div>
-        </div>
-        <div class="table-wrapper no-flow">
-          <table class="sales__table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Employee Name</th>
-                <th>Role</th>
-                <th style="text-align: center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2341</td>
-                <td>John Doe</td>
-                <td>Attendant</td>
-                <td style="text-align: center"><button class="green">Edit</button> <button class="red">Delete</button></td>
-              </tr>
-              <tr>
-                <td>2341</td>
-                <td>Jane Doe</td>
-                <td>Admin</td>
-                <td style="text-align: center"><button class="green">Edit</button> <button class="red">Delete</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <div class="table-wrapper no-flow">
+            <table id="users-table" class="sales__table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Employee Name</th>
+                  <th>Employee Email</th>
+                  <th>Role</th>
+                  <th style="text-align: center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </section>
-    </section>
-  </main>
-  <footer id="site-footer">
-    <p>Store Manager &copy; 2018</p>
-  </footer>
-  <script src="./js/app.js"></script>
-</body>
-
+    </main>
+    <footer id="site-footer"><p>Store Manager &copy; 2018</p></footer>
+    <script src="./js/app.js"></script>
+  </body>
 </html>
