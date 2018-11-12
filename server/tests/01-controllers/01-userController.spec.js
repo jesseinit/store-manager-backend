@@ -54,8 +54,8 @@ describe('User', () => {
         .send(mockData.login.ownerLogin);
 
       expect(response.status).to.equal(200);
-      expect(response.body.data).to.be.a('string');
-      ownerToken = response.body.data;
+      expect(response.body.data.token).to.be.a('string');
+      ownerToken = response.body.data.token;
     });
   });
 
@@ -105,7 +105,7 @@ describe('User', () => {
         .post('/api/v1/auth/login')
         .send(mockData.login.attendantLogin);
 
-      attendantToken = loginResponse.body.data;
+      attendantToken = loginResponse.body.data.token;
 
       const signupResponse = await chai
         .request(app)
@@ -191,7 +191,7 @@ describe('User', () => {
         .post('/api/v1/auth/login')
         .send(mockData.login.adminLogin);
 
-      adminToken = loginResponse.body.data;
+      adminToken = loginResponse.body.data.token;
 
       const response = await chai
         .request(app)

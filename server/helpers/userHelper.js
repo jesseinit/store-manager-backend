@@ -39,7 +39,7 @@ class AuthHelper {
 
       const token = jwt.sign({ id, email, name, role }, SECRET_KEY, { expiresIn: '24h' });
 
-      return token;
+      return { token, role };
     } catch (error) {
       return error;
     }

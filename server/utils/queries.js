@@ -201,16 +201,16 @@ const query = {
     values: [limit, offset]
   }),
 
-  getTotalProductSold: () => `SELECT sum (ps.product_qty) as total_products_sold FROM productSales as ps`,
+  getTotalProductSold: () => `SELECT COALESCE(SUM(ps.product_qty), 0) as total_products_sold FROM productSales as ps`,
   getTotalProductSoldAttendant: userid => ({
-    text: `SELECT sum (ps.product_qty) as total_products_sold FROM productSales as ps 
+    text: `SELECT COALESCE(SUM(ps.product_qty), 0) as total_products_sold FROM productSales as ps 
           JOIN sales as s ON s.sale_id = ps.sale_id WHERE s.user_id = $1`,
     values: [userid]
   }),
 
-  getTotalProdWorth: () => `SELECT sum (s.sale_total) as total_products_worth FROM sales as s`,
+  getTotalProdWorth: () => `SELECT COALESCE(SUM(s.sale_total), 0) as total_products_worth FROM sales as s`,
   getTotalProdWorthAttendant: userid => ({
-    text: `SELECT sum (s.sale_total) as total_products_worth FROM sales as s 
+    text: `SELECT COALESCE(SUM(s.sale_total), 0) as total_products_worth FROM sales as s 
           WHERE s.user_id = $1`,
     values: [userid]
   }),
