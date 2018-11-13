@@ -1,5 +1,7 @@
 const _ = undefined;
 const basepath = `${window.location.origin}/api/v1`;
+const successToast = 'toast--success';
+const errorToast = 'toast--error';
 const loginForm = document.querySelector('#login-form');
 const signupForm = document.querySelector('#signup-form');
 const logoutBtn = document.querySelector('#logout-btn');
@@ -36,9 +38,6 @@ const createNode = (element, className, content) => {
 
 const append = (parent, el) => parent.appendChild(el);
 
-const successToast = 'toast--success';
-const errorToast = 'toast--error';
-
 const toast = (msg, className, delay = 4000) => {
   const errorParagraph = createNode('p', '', msg);
   const toastParent = createNode('div', 'toast');
@@ -49,6 +48,13 @@ const toast = (msg, className, delay = 4000) => {
   setTimeout(() => {
     body.removeChild(toastParent);
   }, delay);
+};
+
+const destroyInputErrors = formClass => {
+  const form = document.querySelector(formClass);
+  if (form.children[0].classList.contains('error__container')) {
+    form.removeChild(form.children[0]);
+  }
 };
 
 const handleInputErrors = (response, formClass) => {
@@ -78,10 +84,7 @@ const redirectHandler = role => {
   }
 };
 
-const userEditModal = async e => {
-  const userid = Number(e.target.parentElement.getAttribute('data-id'));
-  const allUsersEndpoint = `${basepath}/users/?userid=${userid}`;
-  const response = await processRequest(allUsersEndpoint);
+const populateUserEditModal = response => {
   const { id, name, email } = response.data;
   let { role } = response.data;
   if (role === 'Owner') {
@@ -91,23 +94,73 @@ const userEditModal = async e => {
   } else {
     role = `<option selected value="Attendant">Attendant</option> <option value="Admin">Admin</option>`;
   }
+
   document.body.insertAdjacentHTML(
     'afterbegin',
     `<div class="modal">
       <div class="form-body">
-        <h3>Update User</h3>
-        <form id="update-user-form" data-id=${id}>
-          <input type="text" id="update-name" placeholder="Employee Name" value='${name}' />
-          <input id="update-email" disabled value='${email}' />
+        <h3>Update User</h3><form id="update-user-form" data-id=${id}>
+          <input type="text" id="update-name" placeholder="Employee Name" value='${name}'/>
+          <input id="update-email" disabled value='${email}'/>
           <input type="password" id="update-password" placeholder="Password" />
-          <select id="update-role">
-            ${role}
-          </select>
-          <input type="submit" value="Update User" />
-        </form>
+          <select id="update-role">${role}</select>
+          <input type="submit" value="Update User" /></form>
       </div>
     </div>`
   );
+};
+
+const updateUser = async e => {
+  e.preventDefault();
+
+  const modal = document.body.querySelector('.modal');
+  const uName = document.querySelector('#update-name').value;
+  const uEmail = document.querySelector('#update-email').value;
+  const uRole = document.querySelector('#update-role').value;
+  let uPassword = document.querySelector('#update-password').value;
+  uPassword = uPassword.length < 5 ? undefined : document.querySelector('#update-password').value;
+
+  const userUpdateUrl = `${basepath}/users/${e.target.getAttribute('data-id')}`;
+  const updateInfo = { name: uName, email: uEmail, password: uPassword, role: uRole };
+
+  if (!uPassword) delete updateInfo.password;
+  if (uRole === 'Owner') delete updateInfo.role;
+
+  const updateResponse = await processRequest(userUpdateUrl, 'PUT', updateInfo);
+
+  if (updateResponse.status === 'success') {
+    toast(updateResponse.message, successToast);
+    document.body.removeChild(modal);
+    populateUsersTable();
+    return;
+  }
+
+  toast(updateResponse.message || updateResponse.error[0], errorToast);
+  document.body.removeChild(modal);
+};
+
+const deleteUser = async e => {
+  const modal = document.body.querySelector('.modal');
+  const userid = Number(e.target.getAttribute('data-id'));
+  const deleteUsersEndpoint = `${basepath}/users/${userid}`;
+  const deleteResponse = await processRequest(deleteUsersEndpoint, 'DELETE');
+
+  if (!deleteResponse.status) {
+    toast(deleteResponse.message, errorToast);
+    document.body.removeChild(modal);
+    return;
+  }
+
+  toast(deleteResponse.message, successToast);
+  document.body.removeChild(modal);
+  populateUsersTable();
+};
+
+const userEditModal = async e => {
+  const allUsersEndpoint = `${basepath}/users/?userid=${e.target.parentElement.getAttribute('data-id')}`;
+  const response = await processRequest(allUsersEndpoint);
+
+  populateUserEditModal(response);
 
   const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', evt => {
@@ -115,39 +168,17 @@ const userEditModal = async e => {
   });
 
   const updateForm = document.querySelector('#update-user-form');
-  updateForm.addEventListener('submit', async ev => {
-    ev.preventDefault();
-    const uName = document.querySelector('#update-name').value;
-    const uEmail = document.querySelector('#update-email').value;
-    const uRole = document.querySelector('#update-role').value;
-    let uPassword = document.querySelector('#update-password').value;
-    uPassword = uPassword.length < 5 ? undefined : document.querySelector('#update-password').value;
 
-    const userUpdateUrl = `${basepath}/users/${ev.target.getAttribute('data-id')}`;
-    const updateInfo = { name: uName, email: uEmail, password: uPassword, role: uRole };
-
-    if (!uPassword) delete updateInfo.password;
-    if (uRole === 'Owner') delete updateInfo.role;
-
-    const updateResponse = await processRequest(userUpdateUrl, 'PUT', updateInfo);
-    if (updateResponse.status === 'success') {
-      toast(updateResponse.message, successToast);
-      document.body.removeChild(modal);
-      populateUsersTable();
-      return;
-    }
-    toast(updateResponse.message, errorToast);
-    document.body.removeChild(modal);
-  });
+  updateForm.addEventListener('submit', updateUser);
 };
 
-/* const userDeleteModal = async e => {
+const userDeleteModal = async e => {
   document.body.insertAdjacentHTML(
     'afterbegin',
     `<div class="modal">
       <div class="form-body">
-        <h3>Do you want to delete User</h3>
-        <button id='delete-user'>Yes</button>
+        <h3>Do you want to delete user?</h3>
+        <button data-id=${e.target.parentElement.getAttribute('data-id')} id='delete-user'>Yes</button>
         <button id='cancel'>No</button>
       </div>
     </div>`
@@ -158,28 +189,15 @@ const userEditModal = async e => {
   });
   const delUserBtn = document.querySelector('#delete-user');
   const cancelBtn = document.querySelector('#cancel');
-  delUserBtn.addEventListener('click', async () => {
-    const userid = Number(e.target.parentElement.getAttribute('data-id'));
-    const deleteUsersEndpoint = `${basepath}/users/${userid}`;
-    const deleteResponse = await processRequest(deleteUsersEndpoint, 'DELETE');
-    if (!deleteResponse.status) {
-      toast(deleteResponse.message, errorToast);
-      document.body.removeChild(modal);
-      return;
-    }
-    toast(deleteResponse.message, successToast);
-    document.body.removeChild(modal);
-    populateUsersTable();
-  });
 
+  delUserBtn.addEventListener('click', deleteUser);
   cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
-}; */
+};
 
 const populateUsersTable = async () => {
   const usersTableBody = document.querySelector('#users-table tbody');
   while (usersTableBody.firstChild) usersTableBody.removeChild(usersTableBody.firstChild);
-  const allUsersEndpoint = `${basepath}/users/`;
-  const response = await processRequest(allUsersEndpoint);
+  const response = await processRequest(`${basepath}/users/`);
   response.data.forEach(user => {
     const tr = document.createElement('tr');
     const userId = createNode('td', '', user.id);
@@ -193,7 +211,7 @@ const populateUsersTable = async () => {
     editBtn.id = 'edit-user';
     delBtn.id = 'delete-user';
     editBtn.onclick = userEditModal;
-    // delBtn.onclick = userDeleteModal;
+    delBtn.onclick = userDeleteModal;
     append(actions, editBtn);
     append(actions, delBtn);
     append(tr, userId);
@@ -219,7 +237,10 @@ const login = async e => {
 
   const response = await processRequest(loginUrl, 'POST', loginInfo);
 
+  destroyInputErrors('.form__login');
+
   if (!response.data) {
+    toast('Login failed', errorToast, 5000);
     if (response.message) {
       handleInputErrors(response, '.form__login');
       return;
@@ -246,6 +267,8 @@ const signup = async e => {
   const signupInfo = { name, email, password, role };
 
   const response = await processRequest(signupUrl, 'POST', signupInfo);
+
+  destroyInputErrors('#signup-form');
 
   if (!response.data) {
     handleInputErrors(response, '#signup-form');
