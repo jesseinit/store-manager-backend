@@ -3,7 +3,6 @@ const basepath = `${window.location.origin}/api/v1`;
 const loginForm = document.querySelector('#login-form');
 const signupForm = document.querySelector('#signup-form');
 const logoutBtn = document.querySelector('#logout-btn');
-
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const processRequest = (url, method = 'GET', body = _) => {
@@ -37,6 +36,21 @@ const createNode = (element, className, content) => {
 
 const append = (parent, el) => parent.appendChild(el);
 
+const successToast = 'toast--success';
+const errorToast = 'toast--error';
+
+const toast = (msg, className, delay = 4000) => {
+  const errorParagraph = createNode('p', '', msg);
+  const toastParent = createNode('div', 'toast');
+  toastParent.appendChild(errorParagraph);
+  toastParent.classList.add(className);
+  const body = document.querySelector('body');
+  body.insertBefore(toastParent, body.children[0]);
+  setTimeout(() => {
+    body.removeChild(toastParent);
+  }, delay);
+};
+
 const handleInputErrors = (response, formClass) => {
   const ul = createNode('ul', 'error__container');
   const form = document.querySelector(formClass);
@@ -58,11 +72,108 @@ const handleInputErrors = (response, formClass) => {
 
 const redirectHandler = role => {
   if (role === 'Attendant') {
-    window.location.replace('/ui/make-sale.html');
+    window.location.replace('/make-sale.html');
   } else {
-    window.location.replace('/ui/admin.html');
+    window.location.replace('/admin.html');
   }
 };
+
+const userEditModal = async e => {
+  const userid = Number(e.target.parentElement.getAttribute('data-id'));
+  const allUsersEndpoint = `${basepath}/users/?userid=${userid}`;
+  const response = await processRequest(allUsersEndpoint);
+  const { id, name, email } = response.data;
+  let { role } = response.data;
+  if (role === 'Owner') {
+    role = `<option selected value="Owner">Owner</option>`;
+  } else if (role === 'Admin') {
+    role = `<option value="Attendant">Attendant</option> <option selected value="Admin">Admin</option>`;
+  } else {
+    role = `<option selected value="Attendant">Attendant</option> <option value="Admin">Admin</option>`;
+  }
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Update User</h3>
+        <form id="update-user-form" data-id=${id}>
+          <input type="text" id="update-name" placeholder="Employee Name" value='${name}' />
+          <input id="update-email" disabled value='${email}' />
+          <input type="password" id="update-password" placeholder="Password" />
+          <select id="update-role">
+            ${role}
+          </select>
+          <input type="submit" value="Update User" />
+        </form>
+      </div>
+    </div>`
+  );
+
+  const modal = document.body.querySelector('.modal');
+  modal.addEventListener('click', evt => {
+    if (evt.target.classList.contains('modal')) document.body.removeChild(modal);
+  });
+
+  const updateForm = document.querySelector('#update-user-form');
+  updateForm.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const uName = document.querySelector('#update-name').value;
+    const uEmail = document.querySelector('#update-email').value;
+    const uRole = document.querySelector('#update-role').value;
+    let uPassword = document.querySelector('#update-password').value;
+    uPassword = uPassword.length < 5 ? undefined : document.querySelector('#update-password').value;
+
+    const userUpdateUrl = `${basepath}/users/${ev.target.getAttribute('data-id')}`;
+    const updateInfo = { name: uName, email: uEmail, password: uPassword, role: uRole };
+
+    if (!uPassword) delete updateInfo.password;
+    if (uRole === 'Owner') delete updateInfo.role;
+
+    const updateResponse = await processRequest(userUpdateUrl, 'PUT', updateInfo);
+    if (updateResponse.status === 'success') {
+      toast(updateResponse.message, successToast);
+      document.body.removeChild(modal);
+      populateUsersTable();
+      return;
+    }
+    toast(updateResponse.message, errorToast);
+    document.body.removeChild(modal);
+  });
+};
+
+/* const userDeleteModal = async e => {
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Do you want to delete User</h3>
+        <button id='delete-user'>Yes</button>
+        <button id='cancel'>No</button>
+      </div>
+    </div>`
+  );
+  const modal = document.body.querySelector('.modal');
+  modal.addEventListener('click', evt => {
+    if (evt.target.classList.contains('modal')) document.body.removeChild(modal);
+  });
+  const delUserBtn = document.querySelector('#delete-user');
+  const cancelBtn = document.querySelector('#cancel');
+  delUserBtn.addEventListener('click', async () => {
+    const userid = Number(e.target.parentElement.getAttribute('data-id'));
+    const deleteUsersEndpoint = `${basepath}/users/${userid}`;
+    const deleteResponse = await processRequest(deleteUsersEndpoint, 'DELETE');
+    if (!deleteResponse.status) {
+      toast(deleteResponse.message, errorToast);
+      document.body.removeChild(modal);
+      return;
+    }
+    toast(deleteResponse.message, successToast);
+    document.body.removeChild(modal);
+    populateUsersTable();
+  });
+
+  cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
+}; */
 
 const populateUsersTable = async () => {
   const usersTableBody = document.querySelector('#users-table tbody');
@@ -79,6 +190,10 @@ const populateUsersTable = async () => {
     actions.setAttribute('data-id', user.id);
     const editBtn = createNode('button', 'green', 'Edit');
     const delBtn = createNode('button', 'red', 'Delete');
+    editBtn.id = 'edit-user';
+    delBtn.id = 'delete-user';
+    editBtn.onclick = userEditModal;
+    // delBtn.onclick = userDeleteModal;
     append(actions, editBtn);
     append(actions, delBtn);
     append(tr, userId);
@@ -87,7 +202,6 @@ const populateUsersTable = async () => {
     append(tr, userRole);
     append(tr, actions);
     append(usersTableBody, tr);
-    // console.log(tr);
   });
 };
 
@@ -115,10 +229,9 @@ const login = async e => {
   }
 
   const { token, role } = response.data;
-
   localStorage.setItem('token', token);
   localStorage.setItem('role', role);
-
+  toast(response.message, successToast, 5000);
   redirectHandler(role);
 };
 
@@ -138,7 +251,7 @@ const signup = async e => {
     handleInputErrors(response, '#signup-form');
     return;
   }
-  /* TODO: Totast Success Message Here */
+  toast(response.message, successToast, 5000);
   signupForm.reset();
   populateUsersTable();
 };
@@ -160,22 +273,22 @@ if (logoutBtn) {
 }
 
 switch (window.location.pathname) {
-  case '/ui/admin.html':
+  case '/admin.html':
     break;
-  case '/ui/product-settings.html':
+  case '/product-settings.html':
     break;
-  case '/ui/sale-records.html':
+  case '/sale-records.html':
     break;
-  case '/ui/staff-accounts.html':
+  case '/staff-accounts.html':
     populateUsersTable();
     break;
-  case '/ui/make-sale.html':
+  case '/make-sale.html':
     break;
-  case '/ui/cart.html':
+  case '/cart.html':
     break;
-  case '/ui/my-sales.html':
+  case '/my-sales.html':
     break;
-  case '/ui/view-product.html':
+  case '/view-product.html':
     break;
   default:
     break;

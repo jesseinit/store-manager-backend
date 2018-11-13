@@ -15,7 +15,7 @@ const query = {
     values: [name, email, password, role]
   }),
 
-  getAllUsers: () => `Select * FROM users`,
+  getAllUsers: () => `Select * FROM users ORDER BY id`,
 
   updateUser: (name, password, role, userid) => ({
     text: `UPDATE users SET 
