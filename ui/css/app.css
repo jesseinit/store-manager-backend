@@ -56,7 +56,7 @@ a {
 }
 
 .toast--error {
-  background: #f58383;
+  background: #ffe6e6;
 }
 
 .toast--success {
@@ -88,6 +88,10 @@ a {
   padding: 3px;
   border: 1px solid #e7e7e7;
   outline: none;
+}
+
+.modal .form-body input:focus, .modal .form-body select:focus {
+  border: 1px solid #4297ff;
 }
 
 .modal .form-body button {
