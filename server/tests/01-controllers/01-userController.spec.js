@@ -156,6 +156,15 @@ describe('User', () => {
 
       expect(response.status).to.equal(200);
     });
+
+    it('Store admin/owner should be able to retrieve single users', async () => {
+      const response = await chai
+        .request(app)
+        .get(`/api/v1/users/?userid=${1}`)
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+    });
   });
 
   describe('Update User', () => {

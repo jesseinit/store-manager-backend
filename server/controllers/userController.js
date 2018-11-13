@@ -1,6 +1,8 @@
 import 'babel-polyfill';
 import UserHelper from '../helpers/userHelper';
 import handleResponse from '../utils/responseHandler';
+import pool from '../utils/connection';
+import query from '../utils/queries';
 
 /**
  *
@@ -49,6 +51,12 @@ class UserController {
    * @memberof UserController
    */
   static async getAllUsers(req, res, next) {
+    if (req.query.userid) {
+      const { userid } = req.query;
+      const { rows } = await pool.query(query.findUserById(userid));
+      handleResponse(rows[0], next, res, 200, 'success', 'Users retrieved successfully');
+      return;
+    }
     const result = await UserHelper.getAllUsers();
     handleResponse(result, next, res, 200, 'success', 'Users retrieved successfully');
   }
