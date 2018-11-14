@@ -33,7 +33,7 @@ a {
   right: 50%;
   transform: translate(50%);
   z-index: 10;
-  height: 45px;
+  height: 35px;
   width: auto;
   border-radius: 5px;
   padding: 0 20px;
@@ -56,7 +56,7 @@ a {
 }
 
 .toast--error {
-  background: #ffe6e6;
+  background: #fa7a7a;
 }
 
 .toast--success {
@@ -80,7 +80,8 @@ a {
   padding: 20px;
 }
 
-.modal .form-body input, .modal .form-body select {
+.modal .form-body input,
+.modal .form-body select {
   display: block;
   margin: 3px;
   width: 100%;
@@ -90,7 +91,8 @@ a {
   outline: none;
 }
 
-.modal .form-body input:focus, .modal .form-body select:focus {
+.modal .form-body input:focus,
+.modal .form-body select:focus {
   border: 1px solid #4297ff;
 }
 
@@ -102,6 +104,99 @@ a {
 
 .modal .form-body button#delete-user {
   background: #ff1919;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 10px;
+  border-collapse: collapse;
+  box-shadow: 0px 4.71062px 23.5531px rgba(0, 0, 0, 0.07);
+}
+
+.table thead {
+  background: #2c363b;
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+@media (min-width: 1023px) {
+  .table thead {
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 2023px) {
+  .table thead {
+    font-size: 1.1rem;
+  }
+}
+
+.table thead:hover {
+  background: #2c363b;
+}
+
+.table tbody {
+  font-size: 0.8rem;
+}
+
+@media (min-width: 1023px) {
+  .table tbody {
+    font-size: 0.9rem;
+  }
+}
+
+.table tbody button {
+  width: 50px;
+  padding: 5px;
+  border-radius: 3px;
+  border: none;
+  outline: none;
+  margin: 0 2px 2px;
+  cursor: pointer;
+}
+
+.table tbody button.red {
+  background: #ea5454;
+  color: #fff;
+}
+
+.table tbody button.blue {
+  background: #4297ff;
+  color: #fff;
+}
+
+.table tbody tr:hover {
+  background: rgba(238, 238, 238, 0.3);
+}
+
+.table thead,
+.table tr {
+  border-bottom: 1px solid rgba(169, 207, 255, 0.2);
+}
+
+.table td,
+.table th {
+  padding: 0.6rem;
+  text-align: center;
+}
+
+.table .price,
+.table .total {
+  text-align: right;
+}
+
+.table .remove {
+  display: block;
+  background: #fc4040;
+  font-weight: bold;
+  font-size: 1rem;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 19.9px;
+  color: #fff;
+  border-radius: 20px;
+  cursor: pointer;
 }
 
 #site-header {
@@ -579,17 +674,13 @@ a {
   }
 }
 
-#site-main .main .sales__meta {
-  margin: 10px 0;
-}
-
 #site-main .main .sales__meta #new-account {
   float: right;
   margin-bottom: 10px;
 }
 
 #site-main .main .sales__meta .sort {
-  margin: 20px 0;
+  margin: 0 0 10px;
 }
 
 @media (min-width: 1023px) {
@@ -687,10 +778,6 @@ a {
   }
 }
 
-#site-main .main .sales__meta .add-new {
-  margin-left: 0;
-}
-
 #site-main .main .sales .table-wrapper {
   width: 100%;
   overflow-x: scroll;
@@ -705,102 +792,6 @@ a {
 #site-main .main .sales .table-wrapper.no-flow {
   height: auto;
   overflow-y: unset;
-}
-
-#site-main .main .sales__table {
-  width: 100%;
-  margin-bottom: 10px;
-  border-collapse: collapse;
-  box-shadow: 0px 4.71062px 23.5531px rgba(0, 0, 0, 0.07);
-}
-
-#site-main .main .sales__table thead {
-  background: #2c363b;
-  color: #fff;
-  font-size: 0.8rem;
-}
-
-@media (min-width: 1023px) {
-  #site-main .main .sales__table thead {
-    font-size: 0.9rem;
-  }
-}
-
-@media (min-width: 2023px) {
-  #site-main .main .sales__table thead {
-    font-size: 1.1rem;
-  }
-}
-
-#site-main .main .sales__table thead:hover {
-  background: #2c363b;
-}
-
-#site-main .main .sales__table tbody {
-  font-size: 0.8rem;
-}
-
-@media (min-width: 1023px) {
-  #site-main .main .sales__table tbody {
-    font-size: 0.9rem;
-  }
-}
-
-@media (min-width: 2023px) {
-  #site-main .main .sales__table tbody {
-    font-size: 1.1rem;
-  }
-}
-
-#site-main .main .sales__table tbody button {
-  width: 50px;
-  padding: 5px;
-  margin-bottom: 2px;
-  border: none;
-}
-
-#site-main .main .sales__table tbody button.red {
-  background: #ea5454;
-  color: #fff;
-}
-
-#site-main .main .sales__table tbody button.green {
-  background: #4297ff;
-  color: #fff;
-}
-
-#site-main .main .sales__table tbody tr:hover {
-  background: rgba(238, 238, 238, 0.3);
-}
-
-#site-main .main .sales__table thead,
-#site-main .main .sales__table tr {
-  border-bottom: 1px solid rgba(169, 207, 255, 0.2);
-}
-
-#site-main .main .sales__table td,
-#site-main .main .sales__table th {
-  padding: 0.6rem;
-  text-align: center;
-}
-
-#site-main .main .sales__table .price,
-#site-main .main .sales__table .total {
-  text-align: right;
-}
-
-#site-main .main .sales__table .remove {
-  display: block;
-  background: #fc4040;
-  font-weight: bold;
-  font-size: 1rem;
-  width: 20px;
-  height: 20px;
-  text-align: center;
-  line-height: 19.9px;
-  color: #fff;
-  border-radius: 20px;
-  cursor: pointer;
 }
 
 #site-main .main .sales__btn {

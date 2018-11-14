@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <link rel="stylesheet" href="css/app.css" />
-    <title>Staff Accounts - Store Manager</title>
+    <title>Category Settings - Store Manager</title>
   </head>
 
   <body>
@@ -23,9 +23,9 @@
         <nav class="aside__nav admin">
           <ul>
             <li><a href="./admin.html">Admin Dashboard</a></li>
-            <li><a class="selected" href="./staff-accounts.html">Staff Accounts</a></li>
+            <li><a href="./staff-accounts.html">Staff Accounts</a></li>
             <li><a href="./product-settings.html">Products Settings</a></li>
-            <li><a href="./category-settings.html">Category Settings</a></li>
+            <li><a class="selected" href="./category-settings.html">Category Settings</a></li>
             <li><a href="./sale-records.html">Sale Records</a></li>
           </ul>
         </nav>
@@ -34,39 +34,26 @@
         <section class="sales">
           <div class="sales__meta">
             <div class="sort">
-              <form id="create-user-form">
+              <form id="create-category">
                 <fieldset>
-                  <legend>Create New Staff Account</legend>
-                  <input type="text" id="staff-name" placeholder="Employee Name" required />
-                  <input
-                    type="email"
-                    id="staff-email"
-                    placeholder="Employee Email"
-                    required
-                    pattern="(^[A-Za-z]+)(\.[a-zA-Z]+)?@storemanager.com$"
-                  />
-                  <input type="password" id="staff-password" placeholder="Password" required />
-                  <select id="staff-role">
-                    <option value="Attendant">Attendant</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                  <input type="submit" value="Create Account" />
+                  <legend>Create Category</legend>
+                  <input id="category-name" type="text" placeholder="Category Name" required />
+                  <input type="submit" value="Create Category" />
                 </fieldset>
               </form>
             </div>
           </div>
-          <div class="table-wrapper no-flow">
-            <table id="users-table" class="table">
+          <div class="table-wrapper" style="display: none">
+            <table id="category-table" class="table">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Employee Name</th>
-                  <th>Employee Email</th>
-                  <th>Role</th>
-                  <th style="text-align: center">Actions</th>
+                  <th>Category Name</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody>
+              </tbody>
             </table>
           </div>
         </section>
