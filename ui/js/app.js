@@ -5,6 +5,7 @@ const errorToast = 'toast--error';
 const loginForm = document.querySelector('#login-form');
 const createUserForm = document.querySelector('#create-user-form');
 const createCategoryForm = document.querySelector('#create-category');
+const createProductForm = document.querySelector('#create-new-product');
 const logoutBtn = document.querySelector('#logout-btn');
 const usersTableBody = document.querySelector('#users-table tbody');
 const categoryTableBody = document.querySelector('#category-table tbody');
@@ -336,9 +337,19 @@ const populateCategoryTable = async () => {
   });
 };
 
+const populateCategoryDropDown = async () => {
+  const categoryDropDown = document.querySelector('#product-cat');
+  const response = await processRequest(`${basepath}/category/`);
+  response.data.forEach(category => {
+    categoryDropDown.insertAdjacentHTML(
+      'beforeend',
+      `<option value=${category.category_id}>${category.category_name}</option>`
+    );
+  });
+};
+
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
-/* Login */
 const login = async e => {
   e.preventDefault();
   const email = document.querySelector('#login-email').value;
@@ -390,12 +401,34 @@ const createCategory = async e => {
   destroyInputErrors('#create-category');
   if (!response.data) {
     toast(response.message, errorToast);
-    // handleInputErrors(response, '#create-category');
     return;
   }
   createCategoryForm.reset();
-  toast(response.message, successToast, 5000);
+  toast(response.message, successToast);
   populateCategoryTable();
+};
+
+const createProduct = async e => {
+  e.preventDefault();
+  const imgUrl = document.querySelector('#product-imgurl').value;
+  const name = document.querySelector('#product-name').value;
+  const price = document.querySelector('#product-price').value;
+  const qty = document.querySelector('#product-qty').value;
+  const categoryid = document.querySelector('#product-cat').value;
+  if (!Number(categoryid)) {
+    toast('Please select a category', errorToast, 5000);
+    return;
+  }
+  const productInfo = { imgUrl, name, categoryid, price, qty };
+  const productUrl = `${basepath}/products`;
+  const response = await processRequest(productUrl, 'POST', productInfo);
+  if (!response.data) {
+    handleInputErrors(response, '#create-new-product');
+    return;
+  }
+  destroyInputErrors('#create-new-product');
+  createProductForm.reset();
+  toast(response.message, successToast);
 };
 
 if (loginForm) loginForm.addEventListener('submit', login);
@@ -403,6 +436,8 @@ if (loginForm) loginForm.addEventListener('submit', login);
 if (createUserForm) createUserForm.addEventListener('submit', createUser);
 
 if (createCategoryForm) createCategoryForm.addEventListener('submit', createCategory);
+
+if (createProductForm) createProductForm.addEventListener('submit', createProduct);
 
 if (logoutBtn) {
   logoutBtn.addEventListener('click', e => {
@@ -416,6 +451,7 @@ switch (window.location.pathname) {
   case '/admin.html':
     break;
   case '/product-settings.html':
+    populateCategoryDropDown();
     break;
   case '/category-settings.html':
     populateCategoryTable();

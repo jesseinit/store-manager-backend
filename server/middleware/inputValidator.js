@@ -101,7 +101,7 @@ const validateNewProduct = [
     .withMessage('Product image input should be a valid image url'),
   body('name')
     .isLength({ min: 2 })
-    .withMessage('Product name must be atlease 2 letters long'),
+    .withMessage('Product name must be 2 letters long'),
   body('categoryid')
     .isInt({ min: 1 })
     .withMessage('Category ID must be a positive number from 1'),
@@ -109,7 +109,7 @@ const validateNewProduct = [
     .isFloat({ min: 1.0 })
     .withMessage('Product price must be decimal number of 1.0 or more'),
   body('qty')
-    .isNumeric({ min: 1 })
+    .isInt({ min: 1 })
     .withMessage('Product qty must be a positive number from 1'),
   body('imgUrl')
     .exists()

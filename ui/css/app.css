@@ -63,6 +63,7 @@ a {
 
 .toast--error {
   background: #fa7a7a;
+  color: #fff;
 }
 
 .toast--success {
@@ -782,12 +783,12 @@ a {
 #site-main .main .sales__meta fieldset select {
   padding: 3px;
   margin-bottom: 5px;
+  width: 100%;
 }
 
-@media (min-width: 2023px) {
+@media (min-width: 1023px) {
   #site-main .main .sales__meta fieldset select {
-    padding: 10px;
-    font-size: 1.1rem;
+    width: auto;
   }
 }
 
