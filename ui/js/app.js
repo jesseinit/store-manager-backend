@@ -89,6 +89,7 @@ const redirectHandler = role => {
   }
 };
 
+/* User Settings */
 const populateUserEditModal = response => {
   const { id, name, email } = response.data;
   let { role } = response.data;
@@ -192,32 +193,6 @@ const userDeleteModal = async e => {
   cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
 };
 
-const populateCategoryTable = async () => {
-  categoryTableBody.parentElement.parentElement.style.display = 'none';
-  const response = await processRequest(`${basepath}/category/`);
-  if (!response.data.length) {
-    const message = createNode('h3', 'no-result', 'You have not created a category yet. 😕');
-    document.querySelector('.sales').insertAdjacentElement('beforeend', message);
-    return;
-  }
-  const emptyMessage = document.querySelector('.sales .no-result');
-  if (emptyMessage) emptyMessage.remove();
-  categoryTableBody.parentElement.parentElement.style.display = 'block';
-  while (categoryTableBody.firstChild) categoryTableBody.removeChild(categoryTableBody.firstChild);
-  response.data.forEach(category => {
-    categoryTableBody.insertAdjacentHTML(
-      'beforeend',
-      `<tr>
-        <td>${category.category_id}</td>
-          <td>${category.category_name}</td>
-          <td data-id=${category.category_id} style="text-align: center">
-          <button class="green">Edit</button><button class="red">Delete</button>
-        </td>
-      </tr>`
-    );
-  });
-};
-
 const populateUsersTable = async () => {
   while (usersTableBody.firstChild) usersTableBody.removeChild(usersTableBody.firstChild);
   const response = await processRequest(`${basepath}/users/`);
@@ -238,6 +213,86 @@ const populateUsersTable = async () => {
     const editBtn = usersTableBody.querySelectorAll('button.blue');
     editBtn.forEach(btn => btn.addEventListener('click', userEditModal));
     const delBtn = usersTableBody.querySelectorAll('button.red');
+    delBtn.forEach(btn => btn.addEventListener('click', userDeleteModal));
+  });
+};
+
+/* Category Settings */
+const populateCategoryModal = response => {
+  if (!response.data) {
+    toast(response.message, errorToast);
+    return;
+  }
+  const id = response.data.category_id;
+  const name = response.data.category_name;
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Update Category</h3><form id="update-category-form" data-id=${id}>
+          <input type="text" id="update-name" placeholder="Category Name" value='${name}'/>
+          <input type="submit" value="Update Category" /></form>
+      </div>
+    </div>`
+  );
+};
+
+const updateCategory = async e => {
+  e.preventDefault();
+
+  const modal = document.body.querySelector('.modal');
+  const uName = document.querySelector('#update-name').value;
+
+  const categoryUpdateUrl = `${basepath}/category/${e.target.getAttribute('data-id')}`;
+  const updateInfo = { name: uName };
+
+  const updateResponse = await processRequest(categoryUpdateUrl, 'PUT', updateInfo);
+
+  if (updateResponse.status === 'success') {
+    toast(updateResponse.message, successToast);
+    document.body.removeChild(modal);
+    populateCategoryTable();
+    return;
+  }
+
+  toast(updateResponse.message || updateResponse.error[0], errorToast);
+  document.body.removeChild(modal);
+};
+
+const categoryEditModal = async e => {
+  const singleCategoryUrl = `${basepath}/category/${e.target.parentElement.getAttribute('data-id')}`;
+  const response = await processRequest(singleCategoryUrl);
+  populateCategoryModal(response);
+  const modal = document.body.querySelector('.modal');
+  modal.addEventListener('click', destroyModal);
+  const updateForm = document.querySelector('#update-category-form');
+  updateForm.addEventListener('submit', updateCategory);
+};
+
+const populateCategoryTable = async () => {
+  categoryTableBody.parentElement.parentElement.style.display = 'none';
+  const response = await processRequest(`${basepath}/category/`);
+  if (!response.data.length) {
+    const message = createNode('h3', 'no-result', 'You have not created a category yet. 😕');
+    document.querySelector('.sales').insertAdjacentElement('beforeend', message);
+    return;
+  }
+  const emptyMessage = document.querySelector('.sales .no-result');
+  if (emptyMessage) emptyMessage.remove();
+  categoryTableBody.parentElement.parentElement.style.display = 'block';
+  while (categoryTableBody.firstChild) categoryTableBody.removeChild(categoryTableBody.firstChild);
+  response.data.forEach(category => {
+    categoryTableBody.insertAdjacentHTML(
+      'beforeend',
+      `<tr><td>${category.category_id}</td><td>${category.category_name}</td>
+          <td data-id=${category.category_id} style="text-align: center">
+          <button class="blue">Edit</button><button class="red">Delete</button>
+        </td>
+      </tr>`
+    );
+    const editBtn = categoryTableBody.querySelectorAll('button.blue');
+    editBtn.forEach(btn => btn.addEventListener('click', categoryEditModal));
+    const delBtn = categoryTableBody.querySelectorAll('button.red');
     delBtn.forEach(btn => btn.addEventListener('click', userDeleteModal));
   });
 };
@@ -295,7 +350,8 @@ const createCategory = async e => {
   const response = await processRequest(categoryEnpoint, 'POST', categoryInfo);
   destroyInputErrors('#create-category');
   if (!response.data) {
-    handleInputErrors(response, '#create-category');
+    toast(response.message, errorToast);
+    // handleInputErrors(response, '#create-category');
     return;
   }
   createCategoryForm.reset();

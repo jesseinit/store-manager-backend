@@ -58,6 +58,21 @@ class CategoryController {
 
   /**
    *
+   * @description Retrieves a single product category in the store
+   * @static
+   * @param {object} req Request Object
+   * @param {object} res Response Object
+   * @param {object} next calls the next middleware in the request-response cycle
+   * @returns {object} A single categorie's information
+   * @memberof CategoryController
+   */
+  static async getSingleCategory(req, res, next) {
+    const result = await CategoryHelper.getSingleCategory(req.params.id);
+    handleResponse(result, next, res, 200, 'success', 'Category retrieved successfully.');
+  }
+
+  /**
+   *
    * @description Deletes a product categories in the store
    * @static
    * @param {object} req Request Object

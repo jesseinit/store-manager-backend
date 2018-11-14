@@ -25,6 +25,14 @@ router.put(
 
 router.get('/', authMiddleware.verifyToken, CategoryController.getAllCategories);
 
+router.get(
+  '/:id',
+  authMiddleware.verifyToken,
+  validator.validateCategoryId,
+  validator.validationHandler,
+  CategoryController.getSingleCategory
+);
+
 router.delete(
   '/:id',
   authMiddleware.verifyToken,

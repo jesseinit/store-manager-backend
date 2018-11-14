@@ -102,6 +102,26 @@ describe('Category', () => {
     });
   });
 
+  describe('Get Single Category', () => {
+    it('Admin should be able to retrieve a single category', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/category/1')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(200);
+    });
+
+    it('It should return a not found error when retrieving a category that does not exist', async () => {
+      const response = await chai
+        .request(app)
+        .get('/api/v1/category/10')
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(404);
+    });
+  });
+
   describe('Modify Category', () => {
     it('Should return an authentication error when authorization headers are not present', async () => {
       const response = await chai.request(app).put('/api/v1/category/1');

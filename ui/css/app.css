@@ -34,12 +34,18 @@ a {
   transform: translate(50%);
   z-index: 10;
   height: 35px;
-  width: auto;
+  width: 70%;
   border-radius: 5px;
   padding: 0 20px;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+@media (min-width: 1023px) {
+  .toast {
+    width: 30%;
+  }
 }
 
 .toast p {
@@ -51,7 +57,7 @@ a {
   animation-name: toastAnimation;
   animation-duration: 0.3s;
   animation-timing-function: linear;
-  top: 50px;
+  top: 5px;
   color: #000;
 }
 
@@ -1005,12 +1011,8 @@ a {
 
 /* Animations */
 @keyframes toastAnimation {
-  0% {
-    top: -50px;
-    opacity: 0;
-  }
   50% {
     opacity: 1;
-    top: 50px;
+    top: 0px;
   }
 }

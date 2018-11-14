@@ -73,9 +73,22 @@ class CategoryHelper {
    * @memberof CategoryHelper
    */
   static async getAllCategories() {
+    const { rows } = await pool.query(query.getAllCategories());
+    return rows;
+  }
+
+  /**
+   *
+   * @description Helper method that retrieves all product categories
+   * @static
+   * @returns {array} A list of product categories
+   * @memberof CategoryHelper
+   */
+  static async getSingleCategory(id) {
     try {
-      const allCategories = await pool.query(query.getAllCategories());
-      return allCategories.rows;
+      const foundCategory = await pool.query(query.findCategoryById(id));
+      if (!foundCategory.rowCount) errorHandler(404, 'Category not found');
+      return foundCategory.rows[0];
     } catch (error) {
       return error;
     }
