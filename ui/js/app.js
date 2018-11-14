@@ -67,9 +67,7 @@ const destroyModal = e => {
 const handleInputErrors = (response, formClass) => {
   const ul = createNode('ul', 'error__container');
   const form = document.querySelector(formClass);
-  if (form.children[0].classList.contains('error__container')) {
-    form.removeChild(form.children[0]);
-  }
+  destroyInputErrors(formClass);
   if (response.message) {
     const li = createNode('li', _, response.message);
     append(ul, li);
@@ -256,12 +254,12 @@ const login = async e => {
   const response = await processRequest(loginUrl, 'POST', loginInfo);
   destroyInputErrors('.form__login');
   if (!response.data) {
-    toast('Login failed', errorToast, 5000);
     if (response.message) {
       handleInputErrors(response, '.form__login');
       return;
     }
     handleInputErrors(response, '.form__login');
+    return;
   }
   const { token, role } = response.data;
   localStorage.setItem('token', token);
