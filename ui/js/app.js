@@ -9,6 +9,8 @@ const createProductForm = document.querySelector('#create-new-product');
 const logoutBtn = document.querySelector('#logout-btn');
 const usersTableBody = document.querySelector('#users-table tbody');
 const categoryTableBody = document.querySelector('#category-table tbody');
+const productsTableBody = document.querySelector('#products-table tbody');
+const recordSort = document.querySelector('.sort');
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const processRequest = (url, method = 'GET', body = _) => {
@@ -52,6 +54,21 @@ const toast = (msg, className, delay = 4000) => {
   setTimeout(() => {
     body.removeChild(toastParent);
   }, delay);
+};
+
+const formatCurrency = number =>
+  new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(number);
+
+const populateAdminDashboard = async () => {
+  const totalProducts = document.querySelector('#total-products');
+  const totalCategory = document.querySelector('#total-categories');
+  const totalStaff = document.querySelector('#total-staff');
+  const miscUrl = `${basepath}/sales/?misc=true`;
+  const response = await processRequest(miscUrl);
+  const { totalproducts, totalcategory, totalemployee } = response.misc;
+  totalProducts.textContent = totalproducts;
+  totalCategory.textContent = totalcategory;
+  totalStaff.textContent = totalemployee;
 };
 
 const destroyInputErrors = formClass => {
@@ -265,6 +282,7 @@ const deleteCategory = async e => {
   const categoryId = Number(e.target.getAttribute('data-id'));
   const deleteCategoryUrl = `${basepath}/category/${categoryId}`;
   const deleteResponse = await processRequest(deleteCategoryUrl, 'DELETE');
+  console.log(deleteResponse);
 
   if (!deleteResponse.status) {
     toast(deleteResponse.message, errorToast);
@@ -310,17 +328,15 @@ const categoryEditModal = async e => {
 };
 
 const populateCategoryTable = async () => {
-  categoryTableBody.parentElement.parentElement.style.display = 'none';
   const response = await processRequest(`${basepath}/category/`);
+  while (categoryTableBody.firstChild) categoryTableBody.removeChild(categoryTableBody.firstChild);
   if (!response.data.length) {
-    const message = createNode('h3', 'no-result', 'You have not created a category yet. 😕');
-    document.querySelector('.sales').insertAdjacentElement('beforeend', message);
+    categoryTableBody.insertAdjacentHTML(
+      'beforeend',
+      `<tr><td colspan=3>You have not created a category yet. 😕</td></tr>`
+    );
     return;
   }
-  const emptyMessage = document.querySelector('.sales .no-result');
-  if (emptyMessage) emptyMessage.remove();
-  categoryTableBody.parentElement.parentElement.style.display = 'block';
-  while (categoryTableBody.firstChild) categoryTableBody.removeChild(categoryTableBody.firstChild);
   response.data.forEach(category => {
     categoryTableBody.insertAdjacentHTML(
       'beforeend',
@@ -346,6 +362,45 @@ const populateCategoryDropDown = async () => {
       `<option value=${category.category_id}>${category.category_name}</option>`
     );
   });
+};
+
+/* Products Settings */
+const populateProductsTable = async () => {
+  const response = await processRequest(`${basepath}/products/`);
+  while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+  console.log(response);
+  if (!response.data.length) {
+    productsTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
+    return;
+  }
+  recordSort.style.display = 'block';
+  response.data.forEach(product => {
+    productsTableBody.insertAdjacentHTML(
+      'beforeend',
+      `<tr>
+        <td>${product.product_id}</td>
+        <td>${product.product_name}</td>
+        <td>${formatCurrency(product.product_price)}</td>
+        <td>${product.product_qty}</td>
+        <td data-id=${product.product_id} style="text-align: center">
+          <button class="blue">Edit</button><button class="red">Delete</button>
+        </td>
+      </tr>`
+    );
+  });
+  const prevBtn = response.meta.hasPrevPage
+    ? `<button class="pagination__prev">⬅ Previous Page</button>`
+    : `<button disabled class="pagination__prev">⬅ Previous Page</button>`;
+  const nextBtn = response.meta.hasNextPage
+    ? `<button class="pagination__next">Next Page ➡</button>`
+    : `<button disabled class="pagination__next">Next Page ➡</button>`;
+  productsTableBody.parentElement.parentElement.insertAdjacentHTML(
+    'beforeend',
+    `<section class="pagination">
+        ${prevBtn}
+        ${nextBtn}
+    </section>`
+  );
 };
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
@@ -429,6 +484,7 @@ const createProduct = async e => {
   destroyInputErrors('#create-new-product');
   createProductForm.reset();
   toast(response.message, successToast);
+  populateProductsTable();
 };
 
 if (loginForm) loginForm.addEventListener('submit', login);
@@ -449,9 +505,11 @@ if (logoutBtn) {
 
 switch (window.location.pathname) {
   case '/admin.html':
+    populateAdminDashboard();
     break;
   case '/product-settings.html':
     populateCategoryDropDown();
+    populateProductsTable();
     break;
   case '/category-settings.html':
     populateCategoryTable();

@@ -921,6 +921,7 @@ a {
   display: flex;
   justify-content: center;
   margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 #site-main .main .pagination button {
@@ -935,6 +936,15 @@ a {
 #site-main .main .pagination button:hover {
   background: #a9cfff;
   color: #000;
+}
+
+#site-main .main .pagination button:disabled {
+  border: 1px solid #eee;
+}
+
+#site-main .main .pagination button:disabled:hover {
+  background: transparent;
+  cursor: not-allowed;
 }
 
 #site-main .form__wrapper {
