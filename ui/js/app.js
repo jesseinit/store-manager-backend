@@ -7,7 +7,7 @@ const createUserForm = document.querySelector('#create-user-form');
 const createCategoryForm = document.querySelector('#create-category');
 const logoutBtn = document.querySelector('#logout-btn');
 const usersTableBody = document.querySelector('#users-table tbody');
-// const categoryTableBody = document.querySelector('#category-table tbody');
+const categoryTableBody = document.querySelector('#category-table tbody');
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const processRequest = (url, method = 'GET', body = _) => {
@@ -67,9 +67,7 @@ const destroyModal = e => {
 const handleInputErrors = (response, formClass) => {
   const ul = createNode('ul', 'error__container');
   const form = document.querySelector(formClass);
-  if (form.children[0].classList.contains('error__container')) {
-    form.removeChild(form.children[0]);
-  }
+  destroyInputErrors(formClass);
   if (response.message) {
     const li = createNode('li', _, response.message);
     append(ul, li);
@@ -194,7 +192,7 @@ const userDeleteModal = async e => {
   cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
 };
 
-/* const populateCategoryTable = async () => {
+const populateCategoryTable = async () => {
   categoryTableBody.parentElement.parentElement.style.display = 'none';
   const response = await processRequest(`${basepath}/category/`);
   if (!response.data.length) {
@@ -218,7 +216,7 @@ const userDeleteModal = async e => {
       </tr>`
     );
   });
-}; */
+};
 
 const populateUsersTable = async () => {
   while (usersTableBody.firstChild) usersTableBody.removeChild(usersTableBody.firstChild);
@@ -256,12 +254,12 @@ const login = async e => {
   const response = await processRequest(loginUrl, 'POST', loginInfo);
   destroyInputErrors('.form__login');
   if (!response.data) {
-    toast('Login failed', errorToast, 5000);
     if (response.message) {
       handleInputErrors(response, '.form__login');
       return;
     }
     handleInputErrors(response, '.form__login');
+    return;
   }
   const { token, role } = response.data;
   localStorage.setItem('token', token);
@@ -302,7 +300,7 @@ const createCategory = async e => {
   }
   createCategoryForm.reset();
   toast(response.message, successToast, 5000);
-  // populateCategoryTable();
+  populateCategoryTable();
 };
 
 if (loginForm) loginForm.addEventListener('submit', login);
@@ -325,7 +323,7 @@ switch (window.location.pathname) {
   case '/product-settings.html':
     break;
   case '/category-settings.html':
-    // populateCategoryTable();
+    populateCategoryTable();
     break;
   case '/sale-records.html':
     break;
