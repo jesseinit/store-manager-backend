@@ -7,7 +7,7 @@ const createUserForm = document.querySelector('#create-user-form');
 const createCategoryForm = document.querySelector('#create-category');
 const logoutBtn = document.querySelector('#logout-btn');
 const usersTableBody = document.querySelector('#users-table tbody');
-// const categoryTableBody = document.querySelector('#category-table tbody');
+const categoryTableBody = document.querySelector('#category-table tbody');
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const processRequest = (url, method = 'GET', body = _) => {
@@ -194,7 +194,7 @@ const userDeleteModal = async e => {
   cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
 };
 
-/* const populateCategoryTable = async () => {
+const populateCategoryTable = async () => {
   categoryTableBody.parentElement.parentElement.style.display = 'none';
   const response = await processRequest(`${basepath}/category/`);
   if (!response.data.length) {
@@ -218,7 +218,7 @@ const userDeleteModal = async e => {
       </tr>`
     );
   });
-}; */
+};
 
 const populateUsersTable = async () => {
   while (usersTableBody.firstChild) usersTableBody.removeChild(usersTableBody.firstChild);
@@ -302,7 +302,7 @@ const createCategory = async e => {
   }
   createCategoryForm.reset();
   toast(response.message, successToast, 5000);
-  // populateCategoryTable();
+  populateCategoryTable();
 };
 
 if (loginForm) loginForm.addEventListener('submit', login);
@@ -325,7 +325,7 @@ switch (window.location.pathname) {
   case '/product-settings.html':
     break;
   case '/category-settings.html':
-    // populateCategoryTable();
+    populateCategoryTable();
     break;
   case '/sale-records.html':
     break;
