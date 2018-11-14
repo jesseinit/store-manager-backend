@@ -177,7 +177,7 @@ const userDeleteModal = async e => {
     `<div class="modal">
       <div class="form-body">
         <h3>Do you want to delete user?</h3>
-        <button data-id=${e.target.parentElement.getAttribute('data-id')} id='delete-user'>Yes</button>
+        <button data-id=${e.target.parentElement.getAttribute('data-id')} id='confirm-delete'>Yes</button>
         <button id='cancel'>No</button>
       </div>
     </div>`
@@ -186,7 +186,7 @@ const userDeleteModal = async e => {
   const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
 
-  const delUserBtn = document.querySelector('#delete-user');
+  const delUserBtn = document.querySelector('#confirm-delete');
   const cancelBtn = document.querySelector('#cancel');
 
   delUserBtn.addEventListener('click', deleteUser);
@@ -259,6 +259,45 @@ const updateCategory = async e => {
   document.body.removeChild(modal);
 };
 
+const deleteCategory = async e => {
+  const modal = document.body.querySelector('.modal');
+  const categoryId = Number(e.target.getAttribute('data-id'));
+  const deleteCategoryUrl = `${basepath}/category/${categoryId}`;
+  const deleteResponse = await processRequest(deleteCategoryUrl, 'DELETE');
+
+  if (!deleteResponse.status) {
+    toast(deleteResponse.message, errorToast);
+    document.body.removeChild(modal);
+    return;
+  }
+
+  toast('Category deleted successfully', successToast);
+  document.body.removeChild(modal);
+  populateCategoryTable();
+};
+
+const categoryDeleteModal = async e => {
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Do you want to delete this category?</h3>
+        <button data-id=${e.target.parentElement.getAttribute('data-id')} id='confirm-delete'>Yes</button>
+        <button id='cancel'>No</button>
+      </div>
+    </div>`
+  );
+
+  const modal = document.body.querySelector('.modal');
+  modal.addEventListener('click', destroyModal);
+
+  const delUserBtn = document.querySelector('#confirm-delete');
+  const cancelBtn = document.querySelector('#cancel');
+
+  delUserBtn.addEventListener('click', deleteCategory);
+  cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
+};
+
 const categoryEditModal = async e => {
   const singleCategoryUrl = `${basepath}/category/${e.target.parentElement.getAttribute('data-id')}`;
   const response = await processRequest(singleCategoryUrl);
@@ -293,7 +332,7 @@ const populateCategoryTable = async () => {
     const editBtn = categoryTableBody.querySelectorAll('button.blue');
     editBtn.forEach(btn => btn.addEventListener('click', categoryEditModal));
     const delBtn = categoryTableBody.querySelectorAll('button.red');
-    delBtn.forEach(btn => btn.addEventListener('click', userDeleteModal));
+    delBtn.forEach(btn => btn.addEventListener('click', categoryDeleteModal));
   });
 };
 
