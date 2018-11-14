@@ -61,7 +61,7 @@ const query = {
   /* Products */
   getAllProductsCount: () => ({
     text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
-          FROM products p JOIN category c 
+          FROM products p LEFT JOIN category c 
           ON c.category_id = p.category_id 
           ORDER BY p.product_id DESC `,
     values: []
@@ -69,7 +69,7 @@ const query = {
 
   getAllProducts: (limit, offset) => ({
     text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
-          FROM products p FULL JOIN category c 
+          FROM products p LEFT JOIN category c 
           ON c.category_id = p.category_id 
           ORDER BY p.product_id DESC 
           LIMIT $1 OFFSET $2`,
