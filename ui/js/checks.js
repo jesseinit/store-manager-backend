@@ -30,6 +30,10 @@ switch (currentPage) {
     checkRole();
     adminOnly(role);
     break;
+  case '/category-settings.html':
+    checkRole();
+    adminOnly(role);
+    break;
   case '/sale-records.html':
     checkRole();
     adminOnly(role);
