@@ -198,11 +198,17 @@ describe('Products', () => {
     });
 
     it('Admin should not be able to update a product with a product name that exists', async () => {
+      await chai
+        .request(app)
+        .post('/api/v1/products')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ imgUrl: 'http://example.com/photo.jpg', name: 'TV', categoryid: 1, price: 10.01, qty: 10 });
+
       const response = await chai
         .request(app)
         .put('/api/v1/products/1')
         .set('Authorization', `Bearer ${ownerToken}`)
-        .send(mockData.products.validProductInfo);
+        .send({ imgUrl: 'http://example.com/photo.jpg', name: 'TV', categoryid: 1, price: 10.01, qty: 10 });
 
       expect(response.status).to.equal(400);
     });

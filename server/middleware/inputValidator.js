@@ -133,7 +133,7 @@ const validateProductUpdate = [
   validateProductId[0],
   validateNewProduct[0].optional(),
   validateNewProduct[1].optional(),
-  validateNewProduct[2].exists().withMessage('Category ID must be provided.'),
+  validateNewProduct[2].optional(),
   validateNewProduct[3].optional(),
   validateNewProduct[4].optional()
 ];

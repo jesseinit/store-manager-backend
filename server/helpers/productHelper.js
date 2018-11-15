@@ -18,26 +18,18 @@ class ProductHelper {
    */
   static async allProducts(request) {
     const { limit, page } = request;
-
     const { rowCount } = await pool.query(query.getAllProductsCount());
 
-    if (!rowCount) {
-      return paginateEmptyResult('You have not created products yet.');
-    }
+    if (!rowCount) return paginateEmptyResult('You have not created products yet.');
 
     const limitBy = Number(limit) || 10;
-
     let currentPage = Number(page) || 1;
-
     const totalPages = Math.ceil(rowCount / limitBy);
 
     /* istanbul ignore next */
-    if (currentPage > totalPages) {
-      currentPage = totalPages;
-    }
+    if (currentPage > totalPages) currentPage = totalPages;
 
     const offset = (currentPage - 1) * limitBy;
-
     const { rows } = await pool.query(query.getAllProducts(limitBy, offset));
 
     const result = paginatedResult(rows, totalPages, currentPage);
@@ -53,15 +45,11 @@ class ProductHelper {
    */
   static async allProductsByCategory(request) {
     const { search, catid, page } = request;
-
     const { rowCount } = await pool.query(query.getAllProductsByCategoryCount(catid, search));
 
-    if (!rowCount) {
-      return paginateEmptyResult('No product matches your search.');
-    }
+    if (!rowCount) return paginateEmptyResult('No product matches your search.');
 
     let currentPage = Number(page) || 1;
-
     const totalPages = Math.ceil(rowCount / 10);
 
     /* istanbul ignore next */
@@ -208,11 +196,13 @@ class ProductHelper {
         return result;
       }
 
-      const allProducts = await pool.query(query.getAllProductsCount());
+      if (result.product_name !== productInfo.body.name) {
+        const allProducts = await pool.query(query.getAllProductsCount());
 
-      const isExists = allProducts.rows.some(product => product.product_name === productInfo.body.name);
-      if (isExists) {
-        errorHandler(400, 'The provided product name already exists.');
+        const isExists = allProducts.rows.some(product => product.product_name === productInfo.body.name);
+        if (isExists) {
+          errorHandler(400, 'The provided product name already exists.');
+        }
       }
 
       const foundCategory = await pool.query(query.findCategoryById(productInfo.body.categoryid));

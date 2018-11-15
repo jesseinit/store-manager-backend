@@ -41,7 +41,7 @@ const query = {
     values: [id]
   }),
 
-  getAllCategories: () => `SELECT * from category`,
+  getAllCategories: () => `SELECT * from category ORDER BY category_id`,
 
   createCategory: name => ({
     text: `INSERT INTO category (category_name) VALUES ($1) RETURNING *`,
@@ -159,7 +159,8 @@ const query = {
       updateInfo.imgUrl,
       updateInfo.name,
       updateInfo.categoryid,
-      Number.parseFloat(updateInfo.price).toFixed(2),
+      // Number.parseFloat(updateInfo.price).toFixed(2),
+      updateInfo.price,
       updateInfo.qty,
       id
     ]
