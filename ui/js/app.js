@@ -11,6 +11,10 @@ const usersTableBody = document.querySelector('#users-table tbody');
 const categoryTableBody = document.querySelector('#category-table tbody');
 const productsTableBody = document.querySelector('#products-table tbody');
 const recordSort = document.querySelector('.sort');
+const filterRowsForm = document.querySelector('#filter-rows');
+const filterQtyForm = document.querySelector('#filter-qty');
+const clearFiltersProd = document.querySelector('#clear-product-filters');
+const filterNameForm = document.querySelector('#filter-name');
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const processRequest = (url, method = 'GET', body = _) => {
@@ -233,6 +237,7 @@ const populateUsersTable = async () => {
     const delBtn = usersTableBody.querySelectorAll('button.red');
     delBtn.forEach(btn => btn.addEventListener('click', userDeleteModal));
   });
+  toast(response.message, successToast, 1000);
 };
 
 /* Category Settings */
@@ -274,7 +279,6 @@ const updateCategory = async e => {
   }
 
   toast(updateResponse.message || updateResponse.error[0], errorToast);
-  document.body.removeChild(modal);
 };
 
 const deleteCategory = async e => {
@@ -282,7 +286,6 @@ const deleteCategory = async e => {
   const categoryId = Number(e.target.getAttribute('data-id'));
   const deleteCategoryUrl = `${basepath}/category/${categoryId}`;
   const deleteResponse = await processRequest(deleteCategoryUrl, 'DELETE');
-  console.log(deleteResponse);
 
   if (!deleteResponse.status) {
     toast(deleteResponse.message, errorToast);
@@ -320,6 +323,7 @@ const categoryDeleteModal = async e => {
 const categoryEditModal = async e => {
   const singleCategoryUrl = `${basepath}/category/${e.target.parentElement.getAttribute('data-id')}`;
   const response = await processRequest(singleCategoryUrl);
+
   populateCategoryModal(response);
   const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
@@ -351,6 +355,7 @@ const populateCategoryTable = async () => {
     const delBtn = categoryTableBody.querySelectorAll('button.red');
     delBtn.forEach(btn => btn.addEventListener('click', categoryDeleteModal));
   });
+  toast(response.message, successToast, 1000);
 };
 
 const populateCategoryDropDown = async () => {
@@ -364,43 +369,67 @@ const populateCategoryDropDown = async () => {
   });
 };
 
+const goToPage = async (tbodyElement, page, limit = 10, query = _) => {
+  const queryString = `${basepath}/products/?page=${page}&limit=${limit}&${query}`;
+  const paginationResponse = await processRequest(queryString);
+  while (tbodyElement.firstChild) tbodyElement.removeChild(tbodyElement.firstChild);
+  paginationResponse.data.forEach(product => {
+    generateTableBodyEntries(tbodyElement, product);
+  });
+  paginationComponent(tbodyElement, paginationResponse, limit, query);
+};
+
+const paginationComponent = (tbodyElement, response, limit, query) => {
+  const paginationEl = document.querySelector('.pagination');
+  if (paginationEl) {
+    paginationEl.remove();
+  }
+  const { hasPrevPage, hasNextPage, nextPage, prevPage } = response.meta;
+  const prev = hasPrevPage
+    ? `<button class="pagination__prev">⬅ Previous Page</button>`
+    : `<button disabled class="pagination__prev">⬅ Previous Page</button>`;
+  const next = hasNextPage
+    ? `<button class="pagination__next">Next Page ➡</button>`
+    : `<button disabled class="pagination__next">Next Page ➡</button>`;
+  tbodyElement.parentElement.parentElement.insertAdjacentHTML(
+    'beforeend',
+    `<section class="pagination">${prev}${next}</section>`
+  );
+  const nextPageBtn = document.querySelector('.pagination__next');
+  const prevPageBtn = document.querySelector('.pagination__prev');
+  nextPageBtn.addEventListener('click', () => goToPage(tbodyElement, nextPage, limit, query));
+  prevPageBtn.addEventListener('click', async () => goToPage(tbodyElement, prevPage, limit, query));
+};
+
 /* Products Settings */
+const generateTableBodyEntries = (element, entity) => {
+  element.insertAdjacentHTML(
+    'beforeend',
+    `<tr>
+      <td>${entity.product_id}</td>
+      <td>${entity.product_name}</td>
+      <td>N ${formatCurrency(entity.product_price)}</td>
+      <td>${entity.product_qty}</td>
+      <td data-id=${entity.product_id} style="text-align: center">
+        <button class="blue">Edit</button><button class="red">Delete</button>
+      </td>
+    </tr>`
+  );
+};
+
 const populateProductsTable = async () => {
   const response = await processRequest(`${basepath}/products/`);
   while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
-  console.log(response);
   if (!response.data.length) {
     productsTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
     return;
   }
   recordSort.style.display = 'block';
   response.data.forEach(product => {
-    productsTableBody.insertAdjacentHTML(
-      'beforeend',
-      `<tr>
-        <td>${product.product_id}</td>
-        <td>${product.product_name}</td>
-        <td>${formatCurrency(product.product_price)}</td>
-        <td>${product.product_qty}</td>
-        <td data-id=${product.product_id} style="text-align: center">
-          <button class="blue">Edit</button><button class="red">Delete</button>
-        </td>
-      </tr>`
-    );
+    generateTableBodyEntries(productsTableBody, product);
   });
-  const prevBtn = response.meta.hasPrevPage
-    ? `<button class="pagination__prev">⬅ Previous Page</button>`
-    : `<button disabled class="pagination__prev">⬅ Previous Page</button>`;
-  const nextBtn = response.meta.hasNextPage
-    ? `<button class="pagination__next">Next Page ➡</button>`
-    : `<button disabled class="pagination__next">Next Page ➡</button>`;
-  productsTableBody.parentElement.parentElement.insertAdjacentHTML(
-    'beforeend',
-    `<section class="pagination">
-        ${prevBtn}
-        ${nextBtn}
-    </section>`
-  );
+  paginationComponent(productsTableBody, response);
+  toast(response.message, successToast, 1000);
 };
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
@@ -487,6 +516,49 @@ const createProduct = async e => {
   populateProductsTable();
 };
 
+const filterByRows = async e => {
+  e.preventDefault();
+  const limit = document.querySelector('#filter-pref').value;
+  const filterQuery = `${basepath}/products/?limit=${limit}`;
+  const response = await processRequest(filterQuery);
+  while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+  response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
+  paginationComponent(productsTableBody, response, limit);
+  toast(response.message, successToast, 1000);
+};
+
+const filterByName = async e => {
+  e.preventDefault();
+
+  const searchText = document.querySelector('#search-name').value;
+
+  const filterQuery = `${basepath}/products/?search=${searchText}`;
+  const response = await processRequest(filterQuery);
+  while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+  response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
+  paginationComponent(productsTableBody, response, 10);
+  toast(response.message, successToast, 1000);
+};
+
+const filterByQty = async e => {
+  e.preventDefault();
+  const qty = document.querySelector('#qty-pref').value;
+  const filterQuery = `${basepath}/products/?stock=${qty}`;
+  const response = await processRequest(filterQuery);
+  while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+  response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
+  paginationComponent(productsTableBody, response, 10, `stock=${qty}`);
+  toast(response.message, successToast, 1000);
+};
+
+const clearProductFilers = () => {
+  toast('Filters cleared', successToast, 1000);
+  filterRowsForm.reset();
+  filterQtyForm.reset();
+  filterNameForm.reset();
+  populateProductsTable();
+};
+
 if (loginForm) loginForm.addEventListener('submit', login);
 
 if (createUserForm) createUserForm.addEventListener('submit', createUser);
@@ -494,6 +566,11 @@ if (createUserForm) createUserForm.addEventListener('submit', createUser);
 if (createCategoryForm) createCategoryForm.addEventListener('submit', createCategory);
 
 if (createProductForm) createProductForm.addEventListener('submit', createProduct);
+
+if (filterRowsForm) filterRowsForm.addEventListener('submit', filterByRows);
+if (filterQtyForm) filterQtyForm.addEventListener('submit', filterByQty);
+if (clearFiltersProd) clearFiltersProd.addEventListener('click', clearProductFilers);
+if (filterNameForm) filterNameForm.addEventListener('submit', filterByName);
 
 if (logoutBtn) {
   logoutBtn.addEventListener('click', e => {
