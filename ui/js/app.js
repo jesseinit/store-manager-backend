@@ -222,15 +222,15 @@ const populateUsersTable = async () => {
     usersTableBody.insertAdjacentHTML(
       'beforeend',
       `<tr>
-          <td>${user.id}</td>
-          <td>${user.name}</td>
-          <td>${user.email}</td>
-          <td>${user.role}</td>
-          <td data-id=${user.id} style="text-align: center">
-            <button class="blue">Edit</button>
-            <button class="red">Delete</button>
-          </td>
-      </tr>`
+              <td>${user.id}</td>
+              <td>${user.name}</td>
+              <td>${user.email}</td>
+              <td>${user.role}</td>
+              <td data-id=${user.id} style="text-align: center">
+                <button class="blue">Edit</button>
+                <button class="red">Delete</button>
+              </td>
+          </tr>`
     );
     const editBtn = usersTableBody.querySelectorAll('button.blue');
     editBtn.forEach(btn => btn.addEventListener('click', userEditModal));
@@ -420,19 +420,10 @@ const populateProductsModal = async response => {
     : `<option selected disabled value="Not Set">Select Category</option>`;
   document.body.insertAdjacentHTML(
     'afterbegin',
-    `<div class="modal">
-      <div class="form-body">
-        <h3>Update Product Details</h3><form id="update-product-form" data-id=${id}>
-          <input type="text" id="update-image" placeholder="Image Url" value='${image}'/>
-          <input type="text" id="update-name" placeholder="Product Name" value='${name}'/>
-          <input type="text" id="update-price" placeholder="Product Price" value='${price}'/>
-          <input type="text" id="update-qty" placeholder="Product Quantity" value='${qty}'/>
-          <select id="product-cat" required>
-            ${selectedCategory}
-            <option disabled>----</option>
-          </select>
-          <input type="submit" value="Update Category" /></form>
-      </div>
+    `<div class="modal"><div class="form-body"><h3>Update Product Details</h3><form id="update-product-form" data-id=${id}>
+      <input type="text" id="update-image" placeholder="Image Url" value='${image}'/><input type="text" id="update-name" placeholder="Product Name" value='${name}'/>
+      <input type="text" id="update-price" placeholder="Product Price" value='${price}'/><input type="text" id="update-qty" placeholder="Product Quantity" value='${qty}'/>
+      <select id="product-cat" required>${selectedCategory}<option disabled>----</option></select><input type="submit" value="Update Category" /></form></div>
     </div>`
   );
   populateCategoryDropDown();
@@ -462,6 +453,27 @@ const updateProduct = async e => {
   return toast(updateResponse.message || updateResponse.error[0], errorToast);
 };
 
+const deleteProduct = async e => {
+  const modal = document.body.querySelector('.modal');
+  const productId = Number(e.target.getAttribute('data-id'));
+  const query = `${basepath}/products/${productId}`;
+  const deleteResponse = await processRequest(query, 'DELETE');
+
+  if (!deleteResponse.status) {
+    toast(deleteResponse.message, errorToast);
+    document.body.removeChild(modal);
+    return;
+  }
+
+  toast('Product deleted successfully', successToast);
+  document.body.removeChild(modal);
+  populateProductsTable();
+  const paginationEl = document.querySelector('.pagination');
+  if (paginationEl) {
+    paginationEl.remove();
+  }
+};
+
 const productEditModal = async e => {
   const singleCategoryUrl = `${basepath}/products/${e.target.parentElement.getAttribute('data-id')}`;
   const response = await processRequest(singleCategoryUrl);
@@ -471,6 +483,28 @@ const productEditModal = async e => {
   modal.addEventListener('click', destroyModal);
   const updateForm = document.querySelector('#update-product-form');
   updateForm.addEventListener('submit', updateProduct);
+};
+
+const productDeleteModal = async e => {
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Do you want to delete this product?</h3>
+        <button data-id=${e.target.parentElement.getAttribute('data-id')} id='confirm-delete'>Yes</button>
+        <button id='cancel'>No</button>
+      </div>
+    </div>`
+  );
+
+  const modal = document.body.querySelector('.modal');
+  modal.addEventListener('click', destroyModal);
+
+  const delUserBtn = document.querySelector('#confirm-delete');
+  const cancelBtn = document.querySelector('#cancel');
+
+  delUserBtn.addEventListener('click', deleteProduct);
+  cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
 };
 
 const generateTableBodyEntries = (element, entity) => {
@@ -489,13 +523,14 @@ const generateTableBodyEntries = (element, entity) => {
   const editBtn = element.querySelectorAll('button.blue');
   editBtn.forEach(btn => btn.addEventListener('click', productEditModal));
   const delBtn = element.querySelectorAll('button.red');
-  delBtn.forEach(btn => btn.addEventListener('click', categoryDeleteModal));
+  delBtn.forEach(btn => btn.addEventListener('click', productDeleteModal));
 };
 
 const populateProductsTable = async () => {
   const response = await processRequest(`${basepath}/products/`);
   while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
   if (!response.data.length) {
+    recordSort.style.display = 'none';
     productsTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
     return;
   }
@@ -616,7 +651,6 @@ const filterByName = async e => {
   response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
   paginationComponent(productsTableBody, response, 10);
   toast(response.message, successToast, 1000);
-  console.log(response);
 };
 
 const filterByQty = async e => {
@@ -639,17 +673,13 @@ const clearProductFilers = () => {
 };
 
 if (loginForm) loginForm.addEventListener('submit', login);
-
 if (createUserForm) createUserForm.addEventListener('submit', createUser);
-
 if (createCategoryForm) createCategoryForm.addEventListener('submit', createCategory);
-
 if (createProductForm) createProductForm.addEventListener('submit', createProduct);
-
 if (filterRowsForm) filterRowsForm.addEventListener('submit', filterByRows);
 if (filterQtyForm) filterQtyForm.addEventListener('submit', filterByQty);
-if (clearFiltersProd) clearFiltersProd.addEventListener('click', clearProductFilers);
 if (filterNameForm) filterNameForm.addEventListener('submit', filterByName);
+if (clearFiltersProd) clearFiltersProd.addEventListener('click', clearProductFilers);
 
 if (logoutBtn) {
   logoutBtn.addEventListener('click', e => {

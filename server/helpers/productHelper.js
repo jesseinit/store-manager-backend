@@ -234,7 +234,7 @@ class ProductHelper {
         return result;
       }
       await pool.query(query.deleteProduct(productid));
-      return 'Product deleted';
+      return [];
     } catch (error) {
       return error;
     }

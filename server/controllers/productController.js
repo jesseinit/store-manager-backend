@@ -92,7 +92,7 @@ class ProductController {
     const productId = parseInt(req.params.id, 10);
     const result = await ProductHelper.deleteProduct(productId);
 
-    handleResponse(result, next, res);
+    handleResponse(result, next, res, 200, 'success', 'Product deleted successfully.');
   }
 }
 
