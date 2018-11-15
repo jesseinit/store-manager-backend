@@ -122,7 +122,7 @@ const query = {
     text: `SELECT p.*, COALESCE (c.category_name, 'Not Set') as category_name 
           FROM products p FULL JOIN category c 
           ON c.category_id = p.category_id 
-          WHERE p.product_qty < $1 ORDER BY p.product_id DESC OFFSET $2`,
+          WHERE p.product_qty < $1 ORDER BY p.product_qty LIMIT 10 OFFSET $2`,
     values: [stock, offset]
   }),
 

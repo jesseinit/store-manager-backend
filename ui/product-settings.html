@@ -54,37 +54,36 @@
             </form>
             <div class="sort" style="display: none;">
               <section class="filter">
-                <form id="sort__id">
+                <form id="filter-name">
                   <fieldset>
-                    <legend>Filter By Product ID</legend>
-                    <input type="text" placeholder="Enter Product ID" />
-                    <input type="submit" value="Retrieve Records" />
+                    <legend>Filter By Product Name</legend>
+                    <input id="search-name" type="text" placeholder="Search Product" />
                   </fieldset>
                 </form>
-                <form id="sort__id">
+                <form id="filter-rows">
                   <fieldset>
                     <legend>Filter Rows</legend>
-                    <select name="" id="">
-                      <option value="">10 Records</option>
-                      <option value="">50 Records</option>
-                      <option value="">100 Records</option>
+                    <select id="filter-pref">
+                      <option value="11">11 Records</option>
+                      <option value="50">50 Records</option>
+                      <option value="100">100 Records</option>
                     </select>
                     <input type="submit" value="Retrieve Records" />
                   </fieldset>
                 </form>
-                <form id="sort__stock">
+                <form id="filter-qty">
                   <fieldset>
                     <legend>Filter Remaining Quantity</legend>
-                    <select name="" id="">
+                    <select name="" id="qty-pref">
                         <option value="10">Less than 10</option>
-                        <option value="50">Less than 50</option>
-                        <option value="100">Less than 100</option>
+                        <option value="20">Less than 20</option>
+                        <option value="30">Less than 30</option>
                       </select>
                     <input type="submit" value="Retrieve Records" />
                   </fieldset>
                 </form>
 
-                <button class="clear">Clear Filters</button>
+                <button id="clear-product-filters" class="clear">Clear Filters</button>
               </section>
             </div>
           </div>

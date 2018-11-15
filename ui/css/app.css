@@ -29,7 +29,7 @@ a {
 }
 
 .toast {
-  position: absolute;
+  position: fixed;
   right: 50%;
   transform: translate(50%);
   z-index: 10;
@@ -675,7 +675,7 @@ a {
 
 #site-main .main .sales input[type='submit'],
 #site-main .main .sales input[type='button'] {
-  padding: 5px 5px;
+  padding: 7px;
   border: none;
   background: #a9cfff;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
@@ -706,7 +706,14 @@ a {
   }
 }
 
-#site-main .main .sales__meta .sort #sort__date,
+@media (min-width: 1023px) {
+  #site-main .main .sales__meta .sort #search-name {
+    width: 335px;
+  }
+}
+
+#site-main .main .sales__meta .sort #filter-name,
+#site-main .main .sales__meta .sort #filter-rows,
 #site-main .main .sales__meta .sort #sort__id {
   margin-right: 3px;
 }
@@ -752,7 +759,7 @@ a {
 #site-main .main .sales__meta fieldset input {
   width: 100%;
   margin-bottom: 5px;
-  padding: 3px;
+  padding: 7px;
 }
 
 @media (min-width: 1023px) {
@@ -781,7 +788,7 @@ a {
 }
 
 #site-main .main .sales__meta fieldset select {
-  padding: 3px;
+  padding: 7px;
   margin-bottom: 5px;
   width: 100%;
 }
@@ -930,21 +937,14 @@ a {
   border-radius: 3px;
   border: 1px solid #a9cfff;
   background: white;
+  outline: none;
   cursor: pointer;
 }
 
-#site-main .main .pagination button:hover {
-  background: #a9cfff;
-  color: #000;
-}
-
 #site-main .main .pagination button:disabled {
-  border: 1px solid #eee;
-}
-
-#site-main .main .pagination button:disabled:hover {
-  background: transparent;
   cursor: not-allowed;
+  border: 1px solid #eee;
+  background: #a5a5a5;
 }
 
 #site-main .form__wrapper {
