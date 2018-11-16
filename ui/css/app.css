@@ -58,16 +58,16 @@ a {
   animation-duration: 0.3s;
   animation-timing-function: linear;
   top: 5px;
-  color: #000;
 }
 
 .toast--error {
   background: #fa7a7a;
-  color: #fff;
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .toast--success {
   background: #6beb6b;
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .modal {
@@ -118,6 +118,12 @@ a {
 
 .modal .form-body button#confirm-delete {
   background: #fa4e4e;
+}
+
+.modal .form-body input[type='submit'] {
+  border: none;
+  background: #a9cfff;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 }
 
 .table {
@@ -211,6 +217,23 @@ a {
   color: #fff;
   border-radius: 20px;
   cursor: pointer;
+}
+
+.spinner {
+  padding-right: 40px;
+}
+
+.spinner:before {
+  position: absolute;
+  content: '';
+  width: 20px;
+  height: 20px;
+  left: 50%;
+  top: 10px;
+  border-radius: 50%;
+  border-left: 2px solid white;
+  border-right: 2px solid white;
+  animation: rotate360 0.9s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
 
 #site-header {
@@ -688,11 +711,6 @@ a {
   }
 }
 
-#site-main .main .sales__meta #new-account {
-  float: right;
-  margin-bottom: 10px;
-}
-
 #site-main .main .sales__meta .sort {
   margin: 0 0 10px;
 }
@@ -702,7 +720,6 @@ a {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
   }
 }
 
@@ -714,8 +731,10 @@ a {
 
 #site-main .main .sales__meta .sort #filter-name,
 #site-main .main .sales__meta .sort #filter-rows,
+#site-main .main .sales__meta .sort #filter-qty,
+#site-main .main .sales__meta .sort #sort-date,
 #site-main .main .sales__meta .sort #sort__id {
-  margin-right: 3px;
+  margin-right: 5px;
 }
 
 #site-main .main .sales__meta .sort .filter {
@@ -738,11 +757,13 @@ a {
   margin-left: 3px;
   border: none;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
-@media (min-width: 2023px) {
+@media (min-width: 1023px) {
   #site-main .main .sales__meta .sort .clear {
-    padding: 10px;
+    padding: 5px;
+    width: auto;
   }
 }
 
@@ -784,7 +805,8 @@ a {
 }
 
 #site-main .main .sales__meta fieldset strong {
-  font-size: 11px;
+  font-size: 14px;
+  font-weight: normal;
 }
 
 #site-main .main .sales__meta fieldset select {
@@ -836,7 +858,7 @@ a {
   justify-content: space-between;
   border-bottom: 1px solid rgba(204, 204, 204, 0.3);
   padding-bottom: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 @media (min-width: 1023px) {
@@ -869,7 +891,8 @@ a {
 
 #site-main .main .summary__card .details .header {
   padding-top: 10px;
-  font-size: 0.8rem;
+  font-weight: 300;
+  font-size: 0.85rem;
 }
 
 #site-main .main .summary__card .details .value {
@@ -911,11 +934,13 @@ a {
 
 #site-main .main .summary .prod-cat-summary {
   width: 100%;
+  margin-top: 10px;
 }
 
 @media (min-width: 1023px) {
   #site-main .main .summary .prod-cat-summary {
     width: 32%;
+    margin-top: 0;
   }
 }
 
@@ -1032,5 +1057,11 @@ a {
   50% {
     opacity: 1;
     top: 0px;
+  }
+}
+
+@keyframes rotate360 {
+  100% {
+    transform: rotate(360deg);
   }
 }

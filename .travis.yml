@@ -1,21 +1,22 @@
 language: node_js
-
 node_js:
-  - "8"
-
-cache:
+- '8'
+cache: 
 directories:
-  - "node_modules"
-
+- node_modules
 services:
-  - postgresql
-
+- postgresql
 before_script:
-  - psql -c 'create database storemanager;' -U postgres
-  - npm run migrations
-
+- psql -c 'create database storemanager;' -U postgres
+- npm run migrations
 script:
-  - npm test
-
-after_success: 
-  - nyc report --reporter=text-lcov | coveralls
+- npm test
+after_success:
+- nyc report --reporter=text-lcov | coveralls
+deploy:
+  provider: heroku
+  api_key:
+    secure: mVtdbri72QAAAqKd3b9fhYfPH4AWLtDRgsKfPCtnQjOyNSySy8SDNKsOERruo6th0GadFGALEtEpJOIyrz/ILP546knNWdiQ5j+x8yIGSI/lJVefH7UxVRqldTEZtGFz/rAHpuYsxdhOVyRZZGMpnJqTNP4VmpWJg7BqtQfkbOly2jmdOylFYz1A99qn86xYV0YaLias0e61nGj4PB84Q8sAeii40/eyDxCHkaaLLenX8LgL0kKuXfmO3upuvih0vRyMSG57boIhra9rby+NReWeCGQMx+Xe6MruvpR0QA7vMg3FHOmiNf74dplENbyOgZ04wEPQYCGwOY0i+xWvK7ag5RhJoXhma/mhzaev6TEf3/ZfSZS7Wyg7pYF74rnMm/4mNQvuIMgb+gZT4Ej6bN2EYsLNWlq5ttKP/fSSFQljMnLUByLed6GV3EaGOyf42clHSNV/lDoY25svJAtyq44hlhDgRwNdbCt1+polOdBayJqZex0B4loEzkr4tMkPHe6oZTJCtrrldrY7+nn5+gl+elxBWyHtdBEudymsdiTVmscM/VOe3c8dqBy7VVjzmyh5+nhrfhTT0286lRTqQpxBgxcAa/PVH2PiXJj/evfRN79V/DddYm7NmA9LVkHklb81bRuKGmJNfugLeuropP/C7F2Ijy/e2wdHfvR0PfA=
+  app: mystoremanager
+  on:
+    branch: develop

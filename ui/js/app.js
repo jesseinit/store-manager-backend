@@ -2,6 +2,7 @@ const _ = undefined;
 const basepath = `${window.location.origin}/api/v1`;
 const successToast = 'toast--success';
 const errorToast = 'toast--error';
+const siteHeader = document.querySelector('#site-header');
 const loginForm = document.querySelector('#login-form');
 const createUserForm = document.querySelector('#create-user-form');
 const createCategoryForm = document.querySelector('#create-category');
@@ -10,11 +11,14 @@ const logoutBtn = document.querySelector('#logout-btn');
 const usersTableBody = document.querySelector('#users-table tbody');
 const categoryTableBody = document.querySelector('#category-table tbody');
 const productsTableBody = document.querySelector('#products-table tbody');
+const latestTableBody = document.querySelector('#lastest-sales tbody');
 const recordSort = document.querySelector('.sort');
 const filterRowsForm = document.querySelector('#filter-rows');
 const filterQtyForm = document.querySelector('#filter-qty');
 const clearFiltersProd = document.querySelector('#clear-product-filters');
 const filterNameForm = document.querySelector('#filter-name');
+const fromDate = document.querySelector('#from-date');
+const toDate = document.querySelector('#to-date');
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const processRequest = (url, method = 'GET', body = _) => {
@@ -37,6 +41,14 @@ const processRequest = (url, method = 'GET', body = _) => {
       }
       return { message, error };
     });
+};
+
+const loadSpinner = () => {
+  if (siteHeader.classList.contains('spinner')) {
+    siteHeader.classList.remove('spinner');
+    return;
+  }
+  siteHeader.classList.add('spinner');
 };
 
 const createNode = (element, className, content) => {
@@ -64,15 +76,33 @@ const formatCurrency = number =>
   new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(number);
 
 const populateAdminDashboard = async () => {
-  const totalProducts = document.querySelector('#total-products');
-  const totalCategory = document.querySelector('#total-categories');
-  const totalStaff = document.querySelector('#total-staff');
+  loadSpinner();
   const miscUrl = `${basepath}/sales/?misc=true`;
   const response = await processRequest(miscUrl);
-  const { totalproducts, totalcategory, totalemployee } = response.misc;
-  totalProducts.textContent = totalproducts;
-  totalCategory.textContent = totalcategory;
-  totalStaff.textContent = totalemployee;
+  const {
+    totalproducts,
+    totalcategory,
+    totalemployee,
+    totalproductsold,
+    totalproductworth,
+    totalsaleorder,
+    latestsales
+  } = response.misc;
+  document.querySelector('#total-products').textContent = totalproducts;
+  document.querySelector('#total-categories').textContent = totalcategory;
+  document.querySelector('#total-staff').textContent = totalemployee;
+  document.querySelector('#total-prod-sold').textContent = totalproductsold;
+  document.querySelector('#total-sales-orders').textContent = totalsaleorder;
+  document.querySelector('#total-prod-worth').textContent = `N ${formatCurrency(totalproductworth)}`;
+  while (latestTableBody.firstChild) latestTableBody.removeChild(latestTableBody.firstChild);
+  toast('Dashboard Updated 🔥', successToast, 2000);
+
+  if (!latestsales.length) {
+    latestTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=6>No sale has been recorded yet. 😕</td></tr>`);
+    loadSpinner();
+    return;
+  }
+  loadSpinner();
 };
 
 const destroyInputErrors = formClass => {
@@ -111,6 +141,19 @@ const redirectHandler = role => {
   }
 };
 
+const generateDeleteModal = (e, entity) => {
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Do you want to delete this ${entity}?</h3>
+        <button data-id=${e.target.parentElement.getAttribute('data-id')} id='confirm-delete'>Yes</button>
+        <button id='cancel'>No</button>
+      </div>
+    </div>`
+  );
+};
+
 /* User Settings */
 const populateUserEditModal = response => {
   const { id, name, email } = response.data;
@@ -137,52 +180,6 @@ const populateUserEditModal = response => {
   );
 };
 
-const updateUser = async e => {
-  e.preventDefault();
-
-  const modal = document.body.querySelector('.modal');
-  const uName = document.querySelector('#update-name').value;
-  const uEmail = document.querySelector('#update-email').value;
-  const uRole = document.querySelector('#update-role').value;
-  let uPassword = document.querySelector('#update-password').value;
-  uPassword = uPassword.length < 5 ? undefined : document.querySelector('#update-password').value;
-
-  const userUpdateUrl = `${basepath}/users/${e.target.getAttribute('data-id')}`;
-  const updateInfo = { name: uName, email: uEmail, password: uPassword, role: uRole };
-
-  if (!uPassword) delete updateInfo.password;
-  if (uRole === 'Owner') delete updateInfo.role;
-
-  const updateResponse = await processRequest(userUpdateUrl, 'PUT', updateInfo);
-
-  if (updateResponse.status === 'success') {
-    toast(updateResponse.message, successToast);
-    document.body.removeChild(modal);
-    populateUsersTable();
-    return;
-  }
-
-  toast(updateResponse.message || updateResponse.error[0], errorToast);
-  document.body.removeChild(modal);
-};
-
-const deleteUser = async e => {
-  const modal = document.body.querySelector('.modal');
-  const userid = Number(e.target.getAttribute('data-id'));
-  const deleteUsersEndpoint = `${basepath}/users/${userid}`;
-  const deleteResponse = await processRequest(deleteUsersEndpoint, 'DELETE');
-
-  if (!deleteResponse.status) {
-    toast(deleteResponse.message, errorToast);
-    document.body.removeChild(modal);
-    return;
-  }
-
-  toast(deleteResponse.message, successToast);
-  document.body.removeChild(modal);
-  populateUsersTable();
-};
-
 const userEditModal = async e => {
   const allUsersEndpoint = `${basepath}/users/?userid=${e.target.parentElement.getAttribute('data-id')}`;
   const response = await processRequest(allUsersEndpoint);
@@ -194,16 +191,7 @@ const userEditModal = async e => {
 };
 
 const userDeleteModal = async e => {
-  document.body.insertAdjacentHTML(
-    'afterbegin',
-    `<div class="modal">
-      <div class="form-body">
-        <h3>Do you want to delete user?</h3>
-        <button data-id=${e.target.parentElement.getAttribute('data-id')} id='confirm-delete'>Yes</button>
-        <button id='cancel'>No</button>
-      </div>
-    </div>`
-  );
+  generateDeleteModal(e, 'user');
 
   const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
@@ -216,27 +204,25 @@ const userDeleteModal = async e => {
 };
 
 const populateUsersTable = async () => {
+  loadSpinner();
   while (usersTableBody.firstChild) usersTableBody.removeChild(usersTableBody.firstChild);
   const response = await processRequest(`${basepath}/users/`);
   response.data.forEach(user => {
     usersTableBody.insertAdjacentHTML(
       'beforeend',
       `<tr>
-              <td>${user.id}</td>
-              <td>${user.name}</td>
-              <td>${user.email}</td>
-              <td>${user.role}</td>
-              <td data-id=${user.id} style="text-align: center">
-                <button class="blue">Edit</button>
-                <button class="red">Delete</button>
-              </td>
-          </tr>`
+          <td>${user.id}</td><td>${user.name}</td><td>${user.email}</td><td>${user.role}</td>
+          <td data-id=${user.id} style="text-align: center">
+            <button class="blue">Edit</button><button class="red">Delete</button>
+          </td>
+      </tr>`
     );
     const editBtn = usersTableBody.querySelectorAll('button.blue');
     editBtn.forEach(btn => btn.addEventListener('click', userEditModal));
     const delBtn = usersTableBody.querySelectorAll('button.red');
     delBtn.forEach(btn => btn.addEventListener('click', userDeleteModal));
   });
+  loadSpinner();
   toast(response.message, successToast, 1000);
 };
 
@@ -299,16 +285,7 @@ const deleteCategory = async e => {
 };
 
 const categoryDeleteModal = async e => {
-  document.body.insertAdjacentHTML(
-    'afterbegin',
-    `<div class="modal">
-      <div class="form-body">
-        <h3>Do you want to delete this category?</h3>
-        <button data-id=${e.target.parentElement.getAttribute('data-id')} id='confirm-delete'>Yes</button>
-        <button id='cancel'>No</button>
-      </div>
-    </div>`
-  );
+  generateDeleteModal(e, 'category');
 
   const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
@@ -332,9 +309,11 @@ const categoryEditModal = async e => {
 };
 
 const populateCategoryTable = async () => {
+  loadSpinner();
   const response = await processRequest(`${basepath}/category/`);
   while (categoryTableBody.firstChild) categoryTableBody.removeChild(categoryTableBody.firstChild);
   if (!response.data.length) {
+    loadSpinner();
     categoryTableBody.insertAdjacentHTML(
       'beforeend',
       `<tr><td colspan=3>You have not created a category yet. 😕</td></tr>`
@@ -355,6 +334,7 @@ const populateCategoryTable = async () => {
     const delBtn = categoryTableBody.querySelectorAll('button.red');
     delBtn.forEach(btn => btn.addEventListener('click', categoryDeleteModal));
   });
+  loadSpinner();
   toast(response.message, successToast, 1000);
 };
 
@@ -371,12 +351,14 @@ const populateCategoryDropDown = async () => {
 
 /* Pagination  */
 const goToPage = async (tbodyElement, page, limit = 10, query = _) => {
+  loadSpinner();
   const queryString = `${basepath}/products/?page=${page}&limit=${limit}&${query}`;
   const paginationResponse = await processRequest(queryString);
   while (tbodyElement.firstChild) tbodyElement.removeChild(tbodyElement.firstChild);
   paginationResponse.data.forEach(product => {
     generateTableBodyEntries(tbodyElement, product);
   });
+  loadSpinner();
   paginationComponent(tbodyElement, paginationResponse, limit, query);
 };
 
@@ -431,42 +413,52 @@ const populateProductsModal = async response => {
 
 const updateProduct = async e => {
   e.preventDefault();
-
+  loadSpinner();
   const modal = document.body.querySelector('.modal');
   const uName = document.querySelector('#update-name').value;
   const uPrice = document.querySelector('#update-price').value;
+  const uQty = document.querySelector('#update-qty').value;
   const uCategory = document.querySelector('#product-cat').value;
 
-  if (Number.isNaN(Number(uCategory))) return toast('Select a category', errorToast);
+  if (Number.isNaN(Number(uCategory))) {
+    loadSpinner();
+    toast('Select a category', errorToast);
+    return;
+  }
 
   const categoryUpdateUrl = `${basepath}/products/${e.target.getAttribute('data-id')}`;
-  const updateInfo = { name: uName, price: uPrice, categoryid: uCategory };
+  const updateInfo = { name: uName, price: uPrice, qty: uQty, categoryid: uCategory };
 
   const updateResponse = await processRequest(categoryUpdateUrl, 'PUT', updateInfo);
 
   if (updateResponse.status === 'success') {
-    toast(updateResponse.message, successToast);
+    loadSpinner();
+    toast(updateResponse.message, successToast, 1000);
     document.body.removeChild(modal);
-    return populateProductsTable();
+    populateProductsTable();
+    return;
   }
-
-  return toast(updateResponse.message || updateResponse.error[0], errorToast);
+  loadSpinner();
+  toast(updateResponse.message || updateResponse.error[0], errorToast);
 };
 
 const deleteProduct = async e => {
+  loadSpinner();
   const modal = document.body.querySelector('.modal');
   const productId = Number(e.target.getAttribute('data-id'));
   const query = `${basepath}/products/${productId}`;
   const deleteResponse = await processRequest(query, 'DELETE');
 
   if (!deleteResponse.status) {
+    loadSpinner();
     toast(deleteResponse.message, errorToast);
     document.body.removeChild(modal);
     return;
   }
 
-  toast('Product deleted successfully', successToast);
+  toast('Product deleted successfully', successToast, 1000);
   document.body.removeChild(modal);
+  loadSpinner();
   populateProductsTable();
   const paginationEl = document.querySelector('.pagination');
   if (paginationEl) {
@@ -486,16 +478,7 @@ const productEditModal = async e => {
 };
 
 const productDeleteModal = async e => {
-  document.body.insertAdjacentHTML(
-    'afterbegin',
-    `<div class="modal">
-      <div class="form-body">
-        <h3>Do you want to delete this product?</h3>
-        <button data-id=${e.target.parentElement.getAttribute('data-id')} id='confirm-delete'>Yes</button>
-        <button id='cancel'>No</button>
-      </div>
-    </div>`
-  );
+  generateDeleteModal(e, 'product');
 
   const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
@@ -527,13 +510,17 @@ const generateTableBodyEntries = (element, entity) => {
 };
 
 const populateProductsTable = async () => {
+  loadSpinner();
   const response = await processRequest(`${basepath}/products/`);
   while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+
   if (!response.data.length) {
+    loadSpinner();
     recordSort.style.display = 'none';
     productsTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
     return;
   }
+  loadSpinner();
   recordSort.style.display = 'block';
   response.data.forEach(product => {
     generateTableBodyEntries(productsTableBody, product);
@@ -586,6 +573,52 @@ const createUser = async e => {
   populateUsersTable();
 };
 
+const updateUser = async e => {
+  e.preventDefault();
+
+  const modal = document.body.querySelector('.modal');
+  const uName = document.querySelector('#update-name').value;
+  const uEmail = document.querySelector('#update-email').value;
+  const uRole = document.querySelector('#update-role').value;
+  let uPassword = document.querySelector('#update-password').value;
+  uPassword = uPassword.length < 5 ? undefined : document.querySelector('#update-password').value;
+
+  const userUpdateUrl = `${basepath}/users/${e.target.getAttribute('data-id')}`;
+  const updateInfo = { name: uName, email: uEmail, password: uPassword, role: uRole };
+
+  if (!uPassword) delete updateInfo.password;
+  if (uRole === 'Owner') delete updateInfo.role;
+
+  const updateResponse = await processRequest(userUpdateUrl, 'PUT', updateInfo);
+
+  if (updateResponse.status === 'success') {
+    toast(updateResponse.message, successToast);
+    document.body.removeChild(modal);
+    populateUsersTable();
+    return;
+  }
+
+  toast(updateResponse.message || updateResponse.error[0], errorToast);
+  document.body.removeChild(modal);
+};
+
+const deleteUser = async e => {
+  const modal = document.body.querySelector('.modal');
+  const userid = Number(e.target.getAttribute('data-id'));
+  const deleteUsersEndpoint = `${basepath}/users/${userid}`;
+  const deleteResponse = await processRequest(deleteUsersEndpoint, 'DELETE');
+
+  if (!deleteResponse.status) {
+    toast(deleteResponse.message, errorToast);
+    document.body.removeChild(modal);
+    return;
+  }
+
+  toast(deleteResponse.message, successToast);
+  document.body.removeChild(modal);
+  populateUsersTable();
+};
+
 const createCategory = async e => {
   e.preventDefault();
   const categoryName = document.querySelector('#category-name').value;
@@ -603,6 +636,7 @@ const createCategory = async e => {
 };
 
 const createProduct = async e => {
+  loadSpinner();
   e.preventDefault();
   const imgUrl = document.querySelector('#product-imgurl').value;
   const name = document.querySelector('#product-name').value;
@@ -610,23 +644,27 @@ const createProduct = async e => {
   const qty = document.querySelector('#product-qty').value;
   const categoryid = document.querySelector('#product-cat').value;
   if (!Number(categoryid)) {
-    toast('Please select a category', errorToast, 5000);
+    loadSpinner();
+    toast('Please select a category', errorToast, 700);
     return;
   }
   const productInfo = { imgUrl, name, categoryid, price, qty };
   const productUrl = `${basepath}/products`;
   const response = await processRequest(productUrl, 'POST', productInfo);
   if (!response.data) {
+    loadSpinner();
     handleInputErrors(response, '#create-new-product');
     return;
   }
   destroyInputErrors('#create-new-product');
   createProductForm.reset();
-  toast(response.message, successToast);
+  loadSpinner();
+  toast(response.message, successToast, 700);
   populateProductsTable();
 };
 
 const filterByRows = async e => {
+  loadSpinner();
   e.preventDefault();
   const limit = document.querySelector('#filter-pref').value;
   const filterQuery = `${basepath}/products/?limit=${limit}`;
@@ -634,31 +672,46 @@ const filterByRows = async e => {
   while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
   response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
   paginationComponent(productsTableBody, response, limit);
+  loadSpinner();
   toast(response.message, successToast, 1000);
 };
 
 const filterByName = async e => {
+  loadSpinner();
   e.preventDefault();
   const searchText = document.querySelector('#search-name').value;
 
   const filterQuery = `${basepath}/products/?search=${searchText}`;
+
   const response = await processRequest(filterQuery);
   while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+
   if (!response.data.length) {
+    loadSpinner();
     productsTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
+    paginationComponent(productsTableBody, response, 10);
     return;
   }
+
+  loadSpinner();
   response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
-  paginationComponent(productsTableBody, response, 10);
   toast(response.message, successToast, 1000);
+  paginationComponent(productsTableBody, response, 10);
 };
 
 const filterByQty = async e => {
   e.preventDefault();
+  loadSpinner();
   const qty = document.querySelector('#qty-pref').value;
   const filterQuery = `${basepath}/products/?stock=${qty}`;
   const response = await processRequest(filterQuery);
   while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+  if (!response.data.length) {
+    loadSpinner();
+    productsTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
+    return;
+  }
+  loadSpinner();
   response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
   paginationComponent(productsTableBody, response, 10, `stock=${qty}`);
   toast(response.message, successToast, 1000);
@@ -680,7 +733,17 @@ if (filterRowsForm) filterRowsForm.addEventListener('submit', filterByRows);
 if (filterQtyForm) filterQtyForm.addEventListener('submit', filterByQty);
 if (filterNameForm) filterNameForm.addEventListener('submit', filterByName);
 if (clearFiltersProd) clearFiltersProd.addEventListener('click', clearProductFilers);
-
+if (fromDate && toDate) {
+  const date = new Date();
+  let day = date.getDate();
+  let month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  month = (month < 10 ? '0' : '') + month;
+  day = (day < 10 ? '0' : '') + day;
+  const today = `${year}-${month}-${day}`;
+  fromDate.value = today;
+  toDate.value = today;
+}
 if (logoutBtn) {
   logoutBtn.addEventListener('click', e => {
     e.preventDefault();
