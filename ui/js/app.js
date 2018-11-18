@@ -10,7 +10,7 @@ const createProductForm = document.querySelector('#create-new-product');
 const logoutBtn = document.querySelector('#logout-btn');
 const usersTableBody = document.querySelector('#users-table tbody');
 const categoryTableBody = document.querySelector('#category-table tbody');
-const productsTableBody = document.querySelector('#products-table tbody');
+const productsTable = document.querySelector('#products-table');
 const latestTableBody = document.querySelector('#lastest-sales tbody');
 const recordSort = document.querySelector('.sort');
 const filterRowsForm = document.querySelector('#filter-rows');
@@ -19,6 +19,11 @@ const clearFiltersProd = document.querySelector('#clear-product-filters');
 const filterNameForm = document.querySelector('#filter-name');
 const fromDate = document.querySelector('#from-date');
 const toDate = document.querySelector('#to-date');
+const productWrapper = document.querySelector('.products');
+const cartCount = document.querySelector('.cart-count');
+const cartTable = document.querySelector('#cart-table');
+const salesTotalWrapper = document.querySelector('.total span');
+const completeOrder = document.querySelector('#complete-order');
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const processRequest = (url, method = 'GET', body = _) => {
@@ -75,6 +80,21 @@ const toast = (msg, className, delay = 4000) => {
 const formatCurrency = number =>
   new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(number);
 
+const nFormatter = num => {
+  if (num >= 1000000000) return `${(num / 1000000000).toFixed(2).replace(/\.0$/, '')}G+`;
+  if (num >= 1000000) return `${(num / 1000000).toFixed(2).replace(/\.0$/, '')}M+`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K+`;
+  return num;
+};
+
+const formatDate = date =>
+  new Date(date)
+    .toJSON()
+    .slice(0, 10)
+    .split('-')
+    .reverse()
+    .join('/');
+
 const populateAdminDashboard = async () => {
   loadSpinner();
   const miscUrl = `${basepath}/sales/?misc=true`;
@@ -88,12 +108,13 @@ const populateAdminDashboard = async () => {
     totalsaleorder,
     latestsales
   } = response.misc;
+
   document.querySelector('#total-products').textContent = totalproducts;
   document.querySelector('#total-categories').textContent = totalcategory;
   document.querySelector('#total-staff').textContent = totalemployee;
   document.querySelector('#total-prod-sold').textContent = totalproductsold;
   document.querySelector('#total-sales-orders').textContent = totalsaleorder;
-  document.querySelector('#total-prod-worth').textContent = `N ${formatCurrency(totalproductworth)}`;
+  document.querySelector('#total-prod-worth').textContent = `N ${nFormatter(totalproductworth)}`;
   while (latestTableBody.firstChild) latestTableBody.removeChild(latestTableBody.firstChild);
   toast('Dashboard Updated 🔥', successToast, 2000);
 
@@ -102,6 +123,19 @@ const populateAdminDashboard = async () => {
     loadSpinner();
     return;
   }
+  latestsales.forEach(sale => {
+    latestTableBody.insertAdjacentHTML(
+      'beforeend',
+      `<tr>
+        <td colspan="1">${formatDate(sale.s_date)}</td>
+        <td>${sale.s_description}</td>
+        <td>${sale.s_qty}</td>
+        <td>${formatCurrency(sale.s_price)}</td>
+        <td class="total">${formatCurrency(sale.s_total)}</td>
+      </tr>`
+    );
+  });
+
   loadSpinner();
 };
 
@@ -135,6 +169,7 @@ const handleInputErrors = (response, formClass) => {
 
 const redirectHandler = role => {
   if (role === 'Attendant') {
+    localStorage.setItem('cart', '[]');
     window.location.replace('/make-sale.html');
   } else {
     window.location.replace('/admin.html');
@@ -248,7 +283,7 @@ const populateCategoryModal = response => {
 
 const updateCategory = async e => {
   e.preventDefault();
-
+  loadSpinner();
   const modal = document.body.querySelector('.modal');
   const uName = document.querySelector('#update-name').value;
 
@@ -258,12 +293,13 @@ const updateCategory = async e => {
   const updateResponse = await processRequest(categoryUpdateUrl, 'PUT', updateInfo);
 
   if (updateResponse.status === 'success') {
+    loadSpinner();
     toast(updateResponse.message, successToast);
     document.body.removeChild(modal);
     populateCategoryTable();
     return;
   }
-
+  loadSpinner();
   toast(updateResponse.message || updateResponse.error[0], errorToast);
 };
 
@@ -350,19 +386,17 @@ const populateCategoryDropDown = async () => {
 };
 
 /* Pagination  */
-const goToPage = async (tbodyElement, page, limit = 10, query = _) => {
+const goToPage = async (element, page, limit = 10, query = _) => {
   loadSpinner();
   const queryString = `${basepath}/products/?page=${page}&limit=${limit}&${query}`;
   const paginationResponse = await processRequest(queryString);
-  while (tbodyElement.firstChild) tbodyElement.removeChild(tbodyElement.firstChild);
-  paginationResponse.data.forEach(product => {
-    generateTableBodyEntries(tbodyElement, product);
-  });
+  while (element.firstChild) element.removeChild(element.firstChild);
+  paginationResponse.data.forEach(product => generateTableBodyEntries(element, product));
   loadSpinner();
-  paginationComponent(tbodyElement, paginationResponse, limit, query);
+  paginationComponent(element, paginationResponse, limit, query);
 };
 
-const paginationComponent = (tbodyElement, response, limit, query) => {
+const paginationComponent = (element, response, limit, query) => {
   const paginationEl = document.querySelector('.pagination');
   if (paginationEl) {
     paginationEl.remove();
@@ -374,14 +408,14 @@ const paginationComponent = (tbodyElement, response, limit, query) => {
   const next = hasNextPage
     ? `<button class="pagination__next">Next Page ➡</button>`
     : `<button disabled class="pagination__next">Next Page ➡</button>`;
-  tbodyElement.parentElement.parentElement.insertAdjacentHTML(
+  element.parentElement.parentElement.insertAdjacentHTML(
     'beforeend',
     `<section class="pagination">${prev}${next}</section>`
   );
   const nextPageBtn = document.querySelector('.pagination__next');
   const prevPageBtn = document.querySelector('.pagination__prev');
-  nextPageBtn.addEventListener('click', () => goToPage(tbodyElement, nextPage, limit, query));
-  prevPageBtn.addEventListener('click', () => goToPage(tbodyElement, prevPage, limit, query));
+  nextPageBtn.addEventListener('click', () => goToPage(element, nextPage, limit, query));
+  prevPageBtn.addEventListener('click', () => goToPage(element, prevPage, limit, query));
 };
 
 /* Products Settings */
@@ -415,6 +449,7 @@ const updateProduct = async e => {
   e.preventDefault();
   loadSpinner();
   const modal = document.body.querySelector('.modal');
+  const uImage = document.querySelector('#update-image').value;
   const uName = document.querySelector('#update-name').value;
   const uPrice = document.querySelector('#update-price').value;
   const uQty = document.querySelector('#update-qty').value;
@@ -427,7 +462,7 @@ const updateProduct = async e => {
   }
 
   const categoryUpdateUrl = `${basepath}/products/${e.target.getAttribute('data-id')}`;
-  const updateInfo = { name: uName, price: uPrice, qty: uQty, categoryid: uCategory };
+  const updateInfo = { imgUrl: uImage, name: uName, price: uPrice, qty: uQty, categoryid: uCategory };
 
   const updateResponse = await processRequest(categoryUpdateUrl, 'PUT', updateInfo);
 
@@ -439,7 +474,7 @@ const updateProduct = async e => {
     return;
   }
   loadSpinner();
-  toast(updateResponse.message || updateResponse.error[0], errorToast);
+  toast(updateResponse.message || updateResponse.error, errorToast);
 };
 
 const deleteProduct = async e => {
@@ -511,28 +546,202 @@ const generateTableBodyEntries = (element, entity) => {
 
 const populateProductsTable = async () => {
   loadSpinner();
-  const response = await processRequest(`${basepath}/products/`);
-  while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+  const endPoint = `${basepath}/products/`;
+  const response = await processRequest(endPoint);
+  const tableBody = productsTable.children[1];
+
+  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
 
   if (!response.data.length) {
     loadSpinner();
     recordSort.style.display = 'none';
-    productsTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
+    tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
     return;
   }
+
   loadSpinner();
   recordSort.style.display = 'block';
-  response.data.forEach(product => {
-    generateTableBodyEntries(productsTableBody, product);
-  });
-  paginationComponent(productsTableBody, response);
+  response.data.forEach(product => generateTableBodyEntries(tableBody, product));
+  paginationComponent(tableBody, response);
   toast(response.message, successToast, 1000);
+};
+
+/* Product Cards */
+const generateProductsCard = (element, entity) => {
+  const inStock = entity.product_qty ? 'in-stock' : 'out-stock';
+  const cartBtn = entity.product_qty
+    ? `<button id="#add-to-cart" data-id=${entity.product_id} class="product__addCart">Add to Cart</button>`
+    : '<button disabled class="product__addCart">Out of Stock</button>';
+  element.insertAdjacentHTML(
+    'beforeend',
+    `<div class="product ${inStock}">
+      <img class="product__image" src="./img/phone.jpg" alt="product-image"/>
+      <div class="product__details">
+        <a class="product__name" href="./view-product.html">${entity.product_name}</a>
+        <p class="product__price"><span class="currency">₦</span>${formatCurrency(entity.product_price)}</p>
+        <div class="product__stkInfo">
+          <p class="product__cat">${entity.category_name}</p>
+          <p class="product__stock">${entity.product_qty}</p>
+        </div>
+        <div  class="amt"><input class="product__qty" type="number" value="1" min="1" max="${
+          entity.product_qty
+        }"/></div>
+      </div>
+      ${cartBtn}
+      </div>`
+  );
+};
+
+const addToCart = async (e, allowedQty, requestedQty) => {
+  const productId = Number(e.target.getAttribute('data-id'));
+  const productQty = Number(requestedQty.value);
+  if (!productQty || productQty === 0 || productQty > allowedQty) {
+    toast('Requested quantity is not allowed', errorToast, 2000);
+    return;
+  }
+  const endPoint = `${basepath}/products/${productId}`;
+  const response = await processRequest(endPoint);
+  const productEntry = {
+    id: productId,
+    qty: productQty,
+    name: response.data.product_name,
+    price: response.data.product_price,
+    total: productQty * response.data.product_price
+  };
+  const cartItems = JSON.parse(localStorage.getItem('cart'));
+  const thisProduct = cartItems.find(product => product.id === productId);
+  if (!thisProduct) {
+    cartItems.push(productEntry);
+  } else {
+    thisProduct.qty = productQty;
+  }
+  toast('Added to cart.', successToast, 1000);
+  const updatedCart = JSON.stringify(cartItems);
+  localStorage.setItem('cart', updatedCart);
+  cartCount.textContent = cartItems.length;
+};
+
+const bindEventToCartBtn = element => {
+  Array.from(element.children).forEach(productCard => {
+    const addToCartBtn = productCard.querySelector('.product__addCart');
+    const allowedQty = Number(productCard.querySelector('.product__stock').textContent);
+    const requestedQty = productCard.querySelector('.product__qty');
+    addToCartBtn.addEventListener('click', e => addToCart(e, allowedQty, requestedQty));
+  });
+};
+
+const cardsPaginationComponent = (wrapperEl, response) => {
+  const paginationEl = document.querySelector('.pagination');
+  if (paginationEl) paginationEl.remove();
+  const { hasPrevPage, hasNextPage, nextPage, prevPage } = response.meta;
+  const prev = hasPrevPage
+    ? `<button class="pagination__prev">⬅ Previous Page</button>`
+    : `<button disabled class="pagination__prev">⬅ Previous Page</button>`;
+  const next = hasNextPage
+    ? `<button class="pagination__next">Next Page ➡</button>`
+    : `<button disabled class="pagination__next">Next Page ➡</button>`;
+  productWrapper.firstChild.parentElement.parentElement.insertAdjacentHTML(
+    'beforeend',
+    `<section class="pagination">${prev}${next}</section>`
+  );
+  const nextPageBtn = document.querySelector('.pagination__next');
+  const prevPageBtn = document.querySelector('.pagination__prev');
+  nextPageBtn.addEventListener('click', async () => {
+    loadSpinner();
+    const queryString = `${basepath}/products/?limit=12&page=${nextPage}`;
+    const paginationResponse = await processRequest(queryString);
+    while (productWrapper.firstChild) productWrapper.removeChild(productWrapper.firstChild);
+    paginationResponse.data.forEach(product => generateProductsCard(productWrapper, product));
+    loadSpinner();
+    cardsPaginationComponent(wrapperEl, paginationResponse);
+  });
+  prevPageBtn.addEventListener('click', async () => {
+    loadSpinner();
+    const queryString = `${basepath}/products/?limit=12&page=${prevPage}`;
+    const paginationResponse = await processRequest(queryString);
+    while (productWrapper.firstChild) productWrapper.removeChild(productWrapper.firstChild);
+    paginationResponse.data.forEach(product => generateProductsCard(productWrapper, product));
+    loadSpinner();
+    cardsPaginationComponent(wrapperEl, paginationResponse);
+  });
+};
+
+const populateMakeSaleCards = async () => {
+  if (!localStorage.getItem('cart')) localStorage.setItem('cart', '[]');
+  cartCount.textContent = JSON.parse(localStorage.getItem('cart')).length;
+  loadSpinner();
+  const endPoint = `${basepath}/products/?limit=12`;
+  const response = await processRequest(endPoint);
+  const noResultText = `<h3 class="no-result">No products found. 😌</h3>`;
+  while (productWrapper.firstChild) productWrapper.removeChild(productWrapper.firstChild);
+  if (!response.data.length) {
+    loadSpinner();
+    productWrapper.parentElement.parentElement.insertAdjacentHTML('beforeend', noResultText);
+    productWrapper.parentElement.remove();
+    return;
+  }
+
+  response.data.forEach(product => generateProductsCard(productWrapper, product));
+  bindEventToCartBtn(productWrapper);
+  cardsPaginationComponent(productWrapper, response);
+  loadSpinner();
+};
+
+/* Cart */
+const updateCartCount = () => {
+  cartCount.textContent = JSON.parse(localStorage.getItem('cart')).length;
+};
+
+const generateCartEntries = async (element, item) => {
+  element.insertAdjacentHTML(
+    'beforeend',
+    `<tr data-id=${item.id}>
+        <td><span class="remove">-</span></td>
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>${formatCurrency(item.price)}</td>
+        <td class="total">${formatCurrency(item.total)}</td>
+      </tr>`
+  );
+};
+
+const populateCart = () => {
+  loadSpinner();
+  const cartItems = JSON.parse(localStorage.getItem('cart'));
+  const tableBody = cartTable.children[1];
+  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
+  cartItems.forEach(async item => generateCartEntries(tableBody, item));
+  const total = cartItems.map(item => item.total).reduce((acc, curr) => acc + curr, 0);
+  salesTotalWrapper.textContent = formatCurrency(total);
+  Array.from(tableBody.children).forEach(row => {
+    const removeBtn = row.querySelector('.remove');
+    removeBtn.addEventListener('click', () => {
+      const rowId = Number(row.dataset.id);
+      const thisProduct = cartItems.find(product => product.id === rowId);
+      if (thisProduct) {
+        cartItems.splice(cartItems.indexOf(thisProduct), 1);
+        const updatedCart = JSON.stringify(cartItems);
+        localStorage.setItem('cart', updatedCart);
+        row.remove();
+        populateCart();
+      }
+    });
+  });
+  loadSpinner();
+  if (!tableBody.children.length) {
+    completeOrder.style.display = 'none';
+    return;
+  }
+  completeOrder.style.display = 'block';
 };
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const login = async e => {
   e.preventDefault();
+  const loginBtn = document.querySelector(`.${e.target.className} .btn`);
+  loginBtn.textContent = 'Authenticating';
+  loadSpinner();
   const email = document.querySelector('#login-email').value;
   const password = document.querySelector('#login-password').value;
   const loginUrl = `${basepath}/auth/login`;
@@ -540,6 +749,8 @@ const login = async e => {
   const response = await processRequest(loginUrl, 'POST', loginInfo);
   destroyInputErrors('.form__login');
   if (!response.data) {
+    loginBtn.textContent = 'Login';
+    loadSpinner();
     if (response.message) {
       handleInputErrors(response, '.form__login');
       return;
@@ -547,15 +758,17 @@ const login = async e => {
     handleInputErrors(response, '.form__login');
     return;
   }
+  loginBtn.textContent = 'Successful ✅';
   const { token, role } = response.data;
   localStorage.setItem('token', token);
   localStorage.setItem('role', role);
-  toast(response.message, successToast, 5000);
+  toast(response.message, successToast, 2000);
   redirectHandler(role);
 };
 
 const createUser = async e => {
   e.preventDefault();
+  loadSpinner();
   const name = document.querySelector('#staff-name').value;
   const email = document.querySelector('#staff-email').value;
   const password = document.querySelector('#staff-password').value;
@@ -565,61 +778,62 @@ const createUser = async e => {
   const response = await processRequest(signupUrl, 'POST', signupInfo);
   destroyInputErrors('#create-user-form');
   if (!response.data) {
+    loadSpinner();
     handleInputErrors(response, '#create-user-form');
     return;
   }
-  toast(response.message, successToast, 5000);
+  loadSpinner();
+  toast(response.message, successToast, 1000);
   createUserForm.reset();
   populateUsersTable();
 };
 
 const updateUser = async e => {
   e.preventDefault();
-
+  loadSpinner();
   const modal = document.body.querySelector('.modal');
   const uName = document.querySelector('#update-name').value;
   const uEmail = document.querySelector('#update-email').value;
   const uRole = document.querySelector('#update-role').value;
   let uPassword = document.querySelector('#update-password').value;
   uPassword = uPassword.length < 5 ? undefined : document.querySelector('#update-password').value;
-
   const userUpdateUrl = `${basepath}/users/${e.target.getAttribute('data-id')}`;
   const updateInfo = { name: uName, email: uEmail, password: uPassword, role: uRole };
-
   if (!uPassword) delete updateInfo.password;
   if (uRole === 'Owner') delete updateInfo.role;
-
   const updateResponse = await processRequest(userUpdateUrl, 'PUT', updateInfo);
-
   if (updateResponse.status === 'success') {
-    toast(updateResponse.message, successToast);
+    loadSpinner();
+    toast(updateResponse.message, successToast, 800);
     document.body.removeChild(modal);
     populateUsersTable();
     return;
   }
-
-  toast(updateResponse.message || updateResponse.error[0], errorToast);
+  loadSpinner();
+  toast(updateResponse.message || updateResponse.error[0], errorToast, 800);
   document.body.removeChild(modal);
 };
 
 const deleteUser = async e => {
+  loadSpinner();
   const modal = document.body.querySelector('.modal');
   const userid = Number(e.target.getAttribute('data-id'));
   const deleteUsersEndpoint = `${basepath}/users/${userid}`;
   const deleteResponse = await processRequest(deleteUsersEndpoint, 'DELETE');
-
   if (!deleteResponse.status) {
-    toast(deleteResponse.message, errorToast);
+    loadSpinner();
+    toast(deleteResponse.message, errorToast, 800);
     document.body.removeChild(modal);
     return;
   }
-
-  toast(deleteResponse.message, successToast);
+  loadSpinner();
+  toast(deleteResponse.message, successToast, 800);
   document.body.removeChild(modal);
   populateUsersTable();
 };
 
 const createCategory = async e => {
+  loadSpinner();
   e.preventDefault();
   const categoryName = document.querySelector('#category-name').value;
   const categoryEnpoint = `${basepath}/category`;
@@ -627,9 +841,11 @@ const createCategory = async e => {
   const response = await processRequest(categoryEnpoint, 'POST', categoryInfo);
   destroyInputErrors('#create-category');
   if (!response.data) {
+    loadSpinner();
     toast(response.message, errorToast);
     return;
   }
+  loadSpinner();
   createCategoryForm.reset();
   toast(response.message, successToast);
   populateCategoryTable();
@@ -663,15 +879,34 @@ const createProduct = async e => {
   populateProductsTable();
 };
 
+const createNewSale = async () => {
+  loadSpinner();
+  const cartItems = JSON.parse(localStorage.getItem('cart'));
+  const endPointUrl = `${basepath}/sales`;
+  const saleInfo = { products: cartItems };
+  const response = await processRequest(endPointUrl, 'POST', saleInfo);
+  if (!response.data) {
+    loadSpinner();
+    toast(response.message, errorToast);
+    return;
+  }
+  loadSpinner();
+  toast(response.message, successToast);
+  localStorage.setItem('cart', '[]');
+  /* TODO: Show a Div with checkout complete for some seconds then show empty cart div */
+  populateCart();
+};
+
 const filterByRows = async e => {
   loadSpinner();
   e.preventDefault();
+  const tableBody = productsTable.children[1];
   const limit = document.querySelector('#filter-pref').value;
   const filterQuery = `${basepath}/products/?limit=${limit}`;
   const response = await processRequest(filterQuery);
-  while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
-  response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
-  paginationComponent(productsTableBody, response, limit);
+  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
+  response.data.forEach(product => generateTableBodyEntries(tableBody, product));
+  paginationComponent(tableBody, response, limit);
   loadSpinner();
   toast(response.message, successToast, 1000);
 };
@@ -679,46 +914,47 @@ const filterByRows = async e => {
 const filterByName = async e => {
   loadSpinner();
   e.preventDefault();
+  const tableBody = productsTable.children[1];
   const searchText = document.querySelector('#search-name').value;
-
   const filterQuery = `${basepath}/products/?search=${searchText}`;
 
   const response = await processRequest(filterQuery);
-  while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
 
   if (!response.data.length) {
     loadSpinner();
-    productsTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
-    paginationComponent(productsTableBody, response, 10);
+    tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
+    paginationComponent(tableBody, response, 10);
     return;
   }
 
   loadSpinner();
-  response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
+  response.data.forEach(product => generateTableBodyEntries(tableBody, product));
   toast(response.message, successToast, 1000);
-  paginationComponent(productsTableBody, response, 10);
+  paginationComponent(tableBody, response, 10);
 };
 
 const filterByQty = async e => {
   e.preventDefault();
+  const tableBody = productsTable.children[1];
   loadSpinner();
   const qty = document.querySelector('#qty-pref').value;
   const filterQuery = `${basepath}/products/?stock=${qty}`;
   const response = await processRequest(filterQuery);
-  while (productsTableBody.firstChild) productsTableBody.removeChild(productsTableBody.firstChild);
+  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
   if (!response.data.length) {
     loadSpinner();
-    productsTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
+    tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
     return;
   }
   loadSpinner();
-  response.data.forEach(product => generateTableBodyEntries(productsTableBody, product));
-  paginationComponent(productsTableBody, response, 10, `stock=${qty}`);
+  response.data.forEach(product => generateTableBodyEntries(tableBody, product));
+  paginationComponent(tableBody, response, 10, `stock=${qty}`);
   toast(response.message, successToast, 1000);
 };
 
 const clearProductFilers = () => {
-  toast('Filters cleared', successToast, 1000);
+  toast('Filters cleared', successToast, 200);
   filterRowsForm.reset();
   filterQtyForm.reset();
   filterNameForm.reset();
@@ -729,6 +965,7 @@ if (loginForm) loginForm.addEventListener('submit', login);
 if (createUserForm) createUserForm.addEventListener('submit', createUser);
 if (createCategoryForm) createCategoryForm.addEventListener('submit', createCategory);
 if (createProductForm) createProductForm.addEventListener('submit', createProduct);
+if (completeOrder) completeOrder.addEventListener('click', createNewSale);
 if (filterRowsForm) filterRowsForm.addEventListener('submit', filterByRows);
 if (filterQtyForm) filterQtyForm.addEventListener('submit', filterByQty);
 if (filterNameForm) filterNameForm.addEventListener('submit', filterByName);
@@ -769,10 +1006,14 @@ switch (window.location.pathname) {
     populateUsersTable();
     break;
   case '/make-sale.html':
+    populateCategoryDropDown();
+    populateMakeSaleCards();
     break;
   case '/cart.html':
+    populateCart();
     break;
   case '/my-sales.html':
+    updateCartCount();
     break;
   case '/view-product.html':
     break;

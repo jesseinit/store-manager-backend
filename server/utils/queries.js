@@ -155,15 +155,7 @@ const query = {
           product_price = COALESCE($4, product_price), 
           product_qty = COALESCE($5, product_qty) 
           WHERE product_id = $6 RETURNING *`,
-    values: [
-      updateInfo.imgUrl,
-      updateInfo.name,
-      updateInfo.categoryid,
-      // Number.parseFloat(updateInfo.price).toFixed(2),
-      updateInfo.price,
-      updateInfo.qty,
-      id
-    ]
+    values: [updateInfo.imgUrl, updateInfo.name, updateInfo.categoryid, updateInfo.price, updateInfo.qty, id]
   }),
 
   deleteProduct: id => ({

@@ -31,11 +31,10 @@
         <section class="sales">
           <div class="sales__meta"><h3 class="header">Cart</h3></div>
           <div class="table-wrapper no-flow">
-            <table class="sales__table">
+            <table id="cart-table" class="table">
               <thead>
                 <tr>
                   <th></th>
-                  <th>ID</th>
                   <th>Description</th>
                   <th>Quantity</th>
                   <th>Price</th>
@@ -43,56 +42,17 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td><span class="remove">-</span></td>
-                  <td>2341</td>
-                  <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
-                  <td>2</td>
-                  <td class="price">249,999</td>
-                  <td class="total">499,998.00</td>
-                </tr>
-                <tr>
-                  <td><span class="remove">-</span></td>
-                  <td>1201</td>
-                  <td>
-                    Xiaomi Redmi S2 3GB 32GB Snapdragon 625 Octa Core 5.99" 18:9 Full Screen Dual Camera 12MP+5MP
-                    Smartphone
-                  </td>
-                  <td>1</td>
-                  <td class="price">89,999</td>
-                  <td class="total">89,999.00</td>
-                </tr>
-                <tr>
-                  <td><span class="remove">-</span></td>
-                  <td>2341</td>
-                  <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
-                  <td>2</td>
-                  <td class="price">249,999</td>
-                  <td class="total">499,998.00</td>
-                </tr>
-                <tr>
-                  <td><span class="remove">-</span></td>
-                  <td>2341</td>
-                  <td>
-                    Original Sandisk Micro SD card Class10 TF card16gb 32gb 64gb 128gb 80Mb/s memory card for samrtphone
-                    and table PC
-                  </td>
-                  <td>1</td>
-                  <td class="price">6,999</td>
-                  <td class="total">6,999.00</td>
-                </tr>
               </tbody>
               <tfoot>
                 <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
-                <th>Total:</th>
-                <th class="total">808,887.00</th>
+                <th class="total">Total: <span>0.00</span></th>
               </tfoot>
             </table>
+            <button id="complete-order" style="display: none;" class="sales__btn">Complete Order</button>
           </div>
-          <button id="complete-order" class="sales__btn">Complete Order</button>
         </section>
       </section>
     </main>

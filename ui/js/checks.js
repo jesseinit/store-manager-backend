@@ -20,8 +20,17 @@ const attendantOnly = role => {
 };
 const currentPage = window.location.pathname;
 const role = localStorage.getItem('role');
+const token = localStorage.getItem('token');
 
 switch (currentPage) {
+  case '/':
+    if (role && token) {
+      adminOnly(role);
+      attendantOnly(role);
+    } else {
+      localStorage.clear();
+    }
+    break;
   case '/admin.html':
     checkRole();
     adminOnly(role);
