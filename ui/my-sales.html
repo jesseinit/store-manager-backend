@@ -34,21 +34,21 @@
         <div class="summary__card">
           <div class="details">
             <p class="header">Sales Order Processed</p>
-            <h2 class="value">20,593</h2>
+            <h2 class="value" id="total-sales-orders"></h2>
           </div>
           <div class="icon yellow"><img src="./img/sales-rec-icon.png" alt="card-icon"></div>
         </div>
         <div class="summary__card">
           <div class="details">
             <p class="header">Total Products Sold</p>
-            <h2 class="value">1,593</h2>
+            <h2 class="value" id="total-prod-sold"></h2>
           </div>
           <div class="icon red"><img src="./img/product-sold-icon.png" alt="card-icon"></div>
         </div>
         <div class="summary__card">
           <div class="details">
             <p class="header">Product Worth Sold</p>
-            <h2 class="value">N157,593</h2>
+            <h2 class="value" id="total-prod-worth"></h2>
           </div>
           <div class="icon green"><img src="./img/product-worth-icon.png" alt="card-icon"></div>
         </div>
@@ -57,7 +57,7 @@
         <div class="sales__meta">
           <h3 class="header">My Sales History</h3>
           <div class="sort">
-            <form id="sort__date">
+            <form id="sort-date">
               <fieldset>
                 <legend>Date Range</legend>
                 <strong>From: </strong><input type="date" id="from-date" required>
@@ -76,7 +76,7 @@
           </div>
         </div>
         <div class="table-wrapper">
-          <table class="table">
+          <table id="my-sales-table" class="table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -88,49 +88,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>2341</td>
-                <td>29-11-2018</td>
-                <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
-                <td>2</td>
-                <td class="price">249,999</td>
-                <td class="total">499,998.00</td>
-              </tr>
-              <tr>
-                <td>1201</td>
-                <td>29-11-2018</td>
-                <td>Xiaomi Redmi S2 3GB 32GB Snapdragon 625 Octa Core 5.99" 18:9 Full Screen
-                  Dual Camera 12MP+5MP Smartphone</td>
-                <td>1</td>
-                <td class="price">89,999</td>
-                <td class="total">89,999.00</td>
-              </tr>
-              <tr>
-                <td>2341</td>
-                <td>29-11-2018</td>
-                <td>Dell Inspiron 15 TZ-228765 Ci7 2.48GHz GTX1080TiTan Laptop</td>
-                <td>2</td>
-                <td class="price">249,999</td>
-                <td class="total">499,998.00</td>
-              </tr>
-              <tr>
-                <td>2341</td>
-                <td>29-11-2018</td>
-                <td>Original Sandisk Micro SD card Class10 TF card16gb 32gb 64gb 128gb
-                  80Mb/s memory card for samrtphone and table PC</td>
-                <td>1</td>
-                <td class="price">6,999</td>
-                <td class="total">6,999.00</td>
-              </tr>
             </tbody>
-            <tfoot>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th>Total:</th>
-              <th class="total">808,887.00</th>
-            </tfoot>
           </table>
         </div>
       </section>

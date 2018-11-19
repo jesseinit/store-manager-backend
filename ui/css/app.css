@@ -137,6 +137,12 @@ a {
   text-align: right;
 }
 
+.table .deleted-product {
+  background: #ffe6e6;
+  display: inline-block;
+  padding: 3px 5px;
+}
+
 .table thead {
   background: #2c363b;
   color: #fff;
@@ -216,6 +222,18 @@ a {
   color: #fff;
   border-radius: 20px;
   cursor: pointer;
+}
+
+.empty-cart::before {
+  position: absolute;
+  background: #fff;
+  content: 'Your cart is currently empty!';
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  width: 100%;
+  height: 100%;
 }
 
 .spinner {
@@ -437,8 +455,9 @@ a {
 
 #site-main .main .search__catergory {
   height: 40px;
+  padding: 0 10px;
   border-left: 1px solid #eee;
-  background: whitesmoke;
+  background: #a9cfff;
 }
 
 #site-main .main .search__submit {
@@ -475,6 +494,13 @@ a {
 
 #site-main .main .products {
   display: block;
+}
+
+@media (min-width: 836px) {
+  #site-main .main .products {
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 
 @media (min-width: 1023px) {
@@ -517,7 +543,7 @@ a {
 
 #site-main .main .products .product {
   position: relative;
-  margin-bottom: 10px;
+  margin-bottom: 2%;
   padding: 20px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
@@ -526,10 +552,23 @@ a {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-@media (min-width: 1023px) {
+@media (min-width: 836px) {
   #site-main .main .products .product {
-    width: 31%;
-    margin-right: 20px;
+    width: 49%;
+    margin-right: 2%;
+  }
+  #site-main .main .products .product:nth-child(2n) {
+    margin-right: 0px;
+  }
+}
+
+@media (min-width: 836px) and (min-width: 1023px) {
+  #site-main .main .products .product {
+    width: 32%;
+    margin-right: 2%;
+  }
+  #site-main .main .products .product:nth-child(2n) {
+    margin-right: 2%;
   }
   #site-main .main .products .product:nth-child(3n) {
     margin-right: 0px;
@@ -700,6 +739,10 @@ a {
 
 #site-main .main .products .product--single .amt {
   margin-bottom: 10px;
+}
+
+#site-main .main .sales {
+  position: relative;
 }
 
 #site-main .main .sales input[type='submit'],
@@ -1027,6 +1070,7 @@ a {
   background: rgba(0, 0, 0, 0.2);
   font-size: 0.9em;
   transition: border 0.5s ease;
+  color: #fff;
 }
 
 #site-main .form__wrapper .form__input::placeholder {

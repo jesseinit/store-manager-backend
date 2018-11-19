@@ -23,7 +23,7 @@ Store Manager is a web application that helps store owners manage sales and prod
 Project is managed [here](https://www.pivotaltracker.com/n/projects/2204201) using the project management tool, [Pivotal Tracker](https://www.pivotaltracker.com).
 
 ## Templates
-UI templates are hosted on Github pages [here](https://jesseinit.github.io/store-manager/)
+UI templates are hosted on Github pages [here](https://jesseinit.github.io/store-manager/ui/)
 
 ## Technologies Used
 * [Node.js](https://nodejs.org) - A runtime environment based off of Chrome's V8 Engine for writing Javascript code on the server.

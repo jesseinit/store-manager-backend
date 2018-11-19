@@ -188,7 +188,7 @@ const query = {
     text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date, p.product_name as s_description, ps.product_qty as s_qty,
           p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
           JOIN sales as s ON s.sale_id = ps.sale_id
-          JOIN products as p ON p.product_id = ps.product_id
+          LEFT JOIN products as p ON p.product_id = ps.product_id
           ORDER BY ps.sale_id DESC
           LIMIT $1 OFFSET $2`,
     values: [limit, offset]
@@ -252,7 +252,7 @@ const query = {
     text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date, p.product_name as s_description, ps.product_qty as s_qty,
           p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
           JOIN sales as s ON s.sale_id = ps.sale_id
-          JOIN products as p ON p.product_id = ps.product_id
+          LEFT JOIN products as p ON p.product_id = ps.product_id
           WHERE s.user_id = $1
           LIMIT $2 OFFSET $3`,
     values: [userid, limit, offset]

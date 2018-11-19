@@ -50,14 +50,14 @@ class ProductHelper {
     if (!rowCount) return paginateEmptyResult('No product matches your search.');
 
     let currentPage = Number(page) || 1;
-    const totalPages = Math.ceil(rowCount / 10);
+    const totalPages = Math.ceil(rowCount / 12);
 
     /* istanbul ignore next */
     if (currentPage > totalPages) {
       currentPage = totalPages;
     }
 
-    const offset = (currentPage - 1) * 10;
+    const offset = (currentPage - 1) * 12;
 
     const { rows } = await pool.query(query.getAllProductsByCategory(catid, search, offset));
 
@@ -84,14 +84,14 @@ class ProductHelper {
 
     let currentPage = Number(page) || 1;
 
-    const totalPages = Math.ceil(rowCount / 10);
+    const totalPages = Math.ceil(rowCount / 12);
 
     /* istanbul ignore next */
     if (currentPage > totalPages) {
       currentPage = totalPages;
     }
 
-    const offset = (currentPage - 1) * 10;
+    const offset = (currentPage - 1) * 12;
 
     const { rows } = await pool.query(query.getAllProductsByName(search, offset));
 
