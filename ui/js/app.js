@@ -11,6 +11,7 @@ const logoutBtn = document.querySelector('#logout-btn');
 const usersTableBody = document.querySelector('#users-table tbody');
 const categoryTableBody = document.querySelector('#category-table tbody');
 const productsTable = document.querySelector('#products-table');
+const salesTable = document.querySelector('#my-sales-table');
 const latestTableBody = document.querySelector('#lastest-sales tbody');
 const recordSort = document.querySelector('.sort');
 const filterRowsForm = document.querySelector('#filter-rows');
@@ -22,8 +23,10 @@ const toDate = document.querySelector('#to-date');
 const productWrapper = document.querySelector('.products');
 const cartCount = document.querySelector('.cart-count');
 const cartTable = document.querySelector('#cart-table');
+const cartContianer = document.querySelector('.sales');
 const salesTotalWrapper = document.querySelector('.total span');
 const completeOrder = document.querySelector('#complete-order');
+const searchForm = document.querySelector('#search-form');
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const processRequest = (url, method = 'GET', body = _) => {
@@ -40,7 +43,11 @@ const processRequest = (url, method = 'GET', body = _) => {
     .then(response => response)
     .catch(e => {
       const { message, error } = e;
-      if (message === 'JsonWebTokenError') {
+      if (
+        message === 'JsonWebTokenError' ||
+        message.includes('admins/owner') ||
+        message.includes('attendants accounts only')
+      ) {
         localStorage.clear();
         window.location.replace('./');
       }
@@ -81,16 +88,16 @@ const formatCurrency = number =>
   new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(number);
 
 const nFormatter = num => {
-  if (num >= 1000000000) return `${(num / 1000000000).toFixed(2).replace(/\.0$/, '')}G+`;
-  if (num >= 1000000) return `${(num / 1000000).toFixed(2).replace(/\.0$/, '')}M+`;
-  if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K+`;
+  if (num >= 1000000000) return `${(num / 1000000000).toFixed(2).replace(/\.0$/, '')}G`;
+  if (num >= 1000000) return `${(num / 1000000).toFixed(2).replace(/\.0$/, '')}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`;
   return num;
 };
 
 const formatDate = date =>
   new Date(date)
     .toJSON()
-    .slice(0, 10)
+    .slice(2, 10)
     .split('-')
     .reverse()
     .join('/');
@@ -131,11 +138,22 @@ const populateAdminDashboard = async () => {
         <td>${sale.s_description}</td>
         <td>${sale.s_qty}</td>
         <td>${formatCurrency(sale.s_price)}</td>
-        <td class="total">${formatCurrency(sale.s_total)}</td>
+        <td class="total">${nFormatter(sale.s_total)}</td>
       </tr>`
     );
   });
 
+  loadSpinner();
+};
+
+const populateAttendantDashboard = async () => {
+  loadSpinner();
+  const miscUrl = `${basepath}/sales/attendants?misc=true`;
+  const response = await processRequest(miscUrl);
+  const { totalproductsold, totalproductworth, totalsaleorder } = response.misc;
+  document.querySelector('#total-prod-sold').textContent = totalproductsold;
+  document.querySelector('#total-sales-orders').textContent = totalsaleorder;
+  document.querySelector('#total-prod-worth').textContent = `N ${nFormatter(totalproductworth)}`;
   loadSpinner();
 };
 
@@ -531,7 +549,7 @@ const generateTableBodyEntries = (element, entity) => {
     `<tr>
       <td>${entity.product_id}</td>
       <td>${entity.product_name}</td>
-      <td>N ${formatCurrency(entity.product_price)}</td>
+      <td>${formatCurrency(entity.product_price)}</td>
       <td>${entity.product_qty}</td>
       <td data-id=${entity.product_id} style="text-align: center">
         <button class="blue">Edit</button><button class="red">Delete</button>
@@ -575,9 +593,9 @@ const generateProductsCard = (element, entity) => {
   element.insertAdjacentHTML(
     'beforeend',
     `<div class="product ${inStock}">
-      <img class="product__image" src="./img/phone.jpg" alt="product-image"/>
+      <img class="product__image" src="${entity.product_image}" alt="product-image"/>
       <div class="product__details">
-        <a class="product__name" href="./view-product.html">${entity.product_name}</a>
+        <p class="product__name">${entity.product_name}</p>
         <p class="product__price"><span class="currency">₦</span>${formatCurrency(entity.product_price)}</p>
         <div class="product__stkInfo">
           <p class="product__cat">${entity.category_name}</p>
@@ -654,6 +672,7 @@ const cardsPaginationComponent = (wrapperEl, response) => {
     paginationResponse.data.forEach(product => generateProductsCard(productWrapper, product));
     loadSpinner();
     cardsPaginationComponent(wrapperEl, paginationResponse);
+    bindEventToCartBtn(wrapperEl);
   });
   prevPageBtn.addEventListener('click', async () => {
     loadSpinner();
@@ -663,34 +682,133 @@ const cardsPaginationComponent = (wrapperEl, response) => {
     paginationResponse.data.forEach(product => generateProductsCard(productWrapper, product));
     loadSpinner();
     cardsPaginationComponent(wrapperEl, paginationResponse);
+    bindEventToCartBtn(wrapperEl);
   });
 };
 
-const populateMakeSaleCards = async () => {
+const populateMakeSaleCards = async query => {
   if (!localStorage.getItem('cart')) localStorage.setItem('cart', '[]');
   cartCount.textContent = JSON.parse(localStorage.getItem('cart')).length;
   loadSpinner();
-  const endPoint = `${basepath}/products/?limit=12`;
+  const noResultTextEl = document.querySelector('.no-result');
+  const paginationEl = document.querySelector('.pagination');
+  const endPoint = query || `${basepath}/products/?limit=12`;
   const response = await processRequest(endPoint);
-  const noResultText = `<h3 class="no-result">No products found. 😌</h3>`;
+  const noResultText = `<h3 class="no-result">${response.message} 😌</h3>`;
   while (productWrapper.firstChild) productWrapper.removeChild(productWrapper.firstChild);
   if (!response.data.length) {
     loadSpinner();
-    productWrapper.parentElement.parentElement.insertAdjacentHTML('beforeend', noResultText);
-    productWrapper.parentElement.remove();
+    if (noResultTextEl) noResultTextEl.remove();
+    productWrapper.parentElement.insertAdjacentHTML('beforeend', noResultText);
+    if (paginationEl) paginationEl.remove();
     return;
   }
-
+  if (noResultTextEl) noResultTextEl.remove();
   response.data.forEach(product => generateProductsCard(productWrapper, product));
   bindEventToCartBtn(productWrapper);
   cardsPaginationComponent(productWrapper, response);
   loadSpinner();
 };
 
-/* Cart */
-const updateCartCount = () => {
-  cartCount.textContent = JSON.parse(localStorage.getItem('cart')).length;
+/* Sales Settings */
+const generateSalesEntries = (element, sale) => {
+  element.insertAdjacentHTML(
+    'beforeend',
+    `<tr>
+      <td>${sale.s_id}</td>
+      <td>${formatDate(sale.s_date)}</td>
+      <td>${sale.s_description || `<span class='deleted-product'>Product Deleted</span>`}</td>
+      <td>${sale.s_qty}</td>
+      <td>${formatCurrency(sale.s_price)}</td>
+      <td class="total">${nFormatter(sale.s_total)}</td>
+    </tr>`
+  );
 };
+
+const salesPaginationComponent = (wrapperEl, response, role) => {
+  const tableBody = salesTable.children[1];
+  const paginationEl = document.querySelector('.pagination');
+  if (paginationEl) paginationEl.remove();
+  const { hasPrevPage, hasNextPage, nextPage, prevPage } = response.meta;
+  const prev = hasPrevPage
+    ? `<button class="pagination__prev">⬅ Previous Page</button>`
+    : `<button disabled class="pagination__prev">⬅ Previous Page</button>`;
+  const next = hasNextPage
+    ? `<button class="pagination__next">Next Page ➡</button>`
+    : `<button disabled class="pagination__next">Next Page ➡</button>`;
+  tableBody.parentElement.parentElement.insertAdjacentHTML(
+    'beforeend',
+    `<section class="pagination">${prev}${next}</section>`
+  );
+  const nextPageBtn = document.querySelector('.pagination__next');
+  const prevPageBtn = document.querySelector('.pagination__prev');
+
+  nextPageBtn.addEventListener('click', async () => {
+    loadSpinner();
+    if (role === 'admin') {
+      const queryString = `${basepath}/sales/?page=${nextPage}`;
+      const paginationResponse = await processRequest(queryString);
+      while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
+      paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
+      loadSpinner();
+      salesPaginationComponent(wrapperEl, paginationResponse, role);
+      return;
+    }
+    const queryString = `${basepath}/sales/attendants?page=${nextPage}`;
+    const paginationResponse = await processRequest(queryString);
+    while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
+    paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
+    loadSpinner();
+    salesPaginationComponent(wrapperEl, paginationResponse);
+    return;
+  });
+
+  prevPageBtn.addEventListener('click', async () => {
+    loadSpinner();
+    if (role === 'admin') {
+      const queryString = `${basepath}/sales/?page=${prevPage}`;
+      const paginationResponse = await processRequest(queryString);
+      while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
+      paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
+      loadSpinner();
+      salesPaginationComponent(wrapperEl, paginationResponse, role);
+      return;
+    }
+    const queryString = `${basepath}/sales/attendants?page=${prevPage}`;
+    const paginationResponse = await processRequest(queryString);
+    while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
+    paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
+    loadSpinner();
+    salesPaginationComponent(wrapperEl, paginationResponse, role);
+  });
+};
+
+const populateSalesTable = async (query, role) => {
+  const tableBody = salesTable.children[1];
+  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
+  if (role === 'admin') {
+    const response = await processRequest(query);
+    response.data.forEach(sale => generateSalesEntries(tableBody, sale));
+    salesPaginationComponent(salesTable, response, role);
+    return;
+  }
+  const response = await processRequest(query);
+  response.data.forEach(sale => generateSalesEntries(tableBody, sale));
+  salesPaginationComponent(salesTable, response, role);
+};
+
+const populateAdminSalesTable = () => {
+  const adminQuery = `${basepath}/sales`;
+  populateSalesTable(adminQuery, 'admin');
+};
+
+const populateAttendantSalesTable = () => {
+  const attendantQuery = `${basepath}/sales/attendants`;
+  populateSalesTable(attendantQuery, 'attendant');
+};
+
+/* Cart */
+const updateCartCount = () => (cartCount.textContent = JSON.parse(localStorage.getItem('cart')).length);
 
 const generateCartEntries = async (element, item) => {
   element.insertAdjacentHTML(
@@ -708,6 +826,12 @@ const generateCartEntries = async (element, item) => {
 const populateCart = () => {
   loadSpinner();
   const cartItems = JSON.parse(localStorage.getItem('cart'));
+  if (!cartItems.length) {
+    cartContianer.classList.add('empty-cart');
+    completeOrder.style.display = 'none';
+    loadSpinner();
+    return;
+  }
   const tableBody = cartTable.children[1];
   while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
   cartItems.forEach(async item => generateCartEntries(tableBody, item));
@@ -882,6 +1006,13 @@ const createProduct = async e => {
 const createNewSale = async () => {
   loadSpinner();
   const cartItems = JSON.parse(localStorage.getItem('cart'));
+  if (!cartItems.length) {
+    cartContianer.classList.add('empty-cart');
+    completeOrder.style.display = 'none';
+    toast('😜', errorToast, 500);
+    loadSpinner();
+    return;
+  }
   const endPointUrl = `${basepath}/sales`;
   const saleInfo = { products: cartItems };
   const response = await processRequest(endPointUrl, 'POST', saleInfo);
@@ -893,8 +1024,18 @@ const createNewSale = async () => {
   loadSpinner();
   toast(response.message, successToast);
   localStorage.setItem('cart', '[]');
-  /* TODO: Show a Div with checkout complete for some seconds then show empty cart div */
   populateCart();
+};
+
+const searchProducts = async e => {
+  e.preventDefault();
+  const searchInput = e.target.children[0].value;
+  const categoryId = e.target.children[1].value;
+  const queryString =
+    categoryId === 'All'
+      ? `${basepath}/products/?search=${searchInput}&limit=12`
+      : `${basepath}/products/?search=${searchInput}&catid=${Number(categoryId)}&limit=12`;
+  populateMakeSaleCards(queryString);
 };
 
 const filterByRows = async e => {
@@ -970,6 +1111,7 @@ if (filterRowsForm) filterRowsForm.addEventListener('submit', filterByRows);
 if (filterQtyForm) filterQtyForm.addEventListener('submit', filterByQty);
 if (filterNameForm) filterNameForm.addEventListener('submit', filterByName);
 if (clearFiltersProd) clearFiltersProd.addEventListener('click', clearProductFilers);
+if (searchForm) searchForm.addEventListener('submit', searchProducts);
 if (fromDate && toDate) {
   const date = new Date();
   let day = date.getDate();
@@ -1001,6 +1143,7 @@ switch (window.location.pathname) {
     populateCategoryTable();
     break;
   case '/sale-records.html':
+    populateAdminSalesTable();
     break;
   case '/staff-accounts.html':
     populateUsersTable();
@@ -1014,8 +1157,8 @@ switch (window.location.pathname) {
     break;
   case '/my-sales.html':
     updateCartCount();
-    break;
-  case '/view-product.html':
+    populateAttendantDashboard();
+    populateAttendantSalesTable();
     break;
   default:
     break;

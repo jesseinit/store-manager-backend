@@ -63,10 +63,6 @@ switch (currentPage) {
     checkRole();
     attendantOnly(role);
     break;
-  case '/view-product.html':
-    checkRole();
-    attendantOnly(role);
-    break;
   default:
     break;
 }
