@@ -27,6 +27,11 @@ const cartContianer = document.querySelector('.sales');
 const salesTotalWrapper = document.querySelector('.total span');
 const completeOrder = document.querySelector('#complete-order');
 const searchForm = document.querySelector('#search-form');
+const filterByDate = document.querySelector('#sort-date');
+const clearAttendantsFilters = document.querySelector('#clear-filters-attendant');
+const clearAdminFilters = document.querySelector('#clear-filters-admin');
+const sortByIdForm = document.querySelector('#sort-id');
+const sortByUserForm = document.querySelector('#sort-user');
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 const processRequest = (url, method = 'GET', body = _) => {
@@ -43,13 +48,16 @@ const processRequest = (url, method = 'GET', body = _) => {
     .then(response => response)
     .catch(e => {
       const { message, error } = e;
-      if (
-        message === 'JsonWebTokenError' ||
-        message.includes('admins/owner') ||
-        message.includes('attendants accounts only')
-      ) {
-        localStorage.clear();
-        window.location.replace('./');
+      if (message) {
+        if (
+          message.includes('JsonWebTokenError') ||
+          message.includes('TokenExpiredError') ||
+          message.includes('admins/owner') ||
+          message.includes('attendants accounts only')
+        ) {
+          localStorage.clear();
+          window.location.replace('./');
+        }
       }
       return { message, error };
     });
@@ -101,6 +109,20 @@ const formatDate = date =>
     .split('-')
     .reverse()
     .join('/');
+
+const resetDateInputs = () => {
+  if (fromDate && toDate) {
+    const date = new Date();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    month = (month < 10 ? '0' : '') + month;
+    day = (day < 10 ? '0' : '') + day;
+    const today = `${year}-${month}-${day}`;
+    fromDate.value = today;
+    toDate.value = today;
+  }
+};
 
 const populateAdminDashboard = async () => {
   loadSpinner();
@@ -279,6 +301,15 @@ const populateUsersTable = async () => {
   toast(response.message, successToast, 1000);
 };
 
+const populateUsersDropDown = async () => {
+  const usersDropDown = document.querySelector('#users-list');
+  const response = await processRequest(`${basepath}/users/`);
+  const attendantsOnly = response.data.filter(user => user.role !== 'Owner');
+  attendantsOnly.forEach(user => {
+    usersDropDown.insertAdjacentHTML('beforeend', `<option value=${user.id}>${user.name}</option>`);
+  });
+};
+
 /* Category Settings */
 const populateCategoryModal = response => {
   if (!response.data) {
@@ -416,16 +447,14 @@ const goToPage = async (element, page, limit = 10, query = _) => {
 
 const paginationComponent = (element, response, limit, query) => {
   const paginationEl = document.querySelector('.pagination');
-  if (paginationEl) {
-    paginationEl.remove();
-  }
+  if (paginationEl) paginationEl.remove();
   const { hasPrevPage, hasNextPage, nextPage, prevPage } = response.meta;
   const prev = hasPrevPage
-    ? `<button class="pagination__prev">⬅ Previous Page</button>`
-    : `<button disabled class="pagination__prev">⬅ Previous Page</button>`;
+    ? `<button class="pagination__prev">Previous Page</button>`
+    : `<button disabled class="pagination__prev">Previous Page</button>`;
   const next = hasNextPage
-    ? `<button class="pagination__next">Next Page ➡</button>`
-    : `<button disabled class="pagination__next">Next Page ➡</button>`;
+    ? `<button class="pagination__next">Next Page</button>`
+    : `<button disabled class="pagination__next">Next Page</button>`;
   element.parentElement.parentElement.insertAdjacentHTML(
     'beforeend',
     `<section class="pagination">${prev}${next}</section>`
@@ -653,11 +682,11 @@ const cardsPaginationComponent = (wrapperEl, response) => {
   if (paginationEl) paginationEl.remove();
   const { hasPrevPage, hasNextPage, nextPage, prevPage } = response.meta;
   const prev = hasPrevPage
-    ? `<button class="pagination__prev">⬅ Previous Page</button>`
-    : `<button disabled class="pagination__prev">⬅ Previous Page</button>`;
+    ? `<button class="pagination__prev">Previous Page</button>`
+    : `<button disabled class="pagination__prev">Previous Page</button>`;
   const next = hasNextPage
-    ? `<button class="pagination__next">Next Page ➡</button>`
-    : `<button disabled class="pagination__next">Next Page ➡</button>`;
+    ? `<button class="pagination__next">Next Page</button>`
+    : `<button disabled class="pagination__next">Next Page</button>`;
   productWrapper.firstChild.parentElement.parentElement.insertAdjacentHTML(
     'beforeend',
     `<section class="pagination">${prev}${next}</section>`
@@ -731,11 +760,11 @@ const salesPaginationComponent = (wrapperEl, response, role) => {
   if (paginationEl) paginationEl.remove();
   const { hasPrevPage, hasNextPage, nextPage, prevPage } = response.meta;
   const prev = hasPrevPage
-    ? `<button class="pagination__prev">⬅ Previous Page</button>`
-    : `<button disabled class="pagination__prev">⬅ Previous Page</button>`;
+    ? `<button class="pagination__prev">Previous Page</button>`
+    : `<button disabled class="pagination__prev">Previous Page</button>`;
   const next = hasNextPage
-    ? `<button class="pagination__next">Next Page ➡</button>`
-    : `<button disabled class="pagination__next">Next Page ➡</button>`;
+    ? `<button class="pagination__next">Next Page</button>`
+    : `<button disabled class="pagination__next">Next Page</button>`;
   tableBody.parentElement.parentElement.insertAdjacentHTML(
     'beforeend',
     `<section class="pagination">${prev}${next}</section>`
@@ -760,7 +789,6 @@ const salesPaginationComponent = (wrapperEl, response, role) => {
     paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
     loadSpinner();
     salesPaginationComponent(wrapperEl, paginationResponse);
-    return;
   });
 
   prevPageBtn.addEventListener('click', async () => {
@@ -784,21 +812,34 @@ const salesPaginationComponent = (wrapperEl, response, role) => {
 };
 
 const populateSalesTable = async (query, role) => {
+  loadSpinner();
   const tableBody = salesTable.children[1];
   while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
   if (role === 'admin') {
     const response = await processRequest(query);
+    if (!response.data.length) {
+      tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=6>${response.message}</td></tr>`);
+      loadSpinner();
+      return;
+    }
     response.data.forEach(sale => generateSalesEntries(tableBody, sale));
     salesPaginationComponent(salesTable, response, role);
+    loadSpinner();
     return;
   }
   const response = await processRequest(query);
+  if (!response.data.length) {
+    tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=6>${response.message}</td></tr>`);
+    loadSpinner();
+    return;
+  }
   response.data.forEach(sale => generateSalesEntries(tableBody, sale));
   salesPaginationComponent(salesTable, response, role);
+  loadSpinner();
 };
 
-const populateAdminSalesTable = () => {
-  const adminQuery = `${basepath}/sales`;
+const populateAdminSalesTable = query => {
+  const adminQuery = query || `${basepath}/sales`;
   populateSalesTable(adminQuery, 'admin');
 };
 
@@ -808,7 +849,9 @@ const populateAttendantSalesTable = () => {
 };
 
 /* Cart */
-const updateCartCount = () => (cartCount.textContent = JSON.parse(localStorage.getItem('cart')).length);
+const updateCartCount = () => {
+  cartCount.textContent = JSON.parse(localStorage.getItem('cart')).length;
+};
 
 const generateCartEntries = async (element, item) => {
   element.insertAdjacentHTML(
@@ -825,7 +868,9 @@ const generateCartEntries = async (element, item) => {
 
 const populateCart = () => {
   loadSpinner();
+  if (!localStorage.getItem('cart')) localStorage.setItem('cart', '[]');
   const cartItems = JSON.parse(localStorage.getItem('cart'));
+  if (cartContianer.classList.contains('empty-cart')) cartContianer.classList.remove('empty-cart');
   if (!cartItems.length) {
     cartContianer.classList.add('empty-cart');
     completeOrder.style.display = 'none';
@@ -1005,10 +1050,10 @@ const createProduct = async e => {
 
 const createNewSale = async () => {
   loadSpinner();
+  if (!localStorage.getItem('cart')) localStorage.setItem('cart', '[]');
   const cartItems = JSON.parse(localStorage.getItem('cart'));
   if (!cartItems.length) {
-    cartContianer.classList.add('empty-cart');
-    completeOrder.style.display = 'none';
+    populateCart();
     toast('😜', errorToast, 500);
     loadSpinner();
     return;
@@ -1102,6 +1147,135 @@ const clearProductFilers = () => {
   populateProductsTable();
 };
 
+const clearAttendantSaleFilters = () => {
+  sortByIdForm.reset();
+  populateAttendantSalesTable();
+};
+
+const clearAdminSaleFilters = () => {
+  sortByIdForm.reset();
+  sortByUserForm.reset();
+  resetDateInputs();
+  populateAdminSalesTable();
+};
+
+const sortSalesById = async e => {
+  loadSpinner();
+  e.preventDefault();
+  const paginationEl = document.querySelector('.pagination');
+  if (paginationEl) paginationEl.remove();
+  const saleId = document.querySelector('#sale-id').value;
+  const endPointUrl = `${basepath}/sales/${Number(saleId)}`;
+  const response = await processRequest(endPointUrl);
+  const tableBody = salesTable.children[1];
+  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
+  if (!response.data) {
+    tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=6>${response.message || response.error[0]}</td></tr>`);
+    loadSpinner();
+    return;
+  }
+  response.data.forEach(sale => generateSalesEntries(tableBody, sale));
+  loadSpinner();
+};
+
+const performNavigate = async (endPointUrl, options = {}) => {
+  loadSpinner();
+  const { page, tableBody, tableParent } = options;
+  const queryString = `${endPointUrl}&page=${page}`;
+  const paginationResponse = await processRequest(queryString);
+  while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
+  paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
+  loadSpinner();
+  paginationComponentDate(tableParent, paginationResponse, endPointUrl);
+};
+
+const paginationComponentDate = (tableParent, res, endPointUrl) => {
+  const tableBody = tableParent.children[0].children[1];
+  const paginationEl = document.querySelector('.pagination');
+  if (paginationEl) paginationEl.remove();
+
+  const { hasPrevPage, hasNextPage, nextPage, prevPage } = res.meta;
+  const prev = hasPrevPage
+    ? `<button class="pagination__prev">Previous Page</button>`
+    : `<button disabled class="pagination__prev">Previous Page</button>`;
+  const next = hasNextPage
+    ? `<button class="pagination__next">Next Page</button>`
+    : `<button disabled class="pagination__next">Next Page</button>`;
+  tableParent.insertAdjacentHTML('beforeend', `<section class="pagination">${prev}${next}</section>`);
+
+  const nextPageBtn = document.querySelector('.pagination__next');
+  const prevPageBtn = document.querySelector('.pagination__prev');
+
+  nextPageBtn.addEventListener('click', async () => {
+    const option = { page: nextPage, tableBody, tableParent };
+    performNavigate(endPointUrl, option);
+  });
+
+  prevPageBtn.addEventListener('click', async () => {
+    const option = { page: prevPage, tableBody, tableParent };
+    performNavigate(endPointUrl, option);
+  });
+};
+
+const sortSalesByDate = async e => {
+  e.preventDefault();
+  loadSpinner();
+  const paginationEl = document.querySelector('.pagination');
+  const tableBody = salesTable.children[1];
+  const from = fromDate.value;
+  const to = toDate.value;
+
+  if (from > to) {
+    toast(`Invalid date range selected - Kindly recheck`, errorToast, 2000);
+    loadSpinner();
+    return;
+  }
+
+  const endPointUrl = `${basepath}/sales?fdate=${from}&tdate=${to}`;
+  const response = await processRequest(endPointUrl);
+
+  while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
+  if (!response.data.length) {
+    tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=6>${response.message}</td></tr>`);
+    if (paginationEl) paginationEl.remove();
+    loadSpinner();
+    return;
+  }
+
+  response.data.forEach(sale => generateSalesEntries(tableBody, sale));
+
+  paginationComponentDate(salesTable.parentElement, response, endPointUrl);
+  loadSpinner();
+};
+
+const sortSalesByUser = async e => {
+  e.preventDefault();
+  loadSpinner();
+  const tableBody = salesTable.children[1];
+  const paginationEl = document.querySelector('.pagination');
+  const selectedUser = document.querySelector('#users-list').value;
+  if (!Number(selectedUser)) {
+    toast('Please select a user!', errorToast, 3000);
+    loadSpinner();
+    return;
+  }
+  const endPointUrl = `${basepath}/sales?userid=${Number(selectedUser)}`;
+  const response = await processRequest(endPointUrl);
+
+  while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
+  if (!response.data.length) {
+    tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=6>${response.message}</td></tr>`);
+    if (paginationEl) paginationEl.remove();
+    loadSpinner();
+    return;
+  }
+
+  response.data.forEach(sale => generateSalesEntries(tableBody, sale));
+
+  paginationComponentDate(salesTable.parentElement, response, endPointUrl);
+  loadSpinner();
+};
+
 if (loginForm) loginForm.addEventListener('submit', login);
 if (createUserForm) createUserForm.addEventListener('submit', createUser);
 if (createCategoryForm) createCategoryForm.addEventListener('submit', createCategory);
@@ -1112,17 +1286,12 @@ if (filterQtyForm) filterQtyForm.addEventListener('submit', filterByQty);
 if (filterNameForm) filterNameForm.addEventListener('submit', filterByName);
 if (clearFiltersProd) clearFiltersProd.addEventListener('click', clearProductFilers);
 if (searchForm) searchForm.addEventListener('submit', searchProducts);
-if (fromDate && toDate) {
-  const date = new Date();
-  let day = date.getDate();
-  let month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  month = (month < 10 ? '0' : '') + month;
-  day = (day < 10 ? '0' : '') + day;
-  const today = `${year}-${month}-${day}`;
-  fromDate.value = today;
-  toDate.value = today;
-}
+if (sortByIdForm) sortByIdForm.addEventListener('submit', sortSalesById);
+if (sortByUserForm) sortByUserForm.addEventListener('submit', sortSalesByUser);
+if (filterByDate) filterByDate.addEventListener('submit', sortSalesByDate);
+if (clearAttendantsFilters) clearAttendantsFilters.addEventListener('click', clearAttendantSaleFilters);
+if (clearAdminFilters) clearAdminFilters.addEventListener('click', clearAdminSaleFilters);
+
 if (logoutBtn) {
   logoutBtn.addEventListener('click', e => {
     e.preventDefault();
@@ -1143,7 +1312,9 @@ switch (window.location.pathname) {
     populateCategoryTable();
     break;
   case '/sale-records.html':
+    populateUsersDropDown();
     populateAdminSalesTable();
+    resetDateInputs();
     break;
   case '/staff-accounts.html':
     populateUsersTable();

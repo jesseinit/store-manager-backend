@@ -33,7 +33,7 @@ const productsTable = `CREATE TABLE IF NOT EXISTS products (
 const salesTable = `CREATE TABLE IF NOT EXISTS sales (
   sale_id serial NOT NULL PRIMARY KEY,
   user_id int NOT NULL,
-  sale_date date DEFAULT CURRENT_DATE NOT NULL,
+  sale_date TIMESTAMPTZ DEFAULT CURRENT_DATE NOT NULL,
   sale_total float NOT NULL
 );`;
 
@@ -43,7 +43,7 @@ const productSales = `CREATE TABLE IF NOT EXISTS productsales (
   sale_id int NOT NULL,
   product_worth float NOT NULL,
   product_qty int NOT NULL,
-  sale_date date DEFAULT CURRENT_DATE NOT NULL
+  sale_date TIMESTAMPTZ DEFAULT CURRENT_DATE NOT NULL
 );`;
 
 (async () => {

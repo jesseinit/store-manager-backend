@@ -23,7 +23,7 @@ class SalesHelper {
     const { rowCount } = await pool.query(query.getAllSalesCount());
 
     if (!rowCount) {
-      return paginateEmptyResult('You have not made any sales yet.');
+      return paginateEmptyResult('No sales made yet.');
     }
 
     const limit = Number(request.limit) || 10;
@@ -33,9 +33,7 @@ class SalesHelper {
     const totalPages = Math.ceil(rowCount / limit);
 
     /* istanbul ignore next */
-    if (currentPage > totalPages) {
-      currentPage = totalPages;
-    }
+    if (currentPage > totalPages) currentPage = totalPages;
 
     const offset = (currentPage - 1) * limit;
 
@@ -121,9 +119,7 @@ class SalesHelper {
     const totalPages = Math.ceil(rowCount / limit);
 
     /* istanbul ignore next */
-    if (currentPage > totalPages) {
-      currentPage = totalPages;
-    }
+    if (currentPage > totalPages) currentPage = totalPages;
 
     const offset = (currentPage - 1) * limit;
 
