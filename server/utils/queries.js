@@ -215,7 +215,7 @@ const query = {
     text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date, p.product_name as s_description, ps.product_qty as s_qty,
           p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
           JOIN sales as s ON s.sale_id = ps.sale_id
-          JOIN products as p ON p.product_id = ps.product_id
+          LEFT JOIN products as p ON p.product_id = ps.product_id
           ORDER BY s.sale_id DESC LIMIT 5`
   }),
 
@@ -223,7 +223,7 @@ const query = {
     text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date,  p.product_name as s_description, ps.product_qty as s_qty,
           p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
           JOIN sales as s ON s.sale_id = ps.sale_id
-          JOIN products as p ON p.product_id = ps.product_id
+          LEFT JOIN products as p ON p.product_id = ps.product_id
           WHERE ps.sale_date BETWEEN $1 AND $2
           ORDER BY ps.sale_id DESC`,
     values: [`'${fromDate}'`, `'${endDate}'`]
@@ -233,7 +233,7 @@ const query = {
     text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date,  p.product_name as s_description, ps.product_qty as s_qty,
           p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM productSales as ps 
           JOIN sales as s ON s.sale_id = ps.sale_id
-          JOIN products as p ON p.product_id = ps.product_id
+          LEFT JOIN products as p ON p.product_id = ps.product_id
           WHERE ps.sale_date BETWEEN $1 AND $2
           ORDER BY ps.sale_id DESC
           LIMIT $3 OFFSET $4`,
@@ -243,7 +243,7 @@ const query = {
   getAllSalesByAttendantCount: userid => ({
     text: `SELECT * FROM productSales as ps 
           JOIN sales as s ON s.sale_id = ps.sale_id
-          JOIN products as p ON p.product_id = ps.product_id
+          LEFT JOIN products as p ON p.product_id = ps.product_id
           WHERE s.user_id = $1`,
     values: [userid]
   }),
@@ -262,7 +262,7 @@ const query = {
     text: `SELECT ps.sale_id as s_id, ps.sale_date as s_date, p.product_name as s_description, ps.product_qty as s_qty,
           p.product_price as s_price, ps.product_worth as s_total, s.user_id as s_user FROM sales as s 
           JOIN productSales as ps ON s.sale_id = ps.sale_id
-          JOIN products as p ON p.product_id = ps.product_id 
+          LEFT JOIN products as p ON p.product_id = ps.product_id 
           WHERE s.user_id = $1 AND ps.sale_id = $2`,
     values: [userId, saleId]
   }),
@@ -271,7 +271,7 @@ const query = {
     text: `SELECT ps.sale_id as s_id,ps.sale_date as s_date,p.product_name as s_description,ps.product_qty as s_qty,
           p.product_price as s_price,ps.product_worth as s_total,s.user_id as s_user FROM productSales as ps 
           JOIN sales as s ON s.sale_id = ps.sale_id
-          JOIN products as p ON p.product_id = ps.product_id
+          LEFT JOIN products as p ON p.product_id = ps.product_id
           WHERE ps.sale_id = $1`,
     values: [saleId]
   })

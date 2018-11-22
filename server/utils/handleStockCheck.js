@@ -8,6 +8,11 @@ const stockCheck = (req, res, next) => {
   const cartProducts = req.body.products;
   const cartLength = req.body.products.length;
 
+  if (cartLength > 10) {
+    responseHandler(_, _, res, 400, 'failure', 'You can only checkout 10 items per transaction.');
+    return;
+  }
+
   const isUniqueProductList = cartProducts
     .map(product => product.id)
     .every((value, index, array) => array.lastIndexOf(value) === index);

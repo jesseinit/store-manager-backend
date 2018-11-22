@@ -55,24 +55,15 @@
       </section>
       <section class="sales">
         <div class="sales__meta">
-          <h3 class="header">My Sales History</h3>
           <div class="sort">
-            <form id="sort-date">
-              <fieldset>
-                <legend>Date Range</legend>
-                <strong>From: </strong><input type="date" id="from-date" required>
-                <strong>To: </strong><input type="date" id="to-date" required>
-                <input type="submit" value="Retrieve Records">
-              </fieldset>
-            </form>
-            <form id="sort__id">
+            <form id="sort-id">
               <fieldset>
                 <legend>By Sales ID</legend>
-                <input type="text" placeholder="Enter Sales ID">
+                <input type="text" pattern="[0-9]*" id="sale-id" placeholder="Enter Sales ID">
                 <input type="submit" value="Retrieve Records">
               </fieldset>
             </form>
-            <button class="clear">Clear Filters</button>
+            <button class="clear" id="clear-filters-attendant">Clear Filters</button>
           </div>
         </div>
         <div class="table-wrapper">

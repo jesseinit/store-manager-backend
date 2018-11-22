@@ -43,36 +43,23 @@
                 <input type="submit" value="Retrieve Records">
               </fieldset>
             </form>
-            <form id="sort__id">
+            <form id="sort-id">
               <fieldset>
                 <legend>By Sales ID</legend>
-                <input type="text" placeholder="Enter Sales ID">
+                <input type="text" pattern="[0-9]*" id="sale-id" placeholder="Enter Sales ID">
                 <input type="submit" value="Retrieve Records">
               </fieldset>
             </form>
-            <form id="sort__id">
+            <form id="sort-user">
               <fieldset>
                 <legend>By Attendant</legend>
-                <select name="" id="">
-                  <option value="">Attendant 1</option>
-                  <option value="">Attendant 2</option>
-                  <option value="">Attendant 3</option>
+                <select id="users-list">
+                  <option disabled selected value="0">Select User</option>
                 </select>
                 <input type="submit" value="Retrieve Records">
               </fieldset>
             </form>
-            <form id="sort__id">
-              <fieldset>
-                <legend>Filter Rows</legend>
-                <select name="" id="">
-                  <option value="">10 Records</option>
-                  <option value="">50 Records</option>
-                  <option value="">100 Records</option>
-                </select>
-                <input type="submit" value="Retrieve Records">
-              </fieldset>
-            </form>
-            <button class="clear">Clear filters</button>
+            <button class="clear" id="clear-filters-admin">Clear filters</button>
           </div>
         </div>
         <div class="table-wrapper">

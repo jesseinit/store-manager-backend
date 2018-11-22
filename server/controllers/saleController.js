@@ -58,11 +58,7 @@ class SalesController {
       return;
     }
 
-    if (req.query.fdate && req.query.tdate) {
-      const result = await SalesHelper.getAllSalesByDate(req.query);
-      res.send(result);
-      return;
-    }
+    /* TODO: Implement Date Filter for Attendant */
 
     const result = await SalesHelper.getAllSalesByAttendant(req.query);
     res.send(result);
