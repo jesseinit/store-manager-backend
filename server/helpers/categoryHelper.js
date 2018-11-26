@@ -21,9 +21,7 @@ class CategoryHelper {
     try {
       const foundCategory = await pool.query(query.findCategoryByName(categoryName));
 
-      if (foundCategory.rowCount > 0) {
-        errorHandler(400, 'A category with that name exists.');
-      }
+      if (foundCategory.rowCount > 0) errorHandler(400, 'A category with that name exists.');
 
       const createdCategory = await pool.query(query.createCategory(categoryName));
 
@@ -43,18 +41,17 @@ class CategoryHelper {
    */
   static async updateCategory(categoryInfo) {
     try {
-      const foundCategory = await pool.query(query.findCategoryById(categoryInfo.id));
+      const { rows } = await pool.query(query.findCategoryById(categoryInfo.id));
+      const foundCategory = rows[0];
 
-      if (foundCategory.rows.length < 1) {
-        errorHandler(404, 'The category not found.');
-      }
+      if (!foundCategory) errorHandler(404, 'The category not found.');
 
-      const allCategories = await pool.query(query.getAllCategories());
-
-      const isCategoryExists = allCategories.rows.some(category => category.category_name === categoryInfo.name);
-
-      if (isCategoryExists) {
-        errorHandler(400, 'The category name already exists.');
+      if (foundCategory.category_name !== categoryInfo.name) {
+        const allCategories = await pool.query(query.getAllCategories());
+        const isCategoryExists = allCategories.rows.some(category => category.category_name === categoryInfo.name);
+        if (isCategoryExists) {
+          errorHandler(400, 'The category name already exists.');
+        }
       }
 
       const createdCategory = await pool.query(query.updateCategory(categoryInfo.id, categoryInfo.name));

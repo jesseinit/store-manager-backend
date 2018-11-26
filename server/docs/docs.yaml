@@ -1,0 +1,1216 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: Store Manager
+  description: 'Store Manager is a web application that helps store owners manage sales and product inventory records.'
+
+schemes:
+  - https
+host: mystoremanager.herokuapp.com
+basePath: '/api/v1'
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+tags:
+  - name: 'Authentication'
+
+  - name: 'User'
+
+  - name: 'Category'
+
+  - name: 'Products'
+
+  - name: 'Sales'
+
+paths:
+  /auth/login:
+    post:
+      summary: 'This endpoint authenticates the user.'
+      description: 'This authenticates the user and generates a jwt token for the user which would be needed to access other protected resource.'
+      tags:
+        - Authentication
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: This is the request body object containing user's login information
+          schema:
+            $ref: '#/definitions/UserLoginrequest'
+      responses:
+        200:
+          description: User has been logged in successfully
+          example:
+            status: success,
+            message: Login successfully,
+            data:
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.....,
+              role: Owner
+        401:
+          description: User could not be authenticated
+          example:
+            message: Email address or password is incorrect
+            status: failure
+        404:
+          description: 'User not found in the database'
+          example:
+            message: Email address or password is incorrect
+            status: failure
+        422:
+          description: 'User has entered unprocessable input'
+          example:
+            error:
+              - Invalid email address entered
+              - Password should be atleast 5 characters
+        500:
+          description: 'Internal server error'
+          example:
+            message: Internal server error
+            status: failure
+
+  /auth/signup:
+    post:
+      summary: 'Handles the creation of a new user account'
+      description: 'This endpoint creates a new user and persist the information to the database'
+      tags:
+        - Authentication
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: "This is the request body object containing user's signup information"
+          schema:
+            $ref: '#/definitions/UserSignUprequest'
+      responses:
+        201:
+          description: User has been successfully registered
+          example:
+            status: success,
+            message: User created successfully
+            data:
+              id: 5
+              name: John Doe
+              email: doe@storemanager.com
+              password: $2b$10$yE7fqGmVHbllf9yNKpiK/OYyOM/TH7dqFwqg.2Ojg4F.740elC/P6
+              role: Attendant
+        401:
+          description: User couldn't be authenticated
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to create an account
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        409:
+          description: Email has been used for another user
+          example:
+            message: Email address has been used
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Please provide a name
+              - Name must be atleast 2 characters long
+              - User can either be an Admin or Attendant
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+  /users/:
+    get:
+      summary: Retrieves store accounts
+      description: Retrieves all store accounts in the store
+      tags:
+        - User
+      produces:
+        - application/json,
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: User accounts retrieved successfully
+          example:
+            status: success
+            message: Users retrieved successfully
+            data:
+              - id: 1,
+                name: John Doe
+                email: john.doe@storemanager.com
+                password: $2b$10$LyLTx0YZ52lYAEO2o6Tl8.fktYzClIVXLl5RzU5sfd8iFfGQGsD3e
+                role: 'Attendant'
+              - id: 2,
+                name: Big Man Jesse
+                email: init@storemanager.com
+                password: $2b$10$LyLTx0YZ52lYAEO2o6Tl8.fktYzClIVXLl5RzU5sfd8iFfGQGsD3e
+                role: 'Admin'
+        401:
+          description: User couldn't be authenticated
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to access this resource
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+  /users/{userid}:
+    get:
+      summary: Retrieves a user's account
+      description: Retrieves a single store account in the store
+      tags:
+        - User
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: userid
+          type: integer
+          required: true
+          description: User unique identification number
+      responses:
+        200:
+          description: User retrieved successfully
+          example:
+            status: success,
+            message: User retrieved successfully
+            data:
+              id: 1
+              name: John Doe
+              email: doe@storemanager.com
+              password: $2b$10$yE7fqGmVHbllf9yNKpiK/OYyOM/TH7dqFwqg.2Ojg4F.740elC/P6
+              role: Attendant
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to update an account
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        404:
+          description: 'User not found'
+          example:
+            message: User not found
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - User ID must be a positve integer from 1
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+    put:
+      summary: Updates a user's account
+      description: This endpoint handles the modification of a user's account
+      tags:
+        - User
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: userid
+          type: integer
+          required: true
+          description: User unique identification number
+        - in: body
+          name: body
+          required: true
+          description: Body object representing the user's update information.
+          schema:
+            $ref: '#/definitions/UserUpdateRequest'
+      responses:
+        200:
+          description: User updated successfully
+          example:
+            status: success,
+            message: User updated successfully
+            data:
+              id: 5
+              name: John Doe
+              email: doe@storemanager.com
+              password: $2b$10$yE7fqGmVHbllf9yNKpiK/OYyOM/TH7dqFwqg.2Ojg4F.740elC/P6
+              role: Attendant
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to update an account
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        404:
+          description: 'User not found Error'
+          example:
+            message: User not found
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Please provide a name
+              - Name must be atleast 2 characters long
+              - User can either be an Admin or Attendant
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+    delete:
+      summary: Deletes a user's account
+      description: This handles the deletion of a user's account
+      tags:
+        - User
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: userid
+          type: integer
+          required: true
+          description: User unique identification number
+      responses:
+        200:
+          description: User account deleted successfully
+          example:
+            status: success
+            message: User deleted successfully
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to delete an account
+          example:
+            message: Unauthorized Access. For Owner account only
+            status: failure
+        404:
+          description: 'User not found Error'
+          example:
+            message: User not found
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Please provide a name
+              - Name must be atleast 2 characters long
+              - User can either be an Admin or Attendant
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+  /category/:
+    get:
+      summary: Retrieves all product categories
+      description: This endpoint returns a resource of product categories
+      tags:
+        - Category
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: Categories retrieved successfully.
+          example:
+            status: success,
+            message: Categories retrieved successfully.
+            data:
+              - category_id: 1
+                category_name: Electronics
+              - category_id: 2
+                category_name: Mobile Phones
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+  
+    post:
+      summary: Creates a new product category
+      description: This endpoint creates a new category
+      tags:
+        - Category
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Body object representing the new category information.
+          schema:
+            $ref: '#/definitions/CategoryCreateRequest'
+      responses:
+        201:
+          description: Category created successfully.
+          example:
+            status: success,
+            message: Category created successfully.
+            data:
+              - 
+                category_id: 1
+                category_name: Electronics
+        400:
+          description: Bad Request
+          example:
+            message: The provided category name already exists.
+            status: failure
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to create a category
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Category name should be a string
+              - Category name must be atleast 2 letters long
+              - Category ID must be a positve number from 1
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+  
+  /category/{id}:
+    get:
+      summary: Retrieves a product category
+      description: This endpoint returns a resource of a single product category
+      tags:
+        - Category
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Unique category id
+      responses:
+        200:
+          description: Categories retrieved successfully.
+          example:
+            status: success,
+            message: Category retrieved successfully.
+            data:
+              - category_id: 1
+                category_name: Electronics
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        404:
+          description: 'Category not found'
+          example:
+            message: Category not found
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Category ID must be a positve integer from 1
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+    
+    put:
+      summary: Updates a product category
+      description: This endpoint updates a product category
+      tags:
+        - Category
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Unique category id
+        - in: body
+          name: body
+          required: true
+          description: Body object representing the category's update information.
+          schema:
+            $ref: '#/definitions/CategoryUpdateRequest'
+      responses:
+        200:
+          description: Category updated successfully
+          example:
+            status: success,
+            message: Category updated successfully
+            data:
+              category_id: 1
+              category_name: Mobile Phones
+        400:
+          description: Bad Request
+          example:
+            message: The provided category name already exists.
+            status: failure
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to update a category
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        404:
+          description: Category not found
+          example:
+            message: Category not found
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Category name should be a string
+              - Category name must be atleast 2 letters long
+              - Category ID must be a positve number from 1
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+    delete:
+      summary: Deletes a product category
+      description: This endpoint deletes a product category
+      tags:
+        - Category
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Unique category id
+      responses:
+        200:
+          description: Categories retrieved successfully.
+          example:
+            status: success,
+            message: Category retrieved successfully.
+            data: Category retrieved successfully.
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure        
+        403:
+          description: User does not have the privilage to delete a category
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        404:
+          description: 'Category not found'
+          example:
+            message: Category not found
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Category ID must be a positve integer from 1
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+  /products/:
+    get:
+      summary: Retrieves all store products
+      description: This endpoint returns a resource of all store products
+      tags:
+        - Products
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: Products retrieved successfully.
+          example:
+            status: success,
+            message: Records retrieved successfully.
+            data:
+              - 
+                product_id: 1,
+                product_image: https://ae01.alicdn.com/kf/HTB1b_tGfVooBKNjSZPhq6A2CXXaU.jpg
+                product_name: Asus Zenphone
+                product_price: 123000
+                product_qty: 10
+                category_id: 1
+                category_name: Electronics
+            meta:
+              totalPages: 1
+              currentPage: 1
+              hasNextPage: false
+              hasPrevPage: false
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+    
+    post:
+      summary: Create a new product
+      description: This endpoint creates a new product in the store
+      tags:
+        - Products
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Body object representing the new product's information.
+          schema:
+            $ref: '#/definitions/ProductCreateRequest'
+      responses:
+        201:
+          description: Product created successfully.
+          example:
+            status: success
+            message: Product created successfully.
+            data: 
+              product_id: 14,
+              product_image: http://example.com/photo.jpg
+              product_name: Asus Phantom
+              product_price: 89500.99
+              product_qty: 20
+              category_id: 9
+        400:
+          description: Bad Request
+          example:
+            message: The provided product name already exists.
+            status: failure
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to create a product
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Product name must be 2 letters long
+              - Category ID must be a positve number from 1
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+  /products/{id}:
+    get:
+      summary: Retrieves a single store product
+      description: This endpoint retrieves a single product from the products resource
+      tags:
+        - Products
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Unique product id
+      responses:
+        200:
+          description: Product retrieved successfully.
+          example:
+            status: success,
+            message: Product retrieved successfully.
+            data:
+              product_id: 1,
+              product_image: https://ae01.alicdn.com/kf/HTB1b_tGfVooBKNjSZPhq6A2CXXaU.jpg
+              product_name: Asus Zenphone
+              product_price: 123000
+              product_qty: 10
+              category_id: 1
+              category_name: Electronics
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        404:
+          description: 'Product not found'
+          example:
+            message: Product not found
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Product ID must be a positve integer from 1
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+    
+    put:
+      summary: Updates a store product
+      description: This endpoint updates a product in the products resource
+      tags:
+        - Products
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Unique product id
+        - in: body
+          name: body
+          description: Body object representing the product's update information.
+          schema:
+            $ref: '#/definitions/ProductUpdateRequest'
+      responses:
+        200:
+          description: Product Updated successfully.
+          example:
+            status: success,
+            message: Product Updated successfully.
+            data:
+              product_id: 1,
+              product_image: https://ae01.alicdn.com/kf/HTB1b_tGfVooBKNjSZPhq6A2CXXaU.jpg
+              product_name: Asus Zenphone
+              product_price: 123000
+              product_qty: 10
+              category_id: 1
+              category_name: Electronics
+        400:
+          description: Bad Request
+          example:
+            message: The provided product name already exists.
+            status: failure
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to update a product
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Product ID must be a positve integer from 1
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+ 
+    delete:
+      summary: Deletes a product from the store
+      description: This endpoint deletes a product from the products resource
+      tags:
+        - Products
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Unique product id
+      responses:
+        200:
+          description: Product deleted successfully.
+          example:
+            status: success,
+            message: Product deleted successfully.
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to delete a product
+          example:
+            message: Unauthorized Access. For admins/owner accounts only
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Product ID must be a positve integer from 1
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+ 
+  /sales/:
+    get:
+      summary: Retrieves sale orders by all attendants
+      description: This endpoint returns a resource with sales orders made by all attendants
+      tags:
+        - Sales
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: Sales retrieved successfully.
+          example:
+            status: success,
+            message: Records retrieved successfully.
+            data:
+              - 
+                s_id: 3,
+                s_date: 2018-11-25T00:00:00.000Z
+                s_description: Amazfit Smart Watch
+                s_qty: 3
+                s_price: 132567.23
+                s_total: 397701.69
+                s_user: 2
+              - 
+                s_id: 2,
+                s_date: 2018-11-25T00:00:00.000Z
+                s_description: Amazfit Smart Watch
+                s_qty: 3
+                s_price: 132567.23
+                s_total: 397701.69
+                s_user: 2
+            meta:
+              totalPages: 1
+              currentPage: 1
+              hasNextPage: false
+              hasPrevPage: false
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to view sales orders
+          example:
+            message: Unauthorized Access. For admin/owner accounts only
+            status: failure
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+    
+    post:
+      summary: Create a new sale
+      description: This endpoint creates a new sale in the store
+      tags:
+        - Sales
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Body object representing the new sale information.
+          schema:
+            $ref: '#/definitions/SaleCreateRequest'
+      responses:
+        201:
+          description: Checkout completed successfully.
+          example:
+            status: success
+            message: Checkout completed successfully.
+            data:
+              id: 13
+              product_id: 10
+              sale_id: 3
+              product_worth: 397701.69
+              product_qty: 0
+              sale_date: 2018-11-25T00:00:00.000Z
+              user_id: 2
+              sale_total": 397701.69
+              product_image: https://ae01.alicdn.com/kf/HTB1b_tGfVooBKNjSZPhq6A2CXXaU.jpg
+              product_name: Amazfit Smart Watch
+              product_price: 132567.23
+              category_id: 1
+        400:
+          description: Bad Request
+          example:
+            message: Cant process the requested quantity on Amazfit Smart Watch.
+            status: failure
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to create a sale
+          example:
+            message: Unauthorized Access. For attendant accounts only
+            status: failure
+        404:
+          description: 'Product not found'
+          example:
+            message: Product with id 10000 is not found
+            status: failure
+        422:
+          description: The provided input(s) are not supported
+          example:
+            error:
+              - Products must be specified in the right format
+              - Products must have atleast an entry
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+  /sales/{id}:
+    get:
+      summary: Retrieves a store sale order
+      description: This endpoint returns a resource with a sale order
+      tags:
+        - Sales
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: Sale retrieved successfully.
+          example:
+            status: success,
+            message: Sale retrieved successfully.
+            data:
+              -
+                s_id: 3,
+                s_date: 2018-11-25T00:00:00.000Z
+                s_description: Amazfit Smart Watch
+                s_qty: 3
+                s_price: 132567.23
+                s_total: 397701.69
+                s_user: 2
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        404:
+          description: 'Sale record not found'
+          example:
+            message: Sale record not found
+            status: failure
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+
+  /sales/attendants:
+    get:
+      summary: Retrieves sale orders by an attendant
+      description: This endpoint returns sales orders by an attendant
+      tags:
+        - Sales
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: Sales retrieved successfully.
+          example:
+            status: success,
+            message: Records retrieved successfully.
+            data:
+              - 
+                s_id: 3,
+                s_date: 2018-11-25T00:00:00.000Z
+                s_description: Amazfit Smart Watch
+                s_qty: 3
+                s_price: 132567.23
+                s_total: 397701.69
+                s_user: 2
+              - 
+                s_id: 2,
+                s_date: 2018-11-25T00:00:00.000Z
+                s_description: Amazfit Smart Watch
+                s_qty: 3
+                s_price: 132567.23
+                s_total: 397701.69
+                s_user: 2
+            meta:
+              totalPages: 1
+              currentPage: 1
+              hasNextPage: false
+              hasPrevPage: false
+        401:
+          description: 'Authentication Error'
+          example:
+            message: Token/Header Error
+            status: failure
+        403:
+          description: User does not have the privilage to view sales orders
+          example:
+            message: Unauthorized Access. For attendant accounts only
+            status: failure
+        500:
+          description: Internal server error
+          example:
+            message: Internal server error
+            status: failure
+    
+definitions:
+  UserLoginrequest:
+    title: 'User Login Request'
+    type: object
+    properties:
+      email:
+        description: 'The email address of the user'
+        type: string
+      password:
+        description: 'The Password of the user'
+        type: string
+    example:
+      email: example@storemanager.com
+      password: example
+    required:
+      - email, password
+
+  UserSignUprequest:
+    title: 'User Sign Up Request'
+    type: object
+    properties:
+      name:
+        description: 'The fullname of the user'
+        type: string
+      email:
+        description: 'The email address of the user'
+        type: string
+      password:
+        description: 'The password of the user'
+        type: string
+      role:
+        description: 'The role of the user - Attendant or Admin'
+        type: string
+    example:
+      name: John Doe
+      email: john.doe@storemanager.com
+      password: user1234
+      role: 'Attendant'
+    required:
+      - name, email, password, role
+
+  UserUpdateRequest:
+    title: 'User Update Request'
+    type: object
+    properties:
+      name:
+        description: 'The fullname of the user'
+        type: string
+      email:
+        description: 'The email address of the user'
+        type: string
+      password:
+        description: 'The password of the user'
+        type: string
+      role:
+        description: 'The role of the user - Attendant or Admin'
+        type: string
+    example:
+      name: John Doe
+      email: john.doe@storemanager.com
+      password: user1234
+      role: 'Attendant'
+    required:
+      - name, email, password, role
+
+  CategoryCreateRequest:
+    title: 'Category Create Request'
+    type: object
+    properties:
+      name:
+        description: The fullname of the user
+        type: string
+    example:
+      name: Electronics
+    required:
+      - name
+
+  CategoryUpdateRequest:
+    title: 'Category Update Request'
+    type: object
+    properties:
+      name:
+        description: 'The name of the category'
+        type: string
+    example:
+      name: Phones
+    required:
+      - name
+
+  ProductCreateRequest:
+    title: 'Product Create Request'
+    type: object
+    properties:
+      imgUrl:
+        description: Product Image URL
+        type: string
+      name:
+        description: Product name
+        type: string
+      categoryid:
+        description: Product category id
+        type: integer
+      price:
+        description: Product price
+        type: float
+      qty:
+        description: Product quantity
+        type: integer
+    example:
+      imgUrl: http://example.com/photo.jpg
+      name: Asus Phantom
+      categoryid: 9
+      price: 89500.99
+      qty: 20
+    required:
+      - imgUrl
+      - name
+      - categoryid
+      - price
+      - qty
+  
+  ProductUpdateRequest:
+    title: 'Product Update Request'
+    type: object
+    properties:
+      imgUrl:
+        description: Product Image URL
+        type: string
+      name:
+        description: Product name
+        type: string
+      categoryid:
+        description: Product category id
+        type: integer
+      price:
+        description: Product price
+        type: float
+      qty:
+        description: Product quantity
+        type: integer
+    example:
+      imgUrl: http://example.com/photo.jpg
+      name: Asus Phantom
+      categoryid: 9
+      price: 89500.99
+      qty: 20
+  
+  SaleCreateRequest:
+    title: 'Sale Create Request'
+    type: object
+    properties:
+      products:
+        type: array
+        items: 
+          type: object
+          required: true
+          properties:
+            id:
+              type: integer
+            qty:
+              type: integer
+    example:
+      products:
+        -
+          id: 10
+          qty: 3
+    required:
+      - products

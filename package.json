@@ -60,7 +60,9 @@
     "jsonwebtoken": "^8.3.0",
     "pg": "^7.5.0",
     "sinon": "^6.3.5",
-    "sinon-express-mock": "^2.0.5"
+    "sinon-express-mock": "^2.0.5",
+    "swagger-ui-express": "^4.0.1",
+    "yamljs": "^0.3.0"
   },
   "nyc": {
     "exclude": [

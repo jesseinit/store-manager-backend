@@ -52,8 +52,7 @@ const processRequest = (url, method = 'GET', body = _) => {
         if (
           message.includes('JsonWebTokenError') ||
           message.includes('TokenExpiredError') ||
-          message.includes('admins/owner') ||
-          message.includes('attendants accounts only')
+          message.includes('Unauthorized Access')
         ) {
           localStorage.clear();
           window.location.replace('./');
@@ -256,26 +255,16 @@ const populateUserEditModal = response => {
 };
 
 const userEditModal = async e => {
-  const allUsersEndpoint = `${basepath}/users/?userid=${e.target.parentElement.getAttribute('data-id')}`;
-  const response = await processRequest(allUsersEndpoint);
+  loadSpinner();
+  const userId = e.target.parentElement.dataset.id;
+  const endPointUrl = `${basepath}/users/${userId}`;
+  const response = await processRequest(endPointUrl);
   populateUserEditModal(response);
   const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
   const updateForm = document.querySelector('#update-user-form');
   updateForm.addEventListener('submit', updateUser);
-};
-
-const userDeleteModal = async e => {
-  generateDeleteModal(e, 'user');
-
-  const modal = document.body.querySelector('.modal');
-  modal.addEventListener('click', destroyModal);
-
-  const delUserBtn = document.querySelector('#confirm-delete');
-  const cancelBtn = document.querySelector('#cancel');
-
-  delUserBtn.addEventListener('click', deleteUser);
-  cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
+  loadSpinner();
 };
 
 const populateUsersTable = async () => {
@@ -301,6 +290,19 @@ const populateUsersTable = async () => {
   toast(response.message, successToast, 1000);
 };
 
+const userDeleteModal = async e => {
+  generateDeleteModal(e, 'user');
+
+  const modal = document.body.querySelector('.modal');
+  modal.addEventListener('click', destroyModal);
+
+  const delUserBtn = document.querySelector('#confirm-delete');
+  const cancelBtn = document.querySelector('#cancel');
+
+  delUserBtn.addEventListener('click', deleteUser);
+  cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
+};
+
 const populateUsersDropDown = async () => {
   const usersDropDown = document.querySelector('#users-list');
   const response = await processRequest(`${basepath}/users/`);
@@ -314,6 +316,7 @@ const populateUsersDropDown = async () => {
 const populateCategoryModal = response => {
   if (!response.data) {
     toast(response.message, errorToast);
+    loadSpinner();
     return;
   }
   const id = response.data.category_id;
@@ -353,17 +356,21 @@ const updateCategory = async e => {
 };
 
 const deleteCategory = async e => {
+  loadSpinner();
   const modal = document.body.querySelector('.modal');
-  const categoryId = Number(e.target.getAttribute('data-id'));
-  const deleteCategoryUrl = `${basepath}/category/${categoryId}`;
-  const deleteResponse = await processRequest(deleteCategoryUrl, 'DELETE');
+  const categoryId = Number(e.target.dataset.id);
+  const endPointUrl = `${basepath}/category/${categoryId}`;
+  const deleteResponse = await processRequest(endPointUrl, 'DELETE');
 
-  if (!deleteResponse.status) {
+  if (!deleteResponse.data) {
     toast(deleteResponse.message, errorToast);
     document.body.removeChild(modal);
+    populateCategoryTable();
+    loadSpinner();
     return;
   }
 
+  loadSpinner();
   toast('Category deleted successfully', successToast);
   document.body.removeChild(modal);
   populateCategoryTable();
@@ -371,18 +378,16 @@ const deleteCategory = async e => {
 
 const categoryDeleteModal = async e => {
   generateDeleteModal(e, 'category');
-
   const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
-
   const delUserBtn = document.querySelector('#confirm-delete');
   const cancelBtn = document.querySelector('#cancel');
-
   delUserBtn.addEventListener('click', deleteCategory);
   cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
 };
 
 const categoryEditModal = async e => {
+  loadSpinner();
   const singleCategoryUrl = `${basepath}/category/${e.target.parentElement.getAttribute('data-id')}`;
   const response = await processRequest(singleCategoryUrl);
 
@@ -391,6 +396,7 @@ const categoryEditModal = async e => {
   modal.addEventListener('click', destroyModal);
   const updateForm = document.querySelector('#update-category-form');
   updateForm.addEventListener('submit', updateCategory);
+  loadSpinner();
 };
 
 const populateCategoryTable = async () => {
@@ -425,7 +431,8 @@ const populateCategoryTable = async () => {
 
 const populateCategoryDropDown = async () => {
   const categoryDropDown = document.querySelector('#product-cat');
-  const response = await processRequest(`${basepath}/category/`);
+  const endPointUrl = `${basepath}/category/`;
+  const response = await processRequest(endPointUrl);
   response.data.forEach(category => {
     categoryDropDown.insertAdjacentHTML(
       'beforeend',
@@ -435,38 +442,44 @@ const populateCategoryDropDown = async () => {
 };
 
 /* Pagination  */
-const goToPage = async (element, page, limit = 10, query = _) => {
+const goToPage = async (endPointUrl, options) => {
   loadSpinner();
-  const queryString = `${basepath}/products/?page=${page}&limit=${limit}&${query}`;
+  const { page, tableBody, tableParent } = options;
+  const queryString = `${endPointUrl}page=${page}`;
   const paginationResponse = await processRequest(queryString);
-  while (element.firstChild) element.removeChild(element.firstChild);
-  paginationResponse.data.forEach(product => generateTableBodyEntries(element, product));
+  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
+  paginationResponse.data.forEach(product => generateTableBodyEntries(tableBody, product));
   loadSpinner();
-  paginationComponent(element, paginationResponse, limit, query);
+  paginationComponent(tableParent, paginationResponse, endPointUrl);
 };
 
-const paginationComponent = (element, response, limit, query) => {
+const paginationComponent = (tableParent, res, endPointUrl) => {
+  const tableBody = tableParent.children[0].children[1];
   const paginationEl = document.querySelector('.pagination');
   if (paginationEl) paginationEl.remove();
-  const { hasPrevPage, hasNextPage, nextPage, prevPage } = response.meta;
+  const { hasPrevPage, hasNextPage, nextPage, prevPage } = res.meta;
   const prev = hasPrevPage
     ? `<button class="pagination__prev">Previous Page</button>`
     : `<button disabled class="pagination__prev">Previous Page</button>`;
   const next = hasNextPage
     ? `<button class="pagination__next">Next Page</button>`
     : `<button disabled class="pagination__next">Next Page</button>`;
-  element.parentElement.parentElement.insertAdjacentHTML(
-    'beforeend',
-    `<section class="pagination">${prev}${next}</section>`
-  );
+  tableParent.insertAdjacentHTML('beforeend', `<section class="pagination">${prev}${next}</section>`);
   const nextPageBtn = document.querySelector('.pagination__next');
   const prevPageBtn = document.querySelector('.pagination__prev');
-  nextPageBtn.addEventListener('click', () => goToPage(element, nextPage, limit, query));
-  prevPageBtn.addEventListener('click', () => goToPage(element, prevPage, limit, query));
+  nextPageBtn.addEventListener('click', () => {
+    const option = { page: nextPage, tableBody, tableParent };
+    goToPage(endPointUrl, option);
+  });
+  prevPageBtn.addEventListener('click', () => {
+    const option = { page: prevPage, tableBody, tableParent };
+    goToPage(endPointUrl, option);
+  });
 };
 
 /* Products Settings */
 const populateProductsModal = async response => {
+  loadSpinner();
   if (!response.data) {
     toast(response.message, errorToast);
     return;
@@ -490,6 +503,7 @@ const populateProductsModal = async response => {
     </div>`
   );
   populateCategoryDropDown();
+  loadSpinner();
 };
 
 const updateProduct = async e => {
@@ -508,26 +522,27 @@ const updateProduct = async e => {
     return;
   }
 
-  const categoryUpdateUrl = `${basepath}/products/${e.target.getAttribute('data-id')}`;
+  const endPointUrl = `${basepath}/products/${e.target.dataset.id}`;
   const updateInfo = { imgUrl: uImage, name: uName, price: uPrice, qty: uQty, categoryid: uCategory };
 
-  const updateResponse = await processRequest(categoryUpdateUrl, 'PUT', updateInfo);
+  const updateResponse = await processRequest(endPointUrl, 'PUT', updateInfo);
 
-  if (updateResponse.status === 'success') {
+  if (!updateResponse.status === 'success') {
     loadSpinner();
-    toast(updateResponse.message, successToast, 1000);
-    document.body.removeChild(modal);
-    populateProductsTable();
+    toast(updateResponse.message || updateResponse.error, errorToast);
     return;
   }
+
   loadSpinner();
-  toast(updateResponse.message || updateResponse.error, errorToast);
+  toast(updateResponse.message, successToast, 1000);
+  document.body.removeChild(modal);
+  populateProductsTable();
 };
 
 const deleteProduct = async e => {
   loadSpinner();
   const modal = document.body.querySelector('.modal');
-  const productId = Number(e.target.getAttribute('data-id'));
+  const productId = Number(e.target.dataset.id);
   const query = `${basepath}/products/${productId}`;
   const deleteResponse = await processRequest(query, 'DELETE');
 
@@ -549,7 +564,7 @@ const deleteProduct = async e => {
 };
 
 const productEditModal = async e => {
-  const singleCategoryUrl = `${basepath}/products/${e.target.parentElement.getAttribute('data-id')}`;
+  const singleCategoryUrl = `${basepath}/products/${e.target.parentElement.dataset.id}`;
   const response = await processRequest(singleCategoryUrl);
 
   await populateProductsModal(response);
@@ -593,9 +608,9 @@ const generateTableBodyEntries = (element, entity) => {
 
 const populateProductsTable = async () => {
   loadSpinner();
-  const endPoint = `${basepath}/products/`;
-  const response = await processRequest(endPoint);
   const tableBody = productsTable.children[1];
+  const endPointUrl = `${basepath}/products/?`;
+  const response = await processRequest(endPointUrl);
 
   while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
 
@@ -609,7 +624,7 @@ const populateProductsTable = async () => {
   loadSpinner();
   recordSort.style.display = 'block';
   response.data.forEach(product => generateTableBodyEntries(tableBody, product));
-  paginationComponent(tableBody, response);
+  paginationComponent(productsTable.parentElement, response, endPointUrl);
   toast(response.message, successToast, 1000);
 };
 
@@ -640,14 +655,16 @@ const generateProductsCard = (element, entity) => {
 };
 
 const addToCart = async (e, allowedQty, requestedQty) => {
-  const productId = Number(e.target.getAttribute('data-id'));
+  if (!localStorage.getItem('cart')) localStorage.setItem('cart', '[]');
+  toast('Adding to cart.', successToast, 800);
+  const productId = Number(e.target.dataset.id);
   const productQty = Number(requestedQty.value);
   if (!productQty || productQty === 0 || productQty > allowedQty) {
     toast('Requested quantity is not allowed', errorToast, 2000);
     return;
   }
-  const endPoint = `${basepath}/products/${productId}`;
-  const response = await processRequest(endPoint);
+  const endPointUrl = `${basepath}/products/${productId}`;
+  const response = await processRequest(endPointUrl);
   const productEntry = {
     id: productId,
     qty: productQty,
@@ -687,10 +704,7 @@ const cardsPaginationComponent = (wrapperEl, response) => {
   const next = hasNextPage
     ? `<button class="pagination__next">Next Page</button>`
     : `<button disabled class="pagination__next">Next Page</button>`;
-  productWrapper.firstChild.parentElement.parentElement.insertAdjacentHTML(
-    'beforeend',
-    `<section class="pagination">${prev}${next}</section>`
-  );
+  productWrapper.parentElement.insertAdjacentHTML('beforeend', `<section class="pagination">${prev}${next}</section>`);
   const nextPageBtn = document.querySelector('.pagination__next');
   const prevPageBtn = document.querySelector('.pagination__prev');
   nextPageBtn.addEventListener('click', async () => {
@@ -910,6 +924,7 @@ const login = async e => {
   e.preventDefault();
   const loginBtn = document.querySelector(`.${e.target.className} .btn`);
   loginBtn.textContent = 'Authenticating';
+  loginBtn.disabled = true;
   loadSpinner();
   const email = document.querySelector('#login-email').value;
   const password = document.querySelector('#login-password').value;
@@ -919,6 +934,7 @@ const login = async e => {
   destroyInputErrors('.form__login');
   if (!response.data) {
     loginBtn.textContent = 'Login';
+    loginBtn.disabled = false;
     loadSpinner();
     if (response.message) {
       handleInputErrors(response, '.form__login');
@@ -965,7 +981,7 @@ const updateUser = async e => {
   const uEmail = document.querySelector('#update-email').value;
   const uRole = document.querySelector('#update-role').value;
   let uPassword = document.querySelector('#update-password').value;
-  uPassword = uPassword.length < 5 ? undefined : document.querySelector('#update-password').value;
+  uPassword = uPassword.length < 5 ? undefined : uPassword;
   const userUpdateUrl = `${basepath}/users/${e.target.getAttribute('data-id')}`;
   const updateInfo = { name: uName, email: uEmail, password: uPassword, role: uRole };
   if (!uPassword) delete updateInfo.password;
@@ -989,14 +1005,14 @@ const deleteUser = async e => {
   const userid = Number(e.target.getAttribute('data-id'));
   const deleteUsersEndpoint = `${basepath}/users/${userid}`;
   const deleteResponse = await processRequest(deleteUsersEndpoint, 'DELETE');
-  if (!deleteResponse.status) {
-    loadSpinner();
-    toast(deleteResponse.message, errorToast, 800);
+  if (!deleteResponse.data) {
+    toast(deleteResponse.message || deleteResponse.error[0], errorToast, 2000);
     document.body.removeChild(modal);
+    loadSpinner();
     return;
   }
   loadSpinner();
-  toast(deleteResponse.message, successToast, 800);
+  toast(deleteResponse.message, successToast, 1000);
   document.body.removeChild(modal);
   populateUsersTable();
 };
@@ -1088,11 +1104,16 @@ const filterByRows = async e => {
   e.preventDefault();
   const tableBody = productsTable.children[1];
   const limit = document.querySelector('#filter-pref').value;
-  const filterQuery = `${basepath}/products/?limit=${limit}`;
-  const response = await processRequest(filterQuery);
+  const endPointUrl = `${basepath}/products/?limit=${limit}&`;
+  const response = await processRequest(endPointUrl);
   while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
+  if (!response.data.length) {
+    tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
+    loadSpinner();
+    return;
+  }
   response.data.forEach(product => generateTableBodyEntries(tableBody, product));
-  paginationComponent(tableBody, response, limit);
+  paginationComponent(productsTable.parentElement, response, endPointUrl);
   loadSpinner();
   toast(response.message, successToast, 1000);
 };
@@ -1102,9 +1123,9 @@ const filterByName = async e => {
   e.preventDefault();
   const tableBody = productsTable.children[1];
   const searchText = document.querySelector('#search-name').value;
-  const filterQuery = `${basepath}/products/?search=${searchText}`;
+  const endPointUrl = `${basepath}/products/?search=${searchText}&`;
 
-  const response = await processRequest(filterQuery);
+  const response = await processRequest(endPointUrl);
   while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
 
   if (!response.data.length) {
@@ -1117,7 +1138,7 @@ const filterByName = async e => {
   loadSpinner();
   response.data.forEach(product => generateTableBodyEntries(tableBody, product));
   toast(response.message, successToast, 1000);
-  paginationComponent(tableBody, response, 10);
+  paginationComponent(productsTable.parentElement, response, endPointUrl);
 };
 
 const filterByQty = async e => {
@@ -1125,8 +1146,8 @@ const filterByQty = async e => {
   const tableBody = productsTable.children[1];
   loadSpinner();
   const qty = document.querySelector('#qty-pref').value;
-  const filterQuery = `${basepath}/products/?stock=${qty}`;
-  const response = await processRequest(filterQuery);
+  const endPointUrl = `${basepath}/products/?stock=${qty}&`;
+  const response = await processRequest(endPointUrl);
   while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
   if (!response.data.length) {
     loadSpinner();
@@ -1135,7 +1156,7 @@ const filterByQty = async e => {
   }
   loadSpinner();
   response.data.forEach(product => generateTableBodyEntries(tableBody, product));
-  paginationComponent(tableBody, response, 10, `stock=${qty}`);
+  paginationComponent(productsTable.parentElement, response, endPointUrl);
   toast(response.message, successToast, 1000);
 };
 
@@ -1178,7 +1199,7 @@ const sortSalesById = async e => {
   loadSpinner();
 };
 
-const performNavigate = async (endPointUrl, options = {}) => {
+const performNavigate = async (endPointUrl, options) => {
   loadSpinner();
   const { page, tableBody, tableParent } = options;
   const queryString = `${endPointUrl}&page=${page}`;

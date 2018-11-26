@@ -254,6 +254,7 @@ const query = {
           JOIN sales as s ON s.sale_id = ps.sale_id
           LEFT JOIN products as p ON p.product_id = ps.product_id
           WHERE s.user_id = $1
+          ORDER BY s.sale_id DESC
           LIMIT $2 OFFSET $3`,
     values: [userid, limit, offset]
   }),
