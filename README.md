@@ -6,6 +6,10 @@
 
 Store Manager is a web application that helps store owners manage sales and product inventory records.
 
+## App Links
+> [Store Maneger App](https://mystoremanager.herokuapp.com).
+
+> [App Documentation](https://mystoremanager.herokuapp.com/docs).
 
 ## Implemented Features
 * Admin can add a product
@@ -42,8 +46,10 @@ UI templates are hosted on Github pages [here](https://jesseinit.github.io/store
 
 ### Installation
 * Install [NodeJs](https://nodejs.org/en/download/) and [PostgreSQL](https://www.postgresql.org/download/) on your computer.
+* Create a database named `storemanager`
 * Clone this repository using `git clone https://github.com/jesseinit/store-manager.git`.
 * Run `npm install` to install all dependencies.
+* Run `npm run migrations` to seed the database
 * Run `npm run dev` to start the server.
 * Navigate to [localhost:3000/api/v1](localhost:3000/api/v1) in your browser to access the application.
 
@@ -54,7 +60,7 @@ Requirements
 Testing with Postman
 * Install Postman by following the link above.
 * Navigate to `localhost:3000` in Postman to access the application.
-* Use the API Documentation to access the endpoints available (link will be available soon).
+* Use the API Documentation to access the endpoints available.
 
 Running unit tests.
 * In an open terminal, navigate to the cloned project file.

@@ -31,6 +31,12 @@ const validateSignup = [
     .withMessage('Please provide a name')
 ];
 
+const validateUserId = [
+  param('userid')
+    .isInt({ min: 1 })
+    .withMessage('User ID must be a positve integer from 1')
+];
+
 const validateUserUpdate = [
   param('userid')
     .isInt({ min: 1 })
@@ -93,12 +99,6 @@ const validateSaleId = [
 ];
 
 const validateNewProduct = [
-  body('imgUrl')
-    .custom(imageUrl => {
-      const checkUrl = /(http(s?):(\/){2})([^/])([/.\w\s-])*\.(?:jpg|gif|png)/g;
-      return checkUrl.test(imageUrl);
-    })
-    .withMessage('Product image input should be a valid image url'),
   body('name')
     .isLength({ min: 2 })
     .withMessage('Product name must be 2 letters long'),
@@ -111,10 +111,6 @@ const validateNewProduct = [
   body('qty')
     .isInt({ min: 1 })
     .withMessage('Product qty must be a positive number from 1'),
-  body('imgUrl')
-    .exists()
-    .withMessage('Product Image must be provided.'),
-  sanitizeBody('name').customSanitizer(value => value.replace(/\s{2,}/g, ' ').trim()),
   body('name')
     .exists()
     .withMessage('Product name must be provided.'),
@@ -134,8 +130,7 @@ const validateProductUpdate = [
   validateNewProduct[0].optional(),
   validateNewProduct[1].optional(),
   validateNewProduct[2].optional(),
-  validateNewProduct[3].optional(),
-  validateNewProduct[4].optional()
+  validateNewProduct[3].optional()
 ];
 
 const valaidateGetProducts = [
@@ -157,10 +152,27 @@ const valaidateGetProducts = [
     .withMessage('Quantity must be from a number 1 and above')
 ];
 
+const valaidateGetSales = [
+  valaidateGetProducts[0],
+  valaidateGetProducts[1],
+  query('fdate')
+    .optional()
+    .isISO8601()
+    .withMessage('Please enter a valid date'),
+  query('tdate')
+    .optional()
+    .isISO8601()
+    .withMessage('Please enter a valid date'),
+  query('userid')
+    .optional()
+    .isInt({ gt: 0 })
+    .withMessage('User ID must be greater than zero')
+];
+
 const validateNewSale = [
   body('products', 'Products must exists').exists(),
   body('products', 'Products must be specified in the right format').isArray(),
-  body('products', 'Should contain atleast 1 product entry').isLength({ min: 1 }),
+  body('products', 'Products must have atleast an entry').isLength({ min: 1 }),
   body('products.*.id', 'Product Id must be a a number from 1').isInt({ min: 1 }),
   body('products.*.qty', 'Product Qty must be a number from 1').isInt({ min: 1 })
 ];
@@ -177,6 +189,7 @@ const validationHandler = (req, res, next) => {
 const validations = {
   validateLogin,
   validateSignup,
+  validateUserId,
   validateUserUpdate,
   validateUserDelete,
   validateNewCategory,
@@ -188,6 +201,7 @@ const validations = {
   validateNewProduct,
   validateProductId,
   valaidateGetProducts,
+  valaidateGetSales,
   validationHandler
 };
 export default validations;

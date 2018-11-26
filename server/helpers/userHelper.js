@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -29,7 +28,7 @@ class AuthHelper {
 
       const foundUser = await pool.query(query.findUserByEmail(email));
 
-      if (foundUser.rowCount < 1) errorHandler(404, 'Email address or password is incorrect');
+      if (!foundUser.rowCount) errorHandler(404, 'Email address or password is incorrect');
 
       const isPasswordValid = await bcrypt.compare(password, foundUser.rows[0].password);
 
@@ -39,7 +38,7 @@ class AuthHelper {
 
       const token = jwt.sign({ id, email, name, role }, SECRET_KEY, { expiresIn: '24h' });
 
-      return { token, role };
+      return { token };
     } catch (error) {
       return error;
     }
@@ -59,12 +58,12 @@ class AuthHelper {
 
       const foundUser = await pool.query(query.findUserByEmail(email));
 
-      if (foundUser.rowCount > 0) return errorHandler(409, 'Email address has been used');
+      if (foundUser.rowCount) return errorHandler(409, 'Email address has been used');
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const createdUser = await pool.query(query.regUser(name, email, hashedPassword, role));
-
+      delete createdUser.rows[0].password;
       return createdUser.rows[0];
     } catch (error) {
       return error;
@@ -89,6 +88,25 @@ class AuthHelper {
 
   /**
    *
+   * @description Helper method that retrieves a single users from the database
+   * @static
+   * @param {number} userid User Id
+   * @returns {object} User informaiton
+   * @memberof UserHelper
+   */
+  static async getSingleUser(userid) {
+    try {
+      const { rows, rowCount } = await pool.query(query.findUserById(userid));
+      if (!rowCount) errorHandler(404, 'User not found');
+      const foundUser = rows[0];
+      return foundUser;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  /**
+   *
    * @description Helper method that creates a new user in the store
    * @static
    * @param {object} user User registration information
@@ -99,17 +117,16 @@ class AuthHelper {
     try {
       const { userid, name, password, role, userRole } = user;
 
-      const { rows } = await pool.query(query.findUserById(userid));
+      const { rows, rowCount } = await pool.query(query.findUserById(userid));
 
-      if (rows.length < 1) {
-        errorHandler(404, 'User not found');
-      }
+      if (!rowCount) errorHandler(404, 'User not found');
 
       const foundUser = rows[0];
 
-      if (userRole === 'Admin' && foundUser.role === 'Owner') {
-        errorHandler(403, 'Admin cant update owner account');
-      }
+      if (userRole === 'Admin' && foundUser.role === 'Owner') errorHandler(403, 'Admin cant update owner account');
+
+      /* istanbul ignore next */
+      if (foundUser.role === 'Owner' && role) errorHandler(403, 'You cant update owner account role.');
 
       if (!password) {
         const updatedUser = await pool.query(query.updateUser(name, null, role, userid));
@@ -136,15 +153,16 @@ class AuthHelper {
    */
   static async deleteUser(userid) {
     try {
-      const { rows } = await pool.query(query.findUserById(userid));
-      if (rows.length < 1) {
-        errorHandler(404, 'User not found');
-      }
+      const { rows, rowCount } = await pool.query(query.findUserById(userid));
+
+      if (!rowCount) errorHandler(404, 'User not found');
+
       const foundUser = rows[0];
-      if (foundUser.role === 'Owner') {
-        errorHandler(403, 'Store owner account cant be deleted');
-      }
+
+      if (foundUser.role === 'Owner') errorHandler(403, 'Store owner account cant be deleted');
+
       await pool.query(query.deleteUser(userid));
+
       return `${foundUser.name} has been deleted successfully`;
     } catch (error) {
       return error;

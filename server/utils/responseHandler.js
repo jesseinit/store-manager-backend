@@ -1,4 +1,4 @@
-const handleResponse = (result, nextCb, response, statusCode = 200, statusMessage, message) => {
+const handleResponse = (result, nextCb, response, statusCode, statusMessage, message) => {
   if (result instanceof Error) {
     nextCb(result);
   } else {

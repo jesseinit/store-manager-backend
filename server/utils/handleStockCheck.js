@@ -29,7 +29,7 @@ const stockCheck = (req, res, next) => {
     );
 
     if (productInfo.rowCount < 1) {
-      responseHandler(_, _, res, 400, 'failure', `Product with id ${product.id} is not found`);
+      responseHandler(_, _, res, 404, 'failure', `Product with id ${product.id} is not found`);
       return;
     }
 

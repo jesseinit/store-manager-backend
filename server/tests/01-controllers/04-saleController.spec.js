@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import app from '../../index';
+import app from '../../app';
 import mockData from '../mock';
 import pool from '../../utils/connection';
 
@@ -80,10 +80,10 @@ describe('Sales', () => {
         .post('/api/v1/sales')
         .set('Authorization', `Bearer ${attendantToken}`)
         .send({ products: [{ id: 10, qty: 1 }] });
-      expect(response.status).to.equal(400);
+      expect(response.status).to.equal(404);
     });
 
-    it('It should return not found on a product that is non-exisiting', async () => {
+    it('It should return bad request error for a product quantity that cant be fulfiled', async () => {
       const response = await chai
         .request(app)
         .post('/api/v1/sales')
@@ -113,17 +113,15 @@ describe('Sales', () => {
     });
 
     it('Admin should be able to view all sale records sorted by data range', async () => {
-      const day = new Date().getDate();
-      const month = new Date().getMonth() + 1;
-      const year = new Date().getFullYear();
-      const today = `${year}-${month}-${day}`;
-      const yesterday = `${year}-${month}-${day - 1}`;
-
+      const today = new Date()
+        .toJSON()
+        .slice(0, 10)
+        .split('-')
+        .join('-');
       const response = await chai
         .request(app)
-        .get(`/api/v1/sales?fdate=${yesterday}&tdate=${today}`)
+        .get(`/api/v1/sales?fdate=${today}&tdate=${today}`)
         .set('Authorization', `Bearer ${ownerToken}`);
-
       expect(response.status).to.equal(200);
     });
 

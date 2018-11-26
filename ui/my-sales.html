@@ -1,94 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <script src="./js/checks.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="css/app.css" />
+    <title>My Sales - Store Manager</title>
+  </head>
 
-<head>
-  <script src="./js/checks.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="css/app.css">
-  <title>My Sales - Store Manager</title>
-</head>
-
-<body>
-  <header id="site-header">
-    <a class="logo" href="./make-sale.html">Store Manager</a>
-    <nav class="top-nav">
-      <ul>
-        <li class="cart"><a href="./cart.html">Cart <span class="cart-count">0</span></a></li>
-        <li><a id="logout-btn" href="./">Logout</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main id="site-main" class="row">
-    <aside class="aside">
-      <nav class="aside__nav">
+  <body>
+    <header id="site-header" class="row">
+      <a class="logo" href="./make-sale.html">Store Manager</a>
+      <nav class="top-nav">
         <ul>
-          <li><a href="./make-sale.html">Make Sale</a></li>
-          <li><a class="selected" href="./my-sales.html">My Sales</a></li>
+          <li class="cart">
+            <a href="./cart.html"
+              ><img class="cart__image" src="./img/cart-icon.png" /><span class="cart__count">0</span></a
+            >
+          </li>
+          <li><a id="logout-btn" href="./">Logout</a></li>
         </ul>
       </nav>
-    </aside>
-    <section class="main">
-      <section class="summary">
-        <div class="summary__card">
-          <div class="details">
-            <p class="header">Sales Order Processed</p>
-            <h2 class="value" id="total-sales-orders"></h2>
+    </header>
+    <main id="site-main" class="row">
+      <aside class="aside">
+        <nav class="aside__nav">
+          <ul>
+            <li><a href="./make-sale.html">Make Sale</a></li>
+            <li><a class="selected" href="./my-sales.html">My Sales</a></li>
+          </ul>
+        </nav>
+      </aside>
+      <section class="main">
+        <section class="summary">
+          <div class="summary__card">
+            <div class="details">
+              <p class="header">Sales Order Processed</p>
+              <h2 class="value" id="total-sales-orders"></h2>
+            </div>
+            <div class="icon yellow"><img src="./img/sales-rec-icon.png" alt="card-icon" /></div>
           </div>
-          <div class="icon yellow"><img src="./img/sales-rec-icon.png" alt="card-icon"></div>
-        </div>
-        <div class="summary__card">
-          <div class="details">
-            <p class="header">Total Products Sold</p>
-            <h2 class="value" id="total-prod-sold"></h2>
+          <div class="summary__card">
+            <div class="details">
+              <p class="header">Total Products Sold</p>
+              <h2 class="value" id="total-prod-sold"></h2>
+            </div>
+            <div class="icon red"><img src="./img/product-sold-icon.png" alt="card-icon" /></div>
           </div>
-          <div class="icon red"><img src="./img/product-sold-icon.png" alt="card-icon"></div>
-        </div>
-        <div class="summary__card">
-          <div class="details">
-            <p class="header">Product Worth Sold</p>
-            <h2 class="value" id="total-prod-worth"></h2>
+          <div class="summary__card">
+            <div class="details">
+              <p class="header">Product Worth Sold</p>
+              <h2 class="value" id="total-prod-worth"></h2>
+            </div>
+            <div class="icon green"><img src="./img/product-worth-icon.png" alt="card-icon" /></div>
           </div>
-          <div class="icon green"><img src="./img/product-worth-icon.png" alt="card-icon"></div>
-        </div>
-      </section>
-      <section class="sales">
-        <div class="sales__meta">
-          <div class="sort">
-            <form id="sort-id">
+        </section>
+        <section class="sales">
+          <div class="filters">
+            <form id="sort-id" class="filters__form">
               <fieldset>
                 <legend>By Sales ID</legend>
-                <input type="text" pattern="[0-9]*" id="sale-id" placeholder="Enter Sales ID">
-                <input type="submit" value="Retrieve Records">
+                <input type="text" pattern="[0-9]*" id="sale-id" placeholder="Enter Sales ID" />
+                <input type="submit" value="Retrieve Records" />
               </fieldset>
             </form>
-            <button class="clear" id="clear-filters-attendant">Clear Filters</button>
+            <button class="filters__clear" id="clear-filters-attendant">Clear Filters</button>
           </div>
-        </div>
-        <div class="table-wrapper">
-          <table id="my-sales-table" class="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th colspan="1">Date</th>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th class="total">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-        </div>
+          <div class="table-wrapper">
+            <table id="my-sales-table" class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th colspan="1">Date</th>
+                  <th>Description</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th class="total">Total</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
       </section>
-    </section>
-  </main>
-  <footer id="site-footer">
-    <p>Store Manager &copy; 2018</p>
-  </footer>
-  <script src="./js/app.js"></script>
-</body>
-
+    </main>
+    <footer id="site-footer" class="row"><p>Store Manager &copy; 2018</p></footer>
+    <script src="./js/app.js"></script>
+  </body>
 </html>

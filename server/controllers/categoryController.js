@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import CategoryHelper from '../helpers/categoryHelper';
 import handleResponse from '../utils/responseHandler';
 
@@ -84,7 +83,7 @@ class CategoryController {
   static async deleteCategory(req, res, next) {
     const { id } = req.params;
     const result = await CategoryHelper.deleteCategory(id);
-    handleResponse(result, next, res, 200, 'success', undefined);
+    handleResponse(result, next, res, 200, 'success', result);
   }
 }
 

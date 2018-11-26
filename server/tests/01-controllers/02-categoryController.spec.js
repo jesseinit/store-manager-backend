@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import app from '../..';
+import app from '../../app';
 import mockData from '../mock';
 import pool from '../../utils/connection';
 
@@ -150,11 +150,17 @@ describe('Category', () => {
     });
 
     it('Admin should not be able to update a category with an existing category name', async () => {
+      await chai
+        .request(app)
+        .post('/api/v1/category/')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ name: 'Fittings' });
+
       const response = await chai
         .request(app)
         .put('/api/v1/category/1')
         .set('Authorization', `Bearer ${ownerToken}`)
-        .send(mockData.category.existingCategoryName);
+        .send({ name: 'Fittings' });
 
       expect(response.status).to.equal(400);
       expect(response.body.message).to.equal('The category name already exists.');

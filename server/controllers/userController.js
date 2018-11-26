@@ -1,8 +1,5 @@
-import 'babel-polyfill';
 import UserHelper from '../helpers/userHelper';
 import handleResponse from '../utils/responseHandler';
-import pool from '../utils/connection';
-import query from '../utils/queries';
 
 /**
  *
@@ -51,14 +48,24 @@ class UserController {
    * @memberof UserController
    */
   static async getAllUsers(req, res, next) {
-    if (req.query.userid) {
-      const { userid } = req.query;
-      const { rows } = await pool.query(query.findUserById(userid));
-      handleResponse(rows[0], next, res, 200, 'success', 'Users retrieved successfully');
-      return;
-    }
     const result = await UserHelper.getAllUsers();
     handleResponse(result, next, res, 200, 'success', 'Users retrieved successfully');
+  }
+
+  /**
+   *
+   * @description Retrieves a single registered user account in the store
+   * @static
+   * @param {object} req Request Object
+   * @param {object} res Response Object
+   * @param {object} next calls the next middleware in the request-response cycle
+   * @returns {object} A user account information
+   * @memberof UserController
+   */
+  static async getSingleUsers(req, res, next) {
+    const { userid } = req.params;
+    const result = await UserHelper.getSingleUser(Number(userid));
+    handleResponse(result, next, res, 200, 'success', 'User retrieved successfully');
   }
 
   /**

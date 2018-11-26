@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-  
   <head>
     <script src="./js/checks.js"></script>
     <meta charset="UTF-8" />
@@ -11,11 +10,13 @@
   </head>
 
   <body>
-    <header id="site-header">
+    <header id="site-header" class="row">
       <a class="logo" href="./make-sale.html">Store Manager</a>
       <nav class="top-nav">
         <ul>
-          <li class="cart"><a href="./cart.html">Cart <span class="cart-count">0</span></a></li>
+          <li class="cart">
+            <a href="./cart.html"><img class="cart__image" src="./img/cart-icon.png"><span class="cart__count">0</span></a>
+          </li>
           <li><a id="logout-btn" href="./">Logout</a></li>
         </ul>
       </nav>
@@ -33,19 +34,16 @@
         <section class="search">
           <form id="search-form" class="search__form">
             <input type="text" autofocus id="product-name" class="search__input" placeholder="Enter product name" />
-            <select name="" id="product-cat" class="search__catergory">
+            <select id="product-cat" class="search__catergory">
               <option value="All">All</option>
             </select>
             <input type="submit" class="search__submit" value="Search" />
           </form>
         </section>
-        <section class="products-wrapper">
-          <section class="products">
-          </section>
-        </section>
+        <section class="products"></section>
       </section>
     </main>
-    <footer id="site-footer"><p>Store Manager &copy; 2018</p></footer>
+    <footer id="site-footer" class="row"><p>Store Manager &copy; 2018</p></footer>
     <script src="./js/app.js"></script>
   </body>
 </html>

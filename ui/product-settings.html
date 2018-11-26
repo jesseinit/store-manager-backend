@@ -10,7 +10,7 @@
   </head>
 
   <body>
-    <header id="site-header">
+    <header id="site-header" class="row">
       <a class="logo" href="./make-sale.html">Store Manager</a>
       <nav class="top-nav">
         <ul>
@@ -32,61 +32,39 @@
       </aside>
       <section class="main">
         <section class="sales">
-          <div class="sales__meta">
-            <form id="create-new-product">
+          <button class="btn btn--orange" id="create-product">Create Product</button>
+          <section class="filters">
+            <form id="filter-name" class="filters__form">
               <fieldset>
-                <legend>Add New Product</legend>
-                <input
-                  id="product-imgurl"
-                  type="text"
-                  placeholder="Product Image Url"
-                  required
-                  pattern="(http(s?):(\/){2})([^/])([/.\w\s-])*\.(?:jpg|gif|png)"
-                />
-                <input id="product-name" type="text" placeholder="Product Name" required />
-                <input id="product-price" type="text" placeholder="Product Price" required />
-                <input id="product-qty" type="text" placeholder="Product Quantity" required />
-                <select id="product-cat" required>
-                  <option disabled selected value="0">Select Category</option>
-                </select>
-                <input type="submit" value="Add Product" id="new-product" />
+                <legend>Filter By Product Name</legend>
+                <input id="search-name" type="text" placeholder="Search Product" />
+                <input type="submit" value="Retrieve Records" />
               </fieldset>
             </form>
-            <div class="sort" style="display: none;">
-              <section class="filter">
-                <form id="filter-name">
-                  <fieldset>
-                    <legend>Filter By Product Name</legend>
-                    <input id="search-name" type="text" placeholder="Search Product" />
-                  </fieldset>
-                </form>
-                <form id="filter-rows">
-                  <fieldset>
-                    <legend>Filter Rows</legend>
-                    <select id="filter-pref">
-                      <option value="10">10 Records</option>
-                      <option value="50">50 Records</option>
-                      <option value="100">100 Records</option>
-                    </select>
-                    <input type="submit" value="Retrieve Records" />
-                  </fieldset>
-                </form>
-                <form id="filter-qty">
-                  <fieldset>
-                    <legend>Filter Remaining Quantity</legend>
-                    <select name="" id="qty-pref">
-                        <option value="10">Less than 10</option>
-                        <option value="20">Less than 20</option>
-                        <option value="30">Less than 30</option>
-                      </select>
-                    <input type="submit" value="Retrieve Records" />
-                  </fieldset>
-                </form>
-
-                <button id="clear-product-filters" class="clear">Clear Filters</button>
-              </section>
-            </div>
-          </div>
+            <form id="filter-rows" class="filters__form">
+              <fieldset>
+                <legend>Filter Rows</legend>
+                <select id="filter-pref">
+                  <option value="10">10 Records</option>
+                  <option value="50">50 Records</option>
+                  <option value="100">100 Records</option>
+                </select>
+                <input type="submit" value="Retrieve Records" />
+              </fieldset>
+            </form>
+            <form id="filter-qty" class="filters__form">
+              <fieldset>
+                <legend>Filter Remaining Quantity</legend>
+                <select name="" id="qty-pref">
+                  <option value="10">Less than 10</option>
+                  <option value="20">Less than 20</option>
+                  <option value="30">Less than 30</option>
+                </select>
+                <input type="submit" value="Retrieve Records" />
+              </fieldset>
+            </form>
+            <button id="clear-product-filters" class="filters__clear">Clear Filters</button>
+          </section>
           <div class="table-wrapper">
             <table id="products-table" class="table">
               <thead>
@@ -98,15 +76,12 @@
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody>
-              </tbody>
+              <tbody></tbody>
             </table>
           </div>
-        </section>
-        
       </section>
     </main>
-    <footer id="site-footer"><p>Store Manager &copy; 2018</p></footer>
+    <footer id="site-footer" class="row"><p>Store Manager &copy; 2018</p></footer>
     <script src="./js/app.js"></script>
   </body>
 </html>

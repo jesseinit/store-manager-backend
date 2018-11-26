@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
-import app from '../..';
+import app from '../../app';
 import mockData from '../mock';
 import UserHelper from '../../helpers/userHelper';
 
@@ -96,7 +96,7 @@ describe('User', () => {
       expect(response.status).to.equal(201);
       expect(response.body).to.have.property('data');
       expect(response.body).to.be.an('object');
-      expect(response.body.data).to.have.keys(['id', 'name', 'email', 'password', 'role']);
+      expect(response.body.data).to.have.keys(['id', 'name', 'email', 'role']);
     });
 
     it('It should return forbidden when an attendant wants to create an account', async () => {
@@ -156,11 +156,22 @@ describe('User', () => {
 
       expect(response.status).to.equal(200);
     });
+  });
+
+  describe('Get Single User', () => {
+    it('It should return a not found error for a non-existing id', async () => {
+      const response = await chai
+        .request(app)
+        .get(`/api/v1/users/10`)
+        .set('Authorization', `Bearer ${ownerToken}`);
+
+      expect(response.status).to.equal(404);
+    });
 
     it('Store admin/owner should be able to retrieve single users', async () => {
       const response = await chai
         .request(app)
-        .get(`/api/v1/users/?userid=${1}`)
+        .get(`/api/v1/users/1`)
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(response.status).to.equal(200);
