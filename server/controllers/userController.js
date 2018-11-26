@@ -1,8 +1,6 @@
 import 'babel-polyfill';
 import UserHelper from '../helpers/userHelper';
 import handleResponse from '../utils/responseHandler';
-import pool from '../utils/connection';
-import query from '../utils/queries';
 
 /**
  *
@@ -22,7 +20,7 @@ class UserController {
    */
   static async loginUser(req, res, next) {
     const result = await UserHelper.loginUser(req.body);
-    handleResponse(result, next, res, 200, 'success', 'Login successfully');
+    handleResponse(result, next, res, 200, 'Login successfully');
   }
 
   /**
@@ -37,7 +35,7 @@ class UserController {
    */
   static async createUser(req, res, next) {
     const result = await UserHelper.createUser(req.body);
-    handleResponse(result, next, res, 201, 'success', 'User created successfully');
+    handleResponse(result, next, res, 201, 'User created successfully');
   }
 
   /**
@@ -51,14 +49,24 @@ class UserController {
    * @memberof UserController
    */
   static async getAllUsers(req, res, next) {
-    if (req.query.userid) {
-      const { userid } = req.query;
-      const { rows } = await pool.query(query.findUserById(userid));
-      handleResponse(rows[0], next, res, 200, 'success', 'Users retrieved successfully');
-      return;
-    }
     const result = await UserHelper.getAllUsers();
-    handleResponse(result, next, res, 200, 'success', 'Users retrieved successfully');
+    handleResponse(result, next, res, 200, 'Users retrieved successfully');
+  }
+
+  /**
+   *
+   * @description Retrieves a single registered user account in the store
+   * @static
+   * @param {object} req Request Object
+   * @param {object} res Response Object
+   * @param {object} next calls the next middleware in the request-response cycle
+   * @returns {object} A user account information
+   * @memberof UserController
+   */
+  static async getSingleUsers(req, res, next) {
+    const { userid } = req.params;
+    const result = await UserHelper.getSingleUser(Number(userid));
+    handleResponse(result, next, res, 200, 'User retrieved successfully');
   }
 
   /**
@@ -76,7 +84,7 @@ class UserController {
     const { userid } = req.params;
     const { name, password, role } = req.body;
     const result = await UserHelper.updateUser({ userid, name, password, role, userRole });
-    handleResponse(result, next, res, 200, 'success', 'User updated successfully');
+    handleResponse(result, next, res, 200, 'User updated successfully');
   }
 
   /**
@@ -92,7 +100,7 @@ class UserController {
   static async deleteUser(req, res, next) {
     const { userid } = req.params;
     const result = await UserHelper.deleteUser(userid);
-    handleResponse(result, next, res, 200, 'success', result);
+    handleResponse(result, next, res, 200, result);
   }
 }
 

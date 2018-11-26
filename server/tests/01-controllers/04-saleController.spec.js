@@ -80,10 +80,10 @@ describe('Sales', () => {
         .post('/api/v1/sales')
         .set('Authorization', `Bearer ${attendantToken}`)
         .send({ products: [{ id: 10, qty: 1 }] });
-      expect(response.status).to.equal(400);
+      expect(response.status).to.equal(404);
     });
 
-    it('It should return not found on a product that is non-exisiting', async () => {
+    it('It should return bad request error for a product quantity that cant be fulfiled', async () => {
       const response = await chai
         .request(app)
         .post('/api/v1/sales')
