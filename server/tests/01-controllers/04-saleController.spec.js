@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import app from '../../index';
+import app from '../../app';
 import mockData from '../mock';
 import pool from '../../utils/connection';
 
@@ -113,17 +113,15 @@ describe('Sales', () => {
     });
 
     it('Admin should be able to view all sale records sorted by data range', async () => {
-      const day = new Date().getDate();
-      const month = new Date().getMonth() + 1;
-      const year = new Date().getFullYear();
-      const today = `${year}-${month}-${day}`;
-      const yesterday = `${year}-${month}-${day - 1}`;
-
+      const today = new Date()
+        .toJSON()
+        .slice(0, 10)
+        .split('-')
+        .join('-');
       const response = await chai
         .request(app)
-        .get(`/api/v1/sales?fdate=${yesterday}&tdate=${today}`)
+        .get(`/api/v1/sales?fdate=${today}&tdate=${today}`)
         .set('Authorization', `Bearer ${ownerToken}`);
-
       expect(response.status).to.equal(200);
     });
 

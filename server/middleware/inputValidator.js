@@ -99,12 +99,6 @@ const validateSaleId = [
 ];
 
 const validateNewProduct = [
-  body('imgUrl')
-    .custom(imageUrl => {
-      const checkUrl = /(http(s?):(\/){2})([^/])([/.\w\s-])*\.(?:jpg|gif|png)/g;
-      return checkUrl.test(imageUrl);
-    })
-    .withMessage('Product image input should be a valid image url'),
   body('name')
     .isLength({ min: 2 })
     .withMessage('Product name must be 2 letters long'),
@@ -117,10 +111,6 @@ const validateNewProduct = [
   body('qty')
     .isInt({ min: 1 })
     .withMessage('Product qty must be a positive number from 1'),
-  body('imgUrl')
-    .exists()
-    .withMessage('Product Image must be provided.'),
-  sanitizeBody('name').customSanitizer(value => value.replace(/\s{2,}/g, ' ').trim()),
   body('name')
     .exists()
     .withMessage('Product name must be provided.'),
@@ -140,8 +130,7 @@ const validateProductUpdate = [
   validateNewProduct[0].optional(),
   validateNewProduct[1].optional(),
   validateNewProduct[2].optional(),
-  validateNewProduct[3].optional(),
-  validateNewProduct[4].optional()
+  validateNewProduct[3].optional()
 ];
 
 const valaidateGetProducts = [

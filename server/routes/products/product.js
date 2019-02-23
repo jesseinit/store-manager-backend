@@ -3,6 +3,7 @@ import { Router } from 'express';
 import ProductController from '../../controllers/productController';
 import validator from '../../middleware/inputValidator';
 import authMiddleware from '../../middleware/auth';
+import parseForm from '../../middleware/parseForm';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.post(
   '/',
   authMiddleware.verifyToken,
   authMiddleware.adminOnly,
+  parseForm.single('imageUrl'),
   validator.validateNewProduct,
   validator.validationHandler,
   ProductController.createProduct
@@ -37,6 +39,7 @@ router.put(
   authMiddleware.adminOnly,
   validator.validateProductUpdate,
   validator.validationHandler,
+  parseForm.single('imageUrl'),
   ProductController.updateProduct
 );
 

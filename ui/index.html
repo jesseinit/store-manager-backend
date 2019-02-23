@@ -10,8 +10,15 @@
   </head>
 
   <body>
-    <header id="site-header"><a class="logo" href="./">Store Manager</a></header>
-    <main id="site-main" class="ro login-bg">
+    <header id="site-header" class="row">
+      <a class="logo" href="./">Store Manager</a>
+      <nav class="top-nav">
+        <ul>
+          <li><a href="./docs">Docs</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main id="site-main" class="blue-bg row">
       <section class="form__wrapper">
         <div class="form">
           <p class="form__header">Login with your account.</p>
@@ -30,12 +37,12 @@
             <div class="form__control">
               <input type="password" id="login-password" class="form__input" placeholder="Password" required />
             </div>
-            <div class="form__control"><button type="submit" class="btn btn__primary">Login</button></div>
+            <div class="form__control"><button type="submit" class="btn btn--gradient full-width">Login</button></div>
           </form>
         </div>
       </section>
     </main>
-    <footer id="site-footer"><p>Store Manager &copy; 2018</p></footer>
+    <footer id="site-footer" class="blue-bg row"><p>Store Manager &copy; 2018</p></footer>
     <script src="./js/app.js"></script>
   </body>
 </html>

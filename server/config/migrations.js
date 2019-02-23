@@ -1,12 +1,6 @@
-import 'babel-polyfill';
-import pg from 'pg';
 import bcrypt from 'bcrypt';
-import dotenv from 'dotenv';
+import pool from '../utils/connection';
 import query from '../utils/queries';
-
-dotenv.config();
-
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
 const usersTable = `CREATE TABLE IF NOT EXISTS users (
   id serial NOT NULL PRIMARY KEY,
@@ -40,6 +34,8 @@ const salesTable = `CREATE TABLE IF NOT EXISTS sales (
 const productSales = `CREATE TABLE IF NOT EXISTS productsales (
   id serial NOT NULL PRIMARY KEY,
   product_id int NOT NULL,
+  product_name text NOT NULL,
+  product_price float NOT NULL,
   sale_id int NOT NULL,
   product_worth float NOT NULL,
   product_qty int NOT NULL,

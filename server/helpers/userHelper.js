@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -29,7 +28,7 @@ class AuthHelper {
 
       const foundUser = await pool.query(query.findUserByEmail(email));
 
-      if (foundUser.rowCount < 1) errorHandler(404, 'Email address or password is incorrect');
+      if (!foundUser.rowCount) errorHandler(404, 'Email address or password is incorrect');
 
       const isPasswordValid = await bcrypt.compare(password, foundUser.rows[0].password);
 
@@ -59,12 +58,12 @@ class AuthHelper {
 
       const foundUser = await pool.query(query.findUserByEmail(email));
 
-      if (foundUser.rowCount > 0) return errorHandler(409, 'Email address has been used');
+      if (foundUser.rowCount) return errorHandler(409, 'Email address has been used');
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const createdUser = await pool.query(query.regUser(name, email, hashedPassword, role));
-
+      delete createdUser.rows[0].password;
       return createdUser.rows[0];
     } catch (error) {
       return error;

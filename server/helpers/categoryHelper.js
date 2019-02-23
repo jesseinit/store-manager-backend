@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import pool from '../utils/connection';
 import query from '../utils/queries';
 import errorHandler from '../utils/errorHandler';

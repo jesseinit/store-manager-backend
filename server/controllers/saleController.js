@@ -76,7 +76,7 @@ class SalesController {
   static async getSingleSale(req, res, next) {
     const saleId = parseInt(req.params.id, 10);
     const result = await SalesHelper.getSingleSale(saleId, req.user);
-    handleResponse(result, next, res, 200, 'Sale retrieved successfully');
+    handleResponse(result, next, res, 200, 'success', 'Sale retrieved successfully');
   }
 
   /**
@@ -93,7 +93,7 @@ class SalesController {
     const { products } = req.body;
     const { total } = req;
     const result = await SalesHelper.createNewSale({ userid, total, products });
-    handleResponse(result, next, res, 201, 'Checkout completed successfully');
+    handleResponse(result, next, res, 201, 'success', 'Checkout completed successfully');
   }
 }
 export default SalesController;

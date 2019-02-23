@@ -48,7 +48,7 @@ class ProductController {
    */
   static async getProductById(req, res, next) {
     const result = await ProductHelper.getProductById(req.params.id);
-    handleResponse(result, next, res, 200, 'Product retrieved successfully.');
+    handleResponse(result, next, res, 200, 'success', 'Product retrieved successfully.');
   }
 
   /**
@@ -60,11 +60,13 @@ class ProductController {
    * @memberof ProductController
    */
   static async createProduct(req, res, next) {
-    const result = await ProductHelper.createProduct(req.body);
-    handleResponse(result, next, res, 201, 'Product created successfully.');
+    const newProduct = { file: req.file, body: req.body };
+    const result = await ProductHelper.createProduct(newProduct);
+    handleResponse(result, next, res, 201, 'success', 'Product created successfully.');
   }
 
   /**
+   *
    * @description Updates a product
    * @returns {object} Updated product
    * @static
@@ -74,8 +76,9 @@ class ProductController {
    */
   static async updateProduct(req, res, next) {
     const id = parseInt(req.params.id, 10);
-    const result = await ProductHelper.updateProduct({ id, body: req.body });
-    handleResponse(result, next, res, 200, 'Product updated successfully.');
+    const { file, body } = req;
+    const result = await ProductHelper.updateProduct({ id, file, body });
+    handleResponse(result, next, res, 200, 'success', 'Product updated successfully.');
   }
 
   /**
@@ -89,8 +92,7 @@ class ProductController {
   static async deleteProduct(req, res, next) {
     const productId = parseInt(req.params.id, 10);
     const result = await ProductHelper.deleteProduct(productId);
-
-    handleResponse(result, next, res, 200, 'Product deleted successfully.');
+    handleResponse(result, next, res, 200, 'success', 'Product deleted successfully.');
   }
 }
 

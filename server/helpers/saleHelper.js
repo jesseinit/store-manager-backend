@@ -11,8 +11,7 @@ import { paginatedResult, paginateEmptyResult } from '../utils/paginateRecords';
  */
 class SalesHelper {
   /**
-   *
-   * @description Helper method that gets all sales records from the data source
+   description Helper method that gets all sales records from the data source
    * @static
    * @returns {array} An array of sales records objects
    * @memberof SalesHelper
@@ -215,7 +214,16 @@ class SalesHelper {
         const productWorth = foundRecord.product_price * product.qty;
         const newProductQty = foundRecord.product_qty - product.qty;
 
-        await pool.query(query.createProductSales(product.id, saleId, productWorth, product.qty));
+        await pool.query(
+          query.createProductSales(
+            product.id,
+            foundRecord.product_name,
+            foundRecord.product_price,
+            saleId,
+            productWorth,
+            product.qty
+          )
+        );
 
         await pool.query(query.updateProduct(product.id, { price: foundRecord.product_price, qty: newProductQty }));
       });

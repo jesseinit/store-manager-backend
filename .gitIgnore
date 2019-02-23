@@ -3,4 +3,6 @@ package-lock.json
 .nyc_output
 coverage
 dist
+ui/scss
 .env
+.DS_Store

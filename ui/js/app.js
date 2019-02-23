@@ -1,19 +1,16 @@
 const _ = undefined;
-const basepath = `${window.location.origin}/api/v1`;
+const basepath = `http://localhost:3000/api/v1`;
 const successToast = 'toast--success';
 const errorToast = 'toast--error';
 const siteHeader = document.querySelector('#site-header');
 const loginForm = document.querySelector('#login-form');
-const createUserForm = document.querySelector('#create-user-form');
-const createCategoryForm = document.querySelector('#create-category');
-const createProductForm = document.querySelector('#create-new-product');
 const logoutBtn = document.querySelector('#logout-btn');
 const usersTableBody = document.querySelector('#users-table tbody');
 const categoryTableBody = document.querySelector('#category-table tbody');
 const productsTable = document.querySelector('#products-table');
 const salesTable = document.querySelector('#my-sales-table');
 const latestTableBody = document.querySelector('#lastest-sales tbody');
-const recordSort = document.querySelector('.sort');
+const recordSort = document.querySelector('.filters');
 const filterRowsForm = document.querySelector('#filter-rows');
 const filterQtyForm = document.querySelector('#filter-qty');
 const clearFiltersProd = document.querySelector('#clear-product-filters');
@@ -21,7 +18,7 @@ const filterNameForm = document.querySelector('#filter-name');
 const fromDate = document.querySelector('#from-date');
 const toDate = document.querySelector('#to-date');
 const productWrapper = document.querySelector('.products');
-const cartCount = document.querySelector('.cart-count');
+const cartCount = document.querySelector('.cart__count');
 const cartTable = document.querySelector('#cart-table');
 const cartContianer = document.querySelector('.sales');
 const salesTotalWrapper = document.querySelector('.total span');
@@ -32,18 +29,37 @@ const clearAttendantsFilters = document.querySelector('#clear-filters-attendant'
 const clearAdminFilters = document.querySelector('#clear-filters-admin');
 const sortByIdForm = document.querySelector('#sort-id');
 const sortByUserForm = document.querySelector('#sort-user');
+const showNewProdModal = document.querySelector('#create-product');
+const showUserModal = document.querySelector('#show-user-modal');
+const showCategoryModal = document.querySelector('#show-category-modal');
+
+const headersConfig = {
+  json: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${localStorage.getItem('token')}`
+  },
+  multipart: {
+    Authorization: `Bearer ${localStorage.getItem('token')}`
+  }
+};
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
-const processRequest = (url, method = 'GET', body = _) => {
-  const token = localStorage.getItem('token');
-  const options = {
-    method,
+const processRequest = (
+  url,
+  options = {
+    method: _,
+    body: _,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  }
+) =>
+  fetch(url, {
+    method: options.method || 'GET',
     mode: 'cors',
-    body: JSON.stringify(body),
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
-  };
-
-  return fetch(url, options)
+    body: options.body,
+    headers: options.headers
+  })
     .then(async res => (res.ok ? res.json() : Promise.reject(await res.json())))
     .then(response => response)
     .catch(e => {
@@ -60,7 +76,6 @@ const processRequest = (url, method = 'GET', body = _) => {
       }
       return { message, error };
     });
-};
 
 const loadSpinner = () => {
   if (siteHeader.classList.contains('spinner')) {
@@ -144,7 +159,6 @@ const populateAdminDashboard = async () => {
   document.querySelector('#total-sales-orders').textContent = totalsaleorder;
   document.querySelector('#total-prod-worth').textContent = `N ${nFormatter(totalproductworth)}`;
   while (latestTableBody.firstChild) latestTableBody.removeChild(latestTableBody.firstChild);
-  toast('Dashboard Updated 🔥', successToast, 2000);
 
   if (!latestsales.length) {
     latestTableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=6>No sale has been recorded yet. 😕</td></tr>`);
@@ -180,7 +194,7 @@ const populateAttendantDashboard = async () => {
 
 const destroyInputErrors = formClass => {
   const form = document.querySelector(formClass);
-  if (form.children[0].classList.contains('error__container')) {
+  if (form.children[0].classList.contains('errors')) {
     form.removeChild(form.children[0]);
   }
 };
@@ -190,11 +204,11 @@ const destroyModal = e => {
 };
 
 const handleInputErrors = (response, formClass) => {
-  const ul = createNode('ul', 'error__container');
+  const ul = createNode('ul', 'errors');
   const form = document.querySelector(formClass);
   destroyInputErrors(formClass);
   if (response.message) {
-    const li = createNode('li', _, response.message);
+    const li = createNode('li', null, response.message);
     append(ul, li);
     form.insertBefore(ul, form.children[0]);
   } else {
@@ -243,12 +257,14 @@ const populateUserEditModal = response => {
     'afterbegin',
     `<div class="modal">
       <div class="form-body">
-        <h3>Update User</h3><form id="update-user-form" data-id=${id}>
+        <h3>Update User</h3>
+        <form id="update-user-form" data-id=${id}>
           <input type="text" id="update-name" placeholder="Employee Name" value='${name}'/>
           <input id="update-email" disabled value='${email}'/>
           <input type="password" id="update-password" placeholder="Password" />
           <select id="update-role">${role}</select>
-          <input type="submit" value="Update User" /></form>
+          <input type="submit" value="Update User" />
+        </form>
       </div>
     </div>`
   );
@@ -287,7 +303,6 @@ const populateUsersTable = async () => {
     delBtn.forEach(btn => btn.addEventListener('click', userDeleteModal));
   });
   loadSpinner();
-  toast(response.message, successToast, 1000);
 };
 
 const userDeleteModal = async e => {
@@ -325,29 +340,47 @@ const populateCategoryModal = response => {
     'afterbegin',
     `<div class="modal">
       <div class="form-body">
-        <h3>Update Category</h3><form id="update-category-form" data-id=${id}>
-          <input type="text" id="update-name" placeholder="Category Name" value='${name}'/>
-          <input type="submit" value="Update Category" /></form>
+        <h3>Update Category</h3>
+        <form id="update-category-form" data-id=${id}>
+          <div class='input-group'>
+            <label for="update-name">Category Name</label>
+            <input type="text" id="update-name" required placeholder="Category Name" value='${name}'/>
+          </div>
+          <div class='input-group'>
+            <input type="submit" class="btn btn--gradient" value="Update Category" />
+          </div>
+        </form>
       </div>
     </div>`
   );
+};
+
+const categoryEditModal = async e => {
+  loadSpinner();
+  const endPointUrl = `${basepath}/category/${e.target.parentElement.dataset.id}`;
+  const response = await processRequest(endPointUrl);
+  populateCategoryModal(response);
+  const modal = document.body.querySelector('.modal');
+  modal.addEventListener('click', destroyModal);
+  const updateForm = document.querySelector('#update-category-form');
+  updateForm.addEventListener('submit', updateCategory);
+  loadSpinner();
 };
 
 const updateCategory = async e => {
   e.preventDefault();
   loadSpinner();
   const modal = document.body.querySelector('.modal');
-  const uName = document.querySelector('#update-name').value;
-
-  const categoryUpdateUrl = `${basepath}/category/${e.target.getAttribute('data-id')}`;
-  const updateInfo = { name: uName };
-
-  const updateResponse = await processRequest(categoryUpdateUrl, 'PUT', updateInfo);
+  const uName = modal.querySelector('#update-name').value;
+  const endPointUrl = `${basepath}/category/${e.target.dataset.id}`;
+  const updateInfo = JSON.stringify({ name: uName });
+  const options = { body: updateInfo, method: 'PUT', headers: headersConfig.json };
+  const updateResponse = await processRequest(endPointUrl, options);
 
   if (updateResponse.status === 'success') {
     loadSpinner();
     toast(updateResponse.message, successToast);
-    document.body.removeChild(modal);
+    modal.remove();
     populateCategoryTable();
     return;
   }
@@ -355,48 +388,35 @@ const updateCategory = async e => {
   toast(updateResponse.message || updateResponse.error[0], errorToast);
 };
 
+const modal = document.body.querySelector('.modal');
+
 const deleteCategory = async e => {
   loadSpinner();
-  const modal = document.body.querySelector('.modal');
   const categoryId = Number(e.target.dataset.id);
   const endPointUrl = `${basepath}/category/${categoryId}`;
-  const deleteResponse = await processRequest(endPointUrl, 'DELETE');
+  const options = { method: 'DELETE', headers: headersConfig.json };
+  const deleteResponse = await processRequest(endPointUrl, options);
 
   if (!deleteResponse.data) {
     toast(deleteResponse.message, errorToast);
-    document.body.removeChild(modal);
+    modal.remove();
     populateCategoryTable();
     loadSpinner();
     return;
   }
 
   loadSpinner();
-  toast('Category deleted successfully', successToast);
-  document.body.removeChild(modal);
+  modal.remove();
   populateCategoryTable();
 };
 
 const categoryDeleteModal = async e => {
   generateDeleteModal(e, 'category');
-  const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
   const delUserBtn = document.querySelector('#confirm-delete');
   const cancelBtn = document.querySelector('#cancel');
   delUserBtn.addEventListener('click', deleteCategory);
   cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
-};
-
-const categoryEditModal = async e => {
-  loadSpinner();
-  const singleCategoryUrl = `${basepath}/category/${e.target.parentElement.getAttribute('data-id')}`;
-  const response = await processRequest(singleCategoryUrl);
-
-  populateCategoryModal(response);
-  const modal = document.body.querySelector('.modal');
-  modal.addEventListener('click', destroyModal);
-  const updateForm = document.querySelector('#update-category-form');
-  updateForm.addEventListener('submit', updateCategory);
-  loadSpinner();
 };
 
 const populateCategoryTable = async () => {
@@ -444,35 +464,36 @@ const populateCategoryDropDown = async () => {
 /* Pagination  */
 const goToPage = async (endPointUrl, options) => {
   loadSpinner();
-  const { page, tableBody, tableParent } = options;
+  const { page, tableBody, tableParent, callbackFn } = options;
   const queryString = `${endPointUrl}page=${page}`;
   const paginationResponse = await processRequest(queryString);
   while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
-  paginationResponse.data.forEach(product => generateTableBodyEntries(tableBody, product));
+  paginationResponse.data.forEach(callbackFn);
   loadSpinner();
-  paginationComponent(tableParent, paginationResponse, endPointUrl);
+  paginationComponent(tableParent, paginationResponse, { endPointUrl, callbackFn });
 };
 
-const paginationComponent = (tableParent, res, endPointUrl) => {
+const paginationComponent = (tableParent, res, config) => {
   const tableBody = tableParent.children[0].children[1];
+  const { endPointUrl, callbackFn } = config;
   const paginationEl = document.querySelector('.pagination');
   if (paginationEl) paginationEl.remove();
   const { hasPrevPage, hasNextPage, nextPage, prevPage } = res.meta;
   const prev = hasPrevPage
-    ? `<button class="pagination__prev">Previous Page</button>`
-    : `<button disabled class="pagination__prev">Previous Page</button>`;
+    ? `<button class="pagination__prev">Previous</button>`
+    : `<button disabled class="pagination__prev">Previous</button>`;
   const next = hasNextPage
-    ? `<button class="pagination__next">Next Page</button>`
-    : `<button disabled class="pagination__next">Next Page</button>`;
+    ? `<button class="pagination__next">Next</button>`
+    : `<button disabled class="pagination__next">Next</button>`;
   tableParent.insertAdjacentHTML('beforeend', `<section class="pagination">${prev}${next}</section>`);
   const nextPageBtn = document.querySelector('.pagination__next');
   const prevPageBtn = document.querySelector('.pagination__prev');
   nextPageBtn.addEventListener('click', () => {
-    const option = { page: nextPage, tableBody, tableParent };
+    const option = { page: nextPage, tableBody, tableParent, callbackFn };
     goToPage(endPointUrl, option);
   });
   prevPageBtn.addEventListener('click', () => {
-    const option = { page: prevPage, tableBody, tableParent };
+    const option = { page: prevPage, tableBody, tableParent, callbackFn };
     goToPage(endPointUrl, option);
   });
 };
@@ -484,50 +505,100 @@ const populateProductsModal = async response => {
     toast(response.message, errorToast);
     return;
   }
-  const id = response.data.product_id;
-  const image = response.data.product_image;
-  const name = response.data.product_name;
-  const price = response.data.product_price;
-  const qty = response.data.product_qty;
-  const categoryId = response.data.category_id;
-  const catInfo = await processRequest(`${basepath}/category/${categoryId}`);
-  const selectedCategory = catInfo.data
-    ? `<option selected value="${catInfo.data.category_id}">${catInfo.data.category_name}</option>`
-    : `<option selected disabled value="Not Set">Select Category</option>`;
+  const {
+    product_id: id,
+    product_name: name,
+    product_price: price,
+    product_qty: qty,
+    category_id: categoryId
+  } = response.data;
   document.body.insertAdjacentHTML(
     'afterbegin',
-    `<div class="modal"><div class="form-body"><h3>Update Product Details</h3><form id="update-product-form" data-id=${id}>
-      <input type="text" id="update-image" placeholder="Image Url" value='${image}'/><input type="text" id="update-name" placeholder="Product Name" value='${name}'/>
-      <input type="text" id="update-price" placeholder="Product Price" value='${price}'/><input type="text" id="update-qty" placeholder="Product Quantity" value='${qty}'/>
-      <select id="product-cat" required>${selectedCategory}<option disabled>----</option></select><input type="submit" value="Update Category" /></form></div>
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Update Product Details</h3>
+        <form id="update-product-form" data-id=${id} enctype="multipart/form-data">
+          <div class='input-group'>
+            <label for="product-image">Product Image</label>
+            <input type="file" id="product-image" accept=".jpg" class='input-file'>
+          </div>
+          <div class='input-group'>
+            <label for="update-name">Product Name:</label>
+            <input type="text" id="update-name" placeholder="Product Name" value='${name}'/>
+          </div>
+          <div class='input-group'>
+            <label for="update-price">Product Price:</label>
+            <input type="text" id="update-price" placeholder="Product Price" value='${price}'/>
+          </div>
+          <div class='input-group'>
+            <label for="update-qty">Product Qty:</label>
+            <input type="text" id="update-qty" placeholder="Product Quantity" value='${qty}'/>
+          </div>
+          <div class='input-group'>
+            <label for="product-cat">Product Category:</label>
+            <select id="product-cat" required></select>
+          </div>
+          <div class='input-group'>
+            <input type="submit" class="btn btn--gradient" value="Update Category"/>
+          </div>
+        </form>
+      </div>
     </div>`
   );
-  populateCategoryDropDown();
+
+  const { data } = await processRequest(`${basepath}/category/`);
+  const selectedCategory = data.find(category => category.category_id === Number(categoryId));
+  const catDropDownEl = modal.querySelector('#product-cat');
+  if (selectedCategory) {
+    catDropDownEl.insertAdjacentHTML(
+      'beforeend',
+      `<option selected value="${selectedCategory.category_id}">${selectedCategory.category_name}</option>`
+    );
+  } else {
+    catDropDownEl.insertAdjacentHTML(
+      'afterbegin',
+      `<option selected disabled value="Not Set">Select Category</option>`
+    );
+  }
+  data.forEach(category => {
+    if (!selectedCategory || category.category_id !== selectedCategory.category_id) {
+      catDropDownEl.insertAdjacentHTML(
+        'beforeend',
+        `<option value="${category.category_id}">${category.category_name}</option>`
+      );
+    }
+  });
   loadSpinner();
 };
 
 const updateProduct = async e => {
   e.preventDefault();
   loadSpinner();
-  const modal = document.body.querySelector('.modal');
-  const uImage = document.querySelector('#update-image').value;
-  const uName = document.querySelector('#update-name').value;
-  const uPrice = document.querySelector('#update-price').value;
-  const uQty = document.querySelector('#update-qty').value;
-  const uCategory = document.querySelector('#product-cat').value;
+  const imageUrl = document.querySelector('#product-image');
+  const name = document.querySelector('#update-name').value;
+  const price = document.querySelector('#update-price').value;
+  const qty = document.querySelector('#update-qty').value;
+  const categoryId = document.querySelector('#product-cat').value;
 
-  if (Number.isNaN(Number(uCategory))) {
+  if (Number.isNaN(Number(categoryId))) {
     loadSpinner();
     toast('Select a category', errorToast);
     return;
   }
 
   const endPointUrl = `${basepath}/products/${e.target.dataset.id}`;
-  const updateInfo = { imgUrl: uImage, name: uName, price: uPrice, qty: uQty, categoryid: uCategory };
 
-  const updateResponse = await processRequest(endPointUrl, 'PUT', updateInfo);
+  const formData = new FormData();
+  formData.append('imageUrl', imageUrl.files[0]);
+  formData.append('name', name);
+  formData.append('price', price);
+  formData.append('qty', qty);
+  formData.append('categoryid', categoryId);
 
-  if (!updateResponse.status === 'success') {
+  const options = { body: formData, method: 'PUT', headers: headersConfig.multipart };
+  const updateResponse = await processRequest(endPointUrl, options);
+
+  if (!(updateResponse.status === 'success')) {
     loadSpinner();
     toast(updateResponse.message || updateResponse.error, errorToast);
     return;
@@ -541,10 +612,13 @@ const updateProduct = async e => {
 
 const deleteProduct = async e => {
   loadSpinner();
-  const modal = document.body.querySelector('.modal');
   const productId = Number(e.target.dataset.id);
-  const query = `${basepath}/products/${productId}`;
-  const deleteResponse = await processRequest(query, 'DELETE');
+  const endPointUrl = `${basepath}/products/${productId}`;
+  const options = {
+    method: 'DELETE',
+    headers: headersConfig.json
+  };
+  const deleteResponse = await processRequest(endPointUrl, options);
 
   if (!deleteResponse.status) {
     loadSpinner();
@@ -554,13 +628,14 @@ const deleteProduct = async e => {
   }
 
   toast('Product deleted successfully', successToast, 1000);
-  document.body.removeChild(modal);
   loadSpinner();
   populateProductsTable();
   const paginationEl = document.querySelector('.pagination');
   if (paginationEl) {
     paginationEl.remove();
   }
+  // Remove Modal
+  if (modal) modal.remove();
 };
 
 const productEditModal = async e => {
@@ -568,7 +643,6 @@ const productEditModal = async e => {
   const response = await processRequest(singleCategoryUrl);
 
   await populateProductsModal(response);
-  const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
   const updateForm = document.querySelector('#update-product-form');
   updateForm.addEventListener('submit', updateProduct);
@@ -577,7 +651,6 @@ const productEditModal = async e => {
 const productDeleteModal = async e => {
   generateDeleteModal(e, 'product');
 
-  const modal = document.body.querySelector('.modal');
   modal.addEventListener('click', destroyModal);
 
   const delUserBtn = document.querySelector('#confirm-delete');
@@ -587,22 +660,24 @@ const productDeleteModal = async e => {
   cancelBtn.addEventListener('click', () => document.body.removeChild(modal));
 };
 
-const generateTableBodyEntries = (element, entity) => {
-  element.insertAdjacentHTML(
+const listProducts = product => {
+  const tableBody = productsTable.children[1];
+  tableBody.insertAdjacentHTML(
     'beforeend',
     `<tr>
-      <td>${entity.product_id}</td>
-      <td>${entity.product_name}</td>
-      <td>${formatCurrency(entity.product_price)}</td>
-      <td>${entity.product_qty}</td>
-      <td data-id=${entity.product_id} style="text-align: center">
-        <button class="blue">Edit</button><button class="red">Delete</button>
+      <td>${product.product_id}</td>
+      <td>${product.product_name}</td>
+      <td>${formatCurrency(product.product_price)}</td>
+      <td>${product.product_qty}</td>
+      <td data-id=${product.product_id} style="text-align: center">
+        <button title="Edit Product Details" class="blue">Edit</button>
+        <button title="Delete a Product" class="red">Delete</button>
       </td>
     </tr>`
   );
-  const editBtn = element.querySelectorAll('button.blue');
+  const editBtn = tableBody.querySelectorAll('button.blue');
   editBtn.forEach(btn => btn.addEventListener('click', productEditModal));
-  const delBtn = element.querySelectorAll('button.red');
+  const delBtn = tableBody.querySelectorAll('button.red');
   delBtn.forEach(btn => btn.addEventListener('click', productDeleteModal));
 };
 
@@ -616,25 +691,25 @@ const populateProductsTable = async () => {
 
   if (!response.data.length) {
     loadSpinner();
-    recordSort.style.display = 'none';
+    recordSort.classList.add('hide');
     tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
     return;
   }
 
   loadSpinner();
-  recordSort.style.display = 'block';
-  response.data.forEach(product => generateTableBodyEntries(tableBody, product));
-  paginationComponent(productsTable.parentElement, response, endPointUrl);
+  recordSort.classList.remove('hide');
+  response.data.forEach(listProducts);
+  paginationComponent(productsTable.parentElement, response, { endPointUrl, callbackFn: listProducts });
   toast(response.message, successToast, 1000);
 };
 
 /* Product Cards */
-const generateProductsCard = (element, entity) => {
+const listProductCards = entity => {
   const inStock = entity.product_qty ? 'in-stock' : 'out-stock';
   const cartBtn = entity.product_qty
     ? `<button id="#add-to-cart" data-id=${entity.product_id} class="product__addCart">Add to Cart</button>`
     : '<button disabled class="product__addCart">Out of Stock</button>';
-  element.insertAdjacentHTML(
+  productWrapper.insertAdjacentHTML(
     'beforeend',
     `<div class="product ${inStock}">
       <img class="product__image" src="${entity.product_image}" alt="product-image"/>
@@ -712,7 +787,7 @@ const cardsPaginationComponent = (wrapperEl, response) => {
     const queryString = `${basepath}/products/?limit=12&page=${nextPage}`;
     const paginationResponse = await processRequest(queryString);
     while (productWrapper.firstChild) productWrapper.removeChild(productWrapper.firstChild);
-    paginationResponse.data.forEach(product => generateProductsCard(productWrapper, product));
+    paginationResponse.data.forEach(listProductCards);
     loadSpinner();
     cardsPaginationComponent(wrapperEl, paginationResponse);
     bindEventToCartBtn(wrapperEl);
@@ -722,7 +797,7 @@ const cardsPaginationComponent = (wrapperEl, response) => {
     const queryString = `${basepath}/products/?limit=12&page=${prevPage}`;
     const paginationResponse = await processRequest(queryString);
     while (productWrapper.firstChild) productWrapper.removeChild(productWrapper.firstChild);
-    paginationResponse.data.forEach(product => generateProductsCard(productWrapper, product));
+    paginationResponse.data.forEach(listProductCards);
     loadSpinner();
     cardsPaginationComponent(wrapperEl, paginationResponse);
     bindEventToCartBtn(wrapperEl);
@@ -735,8 +810,8 @@ const populateMakeSaleCards = async query => {
   loadSpinner();
   const noResultTextEl = document.querySelector('.no-result');
   const paginationEl = document.querySelector('.pagination');
-  const endPoint = query || `${basepath}/products/?limit=12`;
-  const response = await processRequest(endPoint);
+  const endPointUrl = query || `${basepath}/products/?limit=12&`;
+  const response = await processRequest(endPointUrl);
   const noResultText = `<h3 class="no-result">${response.message} 😌</h3>`;
   while (productWrapper.firstChild) productWrapper.removeChild(productWrapper.firstChild);
   if (!response.data.length) {
@@ -747,82 +822,27 @@ const populateMakeSaleCards = async query => {
     return;
   }
   if (noResultTextEl) noResultTextEl.remove();
-  response.data.forEach(product => generateProductsCard(productWrapper, product));
+  response.data.forEach(listProductCards);
   bindEventToCartBtn(productWrapper);
   cardsPaginationComponent(productWrapper, response);
   loadSpinner();
 };
 
 /* Sales Settings */
-const generateSalesEntries = (element, sale) => {
-  element.insertAdjacentHTML(
+const listSales = sale => {
+  const tableBody = salesTable.children[1];
+  const { s_id: id, s_date: date, s_description: description, s_qty: qty, s_price: price, s_total: total } = sale;
+  tableBody.insertAdjacentHTML(
     'beforeend',
     `<tr>
-      <td>${sale.s_id}</td>
-      <td>${formatDate(sale.s_date)}</td>
-      <td>${sale.s_description || `<span class='deleted-product'>Product Deleted</span>`}</td>
-      <td>${sale.s_qty}</td>
-      <td>${formatCurrency(sale.s_price)}</td>
-      <td class="total">${nFormatter(sale.s_total)}</td>
+      <td>${id}</td>
+      <td>${formatDate(date)}</td>
+      <td>${description || `<span class='deleted-product'>Product Deleted</span>`}</td>
+      <td>${qty}</td>
+      <td>${formatCurrency(price)}</td>
+      <td class="total">${nFormatter(total)}</td>
     </tr>`
   );
-};
-
-const salesPaginationComponent = (wrapperEl, response, role) => {
-  const tableBody = salesTable.children[1];
-  const paginationEl = document.querySelector('.pagination');
-  if (paginationEl) paginationEl.remove();
-  const { hasPrevPage, hasNextPage, nextPage, prevPage } = response.meta;
-  const prev = hasPrevPage
-    ? `<button class="pagination__prev">Previous Page</button>`
-    : `<button disabled class="pagination__prev">Previous Page</button>`;
-  const next = hasNextPage
-    ? `<button class="pagination__next">Next Page</button>`
-    : `<button disabled class="pagination__next">Next Page</button>`;
-  tableBody.parentElement.parentElement.insertAdjacentHTML(
-    'beforeend',
-    `<section class="pagination">${prev}${next}</section>`
-  );
-  const nextPageBtn = document.querySelector('.pagination__next');
-  const prevPageBtn = document.querySelector('.pagination__prev');
-
-  nextPageBtn.addEventListener('click', async () => {
-    loadSpinner();
-    if (role === 'admin') {
-      const queryString = `${basepath}/sales/?page=${nextPage}`;
-      const paginationResponse = await processRequest(queryString);
-      while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
-      paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
-      loadSpinner();
-      salesPaginationComponent(wrapperEl, paginationResponse, role);
-      return;
-    }
-    const queryString = `${basepath}/sales/attendants?page=${nextPage}`;
-    const paginationResponse = await processRequest(queryString);
-    while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
-    paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
-    loadSpinner();
-    salesPaginationComponent(wrapperEl, paginationResponse);
-  });
-
-  prevPageBtn.addEventListener('click', async () => {
-    loadSpinner();
-    if (role === 'admin') {
-      const queryString = `${basepath}/sales/?page=${prevPage}`;
-      const paginationResponse = await processRequest(queryString);
-      while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
-      paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
-      loadSpinner();
-      salesPaginationComponent(wrapperEl, paginationResponse, role);
-      return;
-    }
-    const queryString = `${basepath}/sales/attendants?page=${prevPage}`;
-    const paginationResponse = await processRequest(queryString);
-    while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
-    paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
-    loadSpinner();
-    salesPaginationComponent(wrapperEl, paginationResponse, role);
-  });
 };
 
 const populateSalesTable = async (query, role) => {
@@ -831,14 +851,16 @@ const populateSalesTable = async (query, role) => {
   while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
   if (role === 'admin') {
     const response = await processRequest(query);
+
     if (!response.data.length) {
       tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=6>${response.message}</td></tr>`);
       loadSpinner();
       return;
     }
-    response.data.forEach(sale => generateSalesEntries(tableBody, sale));
-    salesPaginationComponent(salesTable, response, role);
+    response.data.forEach(listSales);
+    paginationComponent(salesTable.parentElement, response, { endPointUrl: query, callbackFn: listSales });
     loadSpinner();
+    toast('Records retrieved successfully', successToast, 3000);
     return;
   }
   const response = await processRequest(query);
@@ -847,19 +869,20 @@ const populateSalesTable = async (query, role) => {
     loadSpinner();
     return;
   }
-  response.data.forEach(sale => generateSalesEntries(tableBody, sale));
-  salesPaginationComponent(salesTable, response, role);
+  response.data.forEach(listSales);
+  paginationComponent(salesTable.parentElement, response, { endPointUrl: query, callbackFn: listSales });
+  toast('Records retrieved successfully', successToast, 3000);
   loadSpinner();
 };
 
 const populateAdminSalesTable = query => {
-  const adminQuery = query || `${basepath}/sales`;
-  populateSalesTable(adminQuery, 'admin');
+  const endPointUrl = query || `${basepath}/sales?`;
+  populateSalesTable(endPointUrl, 'admin');
 };
 
 const populateAttendantSalesTable = () => {
-  const attendantQuery = `${basepath}/sales/attendants`;
-  populateSalesTable(attendantQuery, 'attendant');
+  const endPointUrl = `${basepath}/sales/attendants?`;
+  populateSalesTable(endPointUrl, 'attendant');
 };
 
 /* Cart */
@@ -928,9 +951,15 @@ const login = async e => {
   loadSpinner();
   const email = document.querySelector('#login-email').value;
   const password = document.querySelector('#login-password').value;
+
   const loginUrl = `${basepath}/auth/login`;
   const loginInfo = { email, password };
-  const response = await processRequest(loginUrl, 'POST', loginInfo);
+  const options = {
+    body: JSON.stringify(loginInfo),
+    method: 'POST',
+    headers: headersConfig.json
+  };
+  const response = await processRequest(loginUrl, options);
   destroyInputErrors('.form__login');
   if (!response.data) {
     loginBtn.textContent = 'Login';
@@ -943,7 +972,7 @@ const login = async e => {
     handleInputErrors(response, '.form__login');
     return;
   }
-  loginBtn.textContent = 'Successful ✅';
+  loginBtn.textContent = 'Login Successful';
   const { token, role } = response.data;
   localStorage.setItem('token', token);
   localStorage.setItem('role', role);
@@ -958,9 +987,14 @@ const createUser = async e => {
   const email = document.querySelector('#staff-email').value;
   const password = document.querySelector('#staff-password').value;
   const role = document.querySelector('#staff-role').value;
-  const signupUrl = `${basepath}/auth/signup`;
+  const endPointUrl = `${basepath}/auth/signup`;
   const signupInfo = { name, email, password, role };
-  const response = await processRequest(signupUrl, 'POST', signupInfo);
+  const options = {
+    method: 'POST',
+    body: JSON.stringify(signupInfo),
+    headers: headersConfig.json
+  };
+  const response = await processRequest(endPointUrl, options);
   destroyInputErrors('#create-user-form');
   if (!response.data) {
     loadSpinner();
@@ -969,24 +1003,25 @@ const createUser = async e => {
   }
   loadSpinner();
   toast(response.message, successToast, 1000);
-  createUserForm.reset();
+  modal.remove();
   populateUsersTable();
 };
 
 const updateUser = async e => {
   e.preventDefault();
   loadSpinner();
-  const modal = document.body.querySelector('.modal');
   const uName = document.querySelector('#update-name').value;
   const uEmail = document.querySelector('#update-email').value;
   const uRole = document.querySelector('#update-role').value;
   let uPassword = document.querySelector('#update-password').value;
   uPassword = uPassword.length < 5 ? undefined : uPassword;
-  const userUpdateUrl = `${basepath}/users/${e.target.getAttribute('data-id')}`;
+  const endPointUrl = `${basepath}/users/${e.target.dataset.id}`;
   const updateInfo = { name: uName, email: uEmail, password: uPassword, role: uRole };
   if (!uPassword) delete updateInfo.password;
   if (uRole === 'Owner') delete updateInfo.role;
-  const updateResponse = await processRequest(userUpdateUrl, 'PUT', updateInfo);
+  const options = { body: JSON.stringify(updateInfo), method: 'PUT', headers: headersConfig.json };
+
+  const updateResponse = await processRequest(endPointUrl, options);
   if (updateResponse.status === 'success') {
     loadSpinner();
     toast(updateResponse.message, successToast, 800);
@@ -1001,10 +1036,13 @@ const updateUser = async e => {
 
 const deleteUser = async e => {
   loadSpinner();
-  const modal = document.body.querySelector('.modal');
   const userid = Number(e.target.getAttribute('data-id'));
-  const deleteUsersEndpoint = `${basepath}/users/${userid}`;
-  const deleteResponse = await processRequest(deleteUsersEndpoint, 'DELETE');
+  const endPointUrl = `${basepath}/users/${userid}`;
+  const options = {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  };
+  const deleteResponse = await processRequest(endPointUrl, options);
   if (!deleteResponse.data) {
     toast(deleteResponse.message || deleteResponse.error[0], errorToast, 2000);
     document.body.removeChild(modal);
@@ -1021,9 +1059,14 @@ const createCategory = async e => {
   loadSpinner();
   e.preventDefault();
   const categoryName = document.querySelector('#category-name').value;
-  const categoryEnpoint = `${basepath}/category`;
-  const categoryInfo = { name: categoryName };
-  const response = await processRequest(categoryEnpoint, 'POST', categoryInfo);
+  const endPointUrl = `${basepath}/category`;
+  const categoryInfo = JSON.stringify({ name: categoryName });
+  const options = {
+    method: 'POST',
+    body: categoryInfo,
+    headers: headersConfig.json
+  };
+  const response = await processRequest(endPointUrl, options);
   destroyInputErrors('#create-category');
   if (!response.data) {
     loadSpinner();
@@ -1031,17 +1074,17 @@ const createCategory = async e => {
     return;
   }
   loadSpinner();
-  createCategoryForm.reset();
   toast(response.message, successToast);
   populateCategoryTable();
+  modal.remove();
 };
 
 const createProduct = async e => {
   loadSpinner();
   e.preventDefault();
-  const imgUrl = document.querySelector('#product-imgurl').value;
+  const imgUrl = document.querySelector('#product-image');
   const name = document.querySelector('#product-name').value;
-  const price = document.querySelector('#product-price').value;
+  const price = document.querySelector('#product-price').value.replace(/,/g, '');
   const qty = document.querySelector('#product-qty').value;
   const categoryid = document.querySelector('#product-cat').value;
   if (!Number(categoryid)) {
@@ -1049,16 +1092,31 @@ const createProduct = async e => {
     toast('Please select a category', errorToast, 700);
     return;
   }
-  const productInfo = { imgUrl, name, categoryid, price, qty };
-  const productUrl = `${basepath}/products`;
-  const response = await processRequest(productUrl, 'POST', productInfo);
+  const formData = new FormData();
+  formData.append('imageUrl', imgUrl.files[0]);
+  formData.append('name', name);
+  formData.append('price', price);
+  formData.append('qty', qty);
+  formData.append('categoryid', categoryid);
+
+  const endPointUrl = `${basepath}/products`;
+  const options = {
+    method: 'POST',
+    body: formData,
+    headers: headersConfig.multipart
+  };
+  const response = await processRequest(endPointUrl, options);
+
   if (!response.data) {
     loadSpinner();
     handleInputErrors(response, '#create-new-product');
     return;
   }
-  destroyInputErrors('#create-new-product');
-  createProductForm.reset();
+  // Remove Modal
+  if (modal) {
+    destroyInputErrors('#create-new-product');
+    modal.remove();
+  }
   loadSpinner();
   toast(response.message, successToast, 700);
   populateProductsTable();
@@ -1075,8 +1133,13 @@ const createNewSale = async () => {
     return;
   }
   const endPointUrl = `${basepath}/sales`;
-  const saleInfo = { products: cartItems };
-  const response = await processRequest(endPointUrl, 'POST', saleInfo);
+  const saleInfo = JSON.stringify({ products: cartItems });
+  const options = {
+    method: 'POST',
+    body: saleInfo,
+    headers: headersConfig.json
+  };
+  const response = await processRequest(endPointUrl, options);
   if (!response.data) {
     loadSpinner();
     toast(response.message, errorToast);
@@ -1094,8 +1157,8 @@ const searchProducts = async e => {
   const categoryId = e.target.children[1].value;
   const queryString =
     categoryId === 'All'
-      ? `${basepath}/products/?search=${searchInput}&limit=12`
-      : `${basepath}/products/?search=${searchInput}&catid=${Number(categoryId)}&limit=12`;
+      ? `${basepath}/products/?search=${searchInput}&limit=12&`
+      : `${basepath}/products/?search=${searchInput}&catid=${Number(categoryId)}&limit=12&`;
   populateMakeSaleCards(queryString);
 };
 
@@ -1112,8 +1175,8 @@ const filterByRows = async e => {
     loadSpinner();
     return;
   }
-  response.data.forEach(product => generateTableBodyEntries(tableBody, product));
-  paginationComponent(productsTable.parentElement, response, endPointUrl);
+  response.data.forEach(listProducts);
+  paginationComponent(productsTable.parentElement, response, { endPointUrl, callbackFn: listProducts });
   loadSpinner();
   toast(response.message, successToast, 1000);
 };
@@ -1131,14 +1194,14 @@ const filterByName = async e => {
   if (!response.data.length) {
     loadSpinner();
     tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=5>${response.message}</td></tr>`);
-    paginationComponent(tableBody, response, 10);
+    paginationComponent(productsTable.parentElement, response, 10);
     return;
   }
 
   loadSpinner();
-  response.data.forEach(product => generateTableBodyEntries(tableBody, product));
+  response.data.forEach(listProducts);
   toast(response.message, successToast, 1000);
-  paginationComponent(productsTable.parentElement, response, endPointUrl);
+  paginationComponent(productsTable.parentElement, response, { endPointUrl, callbackFn: listProducts });
 };
 
 const filterByQty = async e => {
@@ -1155,8 +1218,8 @@ const filterByQty = async e => {
     return;
   }
   loadSpinner();
-  response.data.forEach(product => generateTableBodyEntries(tableBody, product));
-  paginationComponent(productsTable.parentElement, response, endPointUrl);
+  response.data.forEach(listProducts);
+  paginationComponent(productsTable.parentElement, response, { endPointUrl, callbackFn: listProducts });
   toast(response.message, successToast, 1000);
 };
 
@@ -1189,13 +1252,13 @@ const sortSalesById = async e => {
   const endPointUrl = `${basepath}/sales/${Number(saleId)}`;
   const response = await processRequest(endPointUrl);
   const tableBody = salesTable.children[1];
-  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
   if (!response.data) {
-    tableBody.insertAdjacentHTML('beforeend', `<tr><td colspan=6>${response.message || response.error[0]}</td></tr>`);
+    toast(response.message, errorToast, 2000);
     loadSpinner();
     return;
   }
-  response.data.forEach(sale => generateSalesEntries(tableBody, sale));
+  while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
+  response.data.forEach(listSales);
   loadSpinner();
 };
 
@@ -1205,7 +1268,7 @@ const performNavigate = async (endPointUrl, options) => {
   const queryString = `${endPointUrl}&page=${page}`;
   const paginationResponse = await processRequest(queryString);
   while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
-  paginationResponse.data.forEach(sale => generateSalesEntries(tableBody, sale));
+  paginationResponse.data.forEach(listSales);
   loadSpinner();
   paginationComponentDate(tableParent, paginationResponse, endPointUrl);
 };
@@ -1252,7 +1315,7 @@ const sortSalesByDate = async e => {
     return;
   }
 
-  const endPointUrl = `${basepath}/sales?fdate=${from}&tdate=${to}`;
+  const endPointUrl = `${basepath}/sales?fdate=${from}&tdate=${to}&`;
   const response = await processRequest(endPointUrl);
 
   while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
@@ -1263,9 +1326,8 @@ const sortSalesByDate = async e => {
     return;
   }
 
-  response.data.forEach(sale => generateSalesEntries(tableBody, sale));
-
-  paginationComponentDate(salesTable.parentElement, response, endPointUrl);
+  response.data.forEach(listSales);
+  paginationComponent(salesTable.parentElement, response, { endPointUrl, callbackFn: listSales });
   loadSpinner();
 };
 
@@ -1280,7 +1342,7 @@ const sortSalesByUser = async e => {
     loadSpinner();
     return;
   }
-  const endPointUrl = `${basepath}/sales?userid=${Number(selectedUser)}`;
+  const endPointUrl = `${basepath}/sales?userid=${Number(selectedUser)}&`;
   const response = await processRequest(endPointUrl);
 
   while (tableBody.hasChildNodes()) tableBody.removeChild(tableBody.firstChild);
@@ -1291,16 +1353,117 @@ const sortSalesByUser = async e => {
     return;
   }
 
-  response.data.forEach(sale => generateSalesEntries(tableBody, sale));
+  response.data.forEach(listSales);
 
-  paginationComponentDate(salesTable.parentElement, response, endPointUrl);
+  paginationComponent(salesTable.parentElement, response, { endPointUrl, callbackFn: listSales });
   loadSpinner();
 };
 
+const showNewProductsModal = () => {
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Create Product</h3>
+        <form id="create-new-product" enctype="multipart/form-data">
+          <div class='input-group'>
+            <label for="product-image">Product Image</label>
+            <input type="file" id="product-image" accept=".jpg" required/>
+          </div>
+          <div class='input-group'>
+            <label for="product-name">Product Name:</label>
+            <input id="product-name" type="text" placeholder="Product Name" required />
+          </div>
+          <div class='input-group'>
+            <label for="product-price">Product Price:</label>
+            <input id="product-price" type="text" placeholder="Product Price" required />
+          </div>
+          <div class='input-group'>
+            <label for="product-qty">Product Qty:</label>
+            <input id="product-qty" type="text" placeholder="Product Quantity" required />
+          </div>
+          <div class='input-group'>
+            <label for="product-cat">Product Category:</label>
+            <select id="product-cat" required></select>
+          </div>
+          <div class='input-group'>
+            <input type="submit" class="btn btn--gradient" value="Create Product"/>
+          </div>
+        </form>
+      </div>
+    </div>`
+  );
+  modal.addEventListener('click', destroyModal);
+  populateCategoryDropDown();
+  const createProductForm = document.querySelector('#create-new-product');
+  if (createProductForm) createProductForm.addEventListener('submit', createProduct);
+};
+
+const showNewUserModal = () => {
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Create New User</h3>
+        <form id="create-user-form">
+          <div class='input-group'>
+            <label for="staff-name">Employee Name</label>
+            <input type="text" id="staff-name" placeholder="Employee Name" required />            
+          </div>
+          <div class='input-group'>
+            <label for="staff-email">Employee Email:</label>
+            <input type="email" id="staff-email" placeholder="Employee Email" required />
+          </div>
+          <div class='input-group'>
+            <label for="staff-password">Product Password:</label>
+            <input type="password" id="staff-password" placeholder="Password" required />
+          </div>
+          <div class='input-group'>
+          <label for="staff-role">Select Role:</label>
+            <select id="staff-role">
+              <option value="Attendant">Attendant</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+          <div class='input-group'>
+            <input type="submit" class="btn btn--gradient" value="Create User"/>
+          </div>
+        </form>
+      </div>
+    </div>`
+  );
+  modal.addEventListener('click', destroyModal);
+  const createUserForm = document.querySelector('#create-user-form');
+  createUserForm.addEventListener('submit', createUser);
+};
+
+const showNewCategoryModal = () => {
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<div class="modal">
+      <div class="form-body">
+        <h3>Create New Category</h3>
+        <form id="create-category">
+          <div class='input-group'>
+            <label for="category-name">Category Name</label>
+            <input id="category-name" type="text" placeholder="Category Name" required />
+          </div>
+          <div class='input-group'>
+            <input type="submit" class="btn btn--gradient" value="Create Category"/>
+          </div>
+        </form>
+      </div>
+    </div>`
+  );
+  modal.addEventListener('click', destroyModal);
+  const createCategoryForm = document.querySelector('#create-category');
+  createCategoryForm.addEventListener('submit', createCategory);
+};
+
 if (loginForm) loginForm.addEventListener('submit', login);
-if (createUserForm) createUserForm.addEventListener('submit', createUser);
-if (createCategoryForm) createCategoryForm.addEventListener('submit', createCategory);
-if (createProductForm) createProductForm.addEventListener('submit', createProduct);
+if (showNewProdModal) showNewProdModal.addEventListener('click', showNewProductsModal);
+if (showUserModal) showUserModal.addEventListener('click', showNewUserModal);
+if (showCategoryModal) showCategoryModal.addEventListener('click', showNewCategoryModal);
 if (completeOrder) completeOrder.addEventListener('click', createNewSale);
 if (filterRowsForm) filterRowsForm.addEventListener('submit', filterByRows);
 if (filterQtyForm) filterQtyForm.addEventListener('submit', filterByQty);
@@ -1326,7 +1489,6 @@ switch (window.location.pathname) {
     populateAdminDashboard();
     break;
   case '/product-settings.html':
-    populateCategoryDropDown();
     populateProductsTable();
     break;
   case '/category-settings.html':

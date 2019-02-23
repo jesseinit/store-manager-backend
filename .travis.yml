@@ -1,18 +1,17 @@
 language: node_js
 node_js:
-- '8'
-cache: 
+  - '8'
+? cache
 directories:
-- node_modules
+  - node_modules
 services:
-- postgresql
+  - postgresql
 before_script:
-- psql -c 'create database storemanager;' -U postgres
-- npm run migrations
+  - psql -c 'create database storemanagertest;' -U postgres
 script:
-- npm test
+  - npm test
 after_success:
-- nyc report --reporter=text-lcov | coveralls
+  - nyc report --reporter=text-lcov | coveralls
 deploy:
   provider: heroku
   api_key:

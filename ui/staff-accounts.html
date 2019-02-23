@@ -10,7 +10,7 @@
   </head>
 
   <body>
-    <header id="site-header">
+    <header id="site-header" class="row">
       <a class="logo" href="./make-sale.html">Store Manager</a>
       <nav class="top-nav">
         <ul>
@@ -32,29 +32,7 @@
       </aside>
       <section class="main">
         <section class="sales">
-          <div class="sales__meta">
-            <div class="sort">
-              <form id="create-user-form">
-                <fieldset>
-                  <legend>Create New Staff Account</legend>
-                  <input type="text" id="staff-name" placeholder="Employee Name" required />
-                  <input
-                    type="email"
-                    id="staff-email"
-                    placeholder="Employee Email"
-                    required
-                    pattern="(^[A-Za-z]+)(\.[a-zA-Z]+)?@storemanager.com$"
-                  />
-                  <input type="password" id="staff-password" placeholder="Password" required />
-                  <select id="staff-role">
-                    <option value="Attendant">Attendant</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                  <input type="submit" value="Create Account" />
-                </fieldset>
-              </form>
-            </div>
-          </div>
+          <button class="btn btn--orange" id="show-user-modal">Create User</button>
           <div class="table-wrapper no-flow">
             <table id="users-table" class="table">
               <thead>
@@ -72,7 +50,7 @@
         </section>
       </section>
     </main>
-    <footer id="site-footer"><p>Store Manager &copy; 2018</p></footer>
+    <footer id="site-footer" class="row"><p>Store Manager &copy; 2018</p></footer>
     <script src="./js/app.js"></script>
   </body>
 </html>

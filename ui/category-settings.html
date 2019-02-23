@@ -10,7 +10,7 @@
   </head>
 
   <body>
-    <header id="site-header">
+    <header id="site-header" class="row">
       <a class="logo" href="./make-sale.html">Store Manager</a>
       <nav class="top-nav">
         <ul>
@@ -32,17 +32,7 @@
       </aside>
       <section class="main">
         <section class="sales">
-          <div class="sales__meta">
-            <div class="sort">
-              <form id="create-category">
-                <fieldset>
-                  <legend>Create Category</legend>
-                  <input id="category-name" type="text" placeholder="Category Name" required />
-                  <input type="submit" value="Create Category" />
-                </fieldset>
-              </form>
-            </div>
-          </div>
+          <button class="btn btn--orange" id="show-category-modal">Create Category</button>
           <div class="table-wrapper">
             <table id="category-table" class="table">
               <thead>
@@ -52,14 +42,13 @@
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody>
-              </tbody>
+              <tbody></tbody>
             </table>
           </div>
         </section>
       </section>
     </main>
-    <footer id="site-footer"><p>Store Manager &copy; 2018</p></footer>
+    <footer id="site-footer" class="row"><p>Store Manager &copy; 2018</p></footer>
     <script src="./js/app.js"></script>
   </body>
 </html>

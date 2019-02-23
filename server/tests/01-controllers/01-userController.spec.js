@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
-import app from '../..';
+import app from '../../app';
 import mockData from '../mock';
 import UserHelper from '../../helpers/userHelper';
 
@@ -96,7 +96,7 @@ describe('User', () => {
       expect(response.status).to.equal(201);
       expect(response.body).to.have.property('data');
       expect(response.body).to.be.an('object');
-      expect(response.body.data).to.have.keys(['id', 'name', 'email', 'password', 'role']);
+      expect(response.body.data).to.have.keys(['id', 'name', 'email', 'role']);
     });
 
     it('It should return forbidden when an attendant wants to create an account', async () => {

@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import app from '../..';
+import app from '../../app';
 import mockData from '../mock';
 import pool from '../../utils/connection';
 

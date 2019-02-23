@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import CategoryHelper from '../helpers/categoryHelper';
 import handleResponse from '../utils/responseHandler';
 
@@ -20,7 +19,7 @@ class CategoryController {
    */
   static async createCategory(req, res, next) {
     const result = await CategoryHelper.createCategory(req.body.name);
-    handleResponse(result, next, res, 201, 'Category created successfully.');
+    handleResponse(result, next, res, 201, 'success', 'Category created successfully.');
   }
 
   /**
@@ -38,7 +37,7 @@ class CategoryController {
     const { name } = req.body;
 
     const result = await CategoryHelper.updateCategory({ id, name });
-    handleResponse(result, next, res, 200, 'Category updated successfully.');
+    handleResponse(result, next, res, 200, 'success', 'Category updated successfully.');
   }
 
   /**
@@ -53,7 +52,7 @@ class CategoryController {
    */
   static async getAllCategories(req, res, next) {
     const result = await CategoryHelper.getAllCategories();
-    handleResponse(result, next, res, 200, 'Categories retrieved successfully.');
+    handleResponse(result, next, res, 200, 'success', 'Categories retrieved successfully.');
   }
 
   /**
@@ -68,7 +67,7 @@ class CategoryController {
    */
   static async getSingleCategory(req, res, next) {
     const result = await CategoryHelper.getSingleCategory(req.params.id);
-    handleResponse(result, next, res, 200, 'Category retrieved successfully.');
+    handleResponse(result, next, res, 200, 'success', 'Category retrieved successfully.');
   }
 
   /**
@@ -84,7 +83,7 @@ class CategoryController {
   static async deleteCategory(req, res, next) {
     const { id } = req.params;
     const result = await CategoryHelper.deleteCategory(id);
-    handleResponse(result, next, res, 200, result);
+    handleResponse(result, next, res, 200, 'success', result);
   }
 }
 

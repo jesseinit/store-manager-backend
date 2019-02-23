@@ -368,7 +368,7 @@ paths:
           example:
             message: Internal server error
             status: failure
-  
+
     post:
       summary: Creates a new product category
       description: This endpoint creates a new category
@@ -392,8 +392,7 @@ paths:
             status: success,
             message: Category created successfully.
             data:
-              - 
-                category_id: 1
+              - category_id: 1
                 category_name: Electronics
         400:
           description: Bad Request
@@ -422,7 +421,7 @@ paths:
           example:
             message: Internal server error
             status: failure
-  
+
   /category/{id}:
     get:
       summary: Retrieves a product category
@@ -468,7 +467,7 @@ paths:
           example:
             message: Internal server error
             status: failure
-    
+
     put:
       summary: Updates a product category
       description: This endpoint updates a product category
@@ -558,7 +557,7 @@ paths:
           description: 'Authentication Error'
           example:
             message: Token/Header Error
-            status: failure        
+            status: failure
         403:
           description: User does not have the privilage to delete a category
           example:
@@ -597,8 +596,7 @@ paths:
             status: success,
             message: Records retrieved successfully.
             data:
-              - 
-                product_id: 1,
+              - product_id: 1,
                 product_image: https://ae01.alicdn.com/kf/HTB1b_tGfVooBKNjSZPhq6A2CXXaU.jpg
                 product_name: Asus Zenphone
                 product_price: 123000
@@ -620,7 +618,7 @@ paths:
           example:
             message: Internal server error
             status: failure
-    
+
     post:
       summary: Create a new product
       description: This endpoint creates a new product in the store
@@ -643,7 +641,7 @@ paths:
           example:
             status: success
             message: Product created successfully.
-            data: 
+            data:
               product_id: 14,
               product_image: http://example.com/photo.jpg
               product_name: Asus Phantom
@@ -727,7 +725,7 @@ paths:
           example:
             message: Internal server error
             status: failure
-    
+
     put:
       summary: Updates a store product
       description: This endpoint updates a product in the products resource
@@ -787,7 +785,7 @@ paths:
           example:
             message: Internal server error
             status: failure
- 
+
     delete:
       summary: Deletes a product from the store
       description: This endpoint deletes a product from the products resource
@@ -829,7 +827,7 @@ paths:
           example:
             message: Internal server error
             status: failure
- 
+
   /sales/:
     get:
       summary: Retrieves sale orders by all attendants
@@ -847,16 +845,14 @@ paths:
             status: success,
             message: Records retrieved successfully.
             data:
-              - 
-                s_id: 3,
+              - s_id: 3,
                 s_date: 2018-11-25T00:00:00.000Z
                 s_description: Amazfit Smart Watch
                 s_qty: 3
                 s_price: 132567.23
                 s_total: 397701.69
                 s_user: 2
-              - 
-                s_id: 2,
+              - s_id: 2,
                 s_date: 2018-11-25T00:00:00.000Z
                 s_description: Amazfit Smart Watch
                 s_qty: 3
@@ -883,7 +879,7 @@ paths:
           example:
             message: Internal server error
             status: failure
-    
+
     post:
       summary: Create a new sale
       description: This endpoint creates a new sale in the store
@@ -968,8 +964,7 @@ paths:
             status: success,
             message: Sale retrieved successfully.
             data:
-              -
-                s_id: 3,
+              - s_id: 3,
                 s_date: 2018-11-25T00:00:00.000Z
                 s_description: Amazfit Smart Watch
                 s_qty: 3
@@ -1009,16 +1004,14 @@ paths:
             status: success,
             message: Records retrieved successfully.
             data:
-              - 
-                s_id: 3,
+              - s_id: 3,
                 s_date: 2018-11-25T00:00:00.000Z
                 s_description: Amazfit Smart Watch
                 s_qty: 3
                 s_price: 132567.23
                 s_total: 397701.69
                 s_user: 2
-              - 
-                s_id: 2,
+              - s_id: 2,
                 s_date: 2018-11-25T00:00:00.000Z
                 s_description: Amazfit Smart Watch
                 s_qty: 3
@@ -1045,7 +1038,7 @@ paths:
           example:
             message: Internal server error
             status: failure
-    
+
 definitions:
   UserLoginrequest:
     title: 'User Login Request'
@@ -1166,7 +1159,7 @@ definitions:
       - categoryid
       - price
       - qty
-  
+
   ProductUpdateRequest:
     title: 'Product Update Request'
     type: object
@@ -1192,14 +1185,14 @@ definitions:
       categoryid: 9
       price: 89500.99
       qty: 20
-  
+
   SaleCreateRequest:
     title: 'Sale Create Request'
     type: object
     properties:
       products:
         type: array
-        items: 
+        items:
           type: object
           required: true
           properties:
@@ -1209,8 +1202,7 @@ definitions:
               type: integer
     example:
       products:
-        -
-          id: 10
+        - id: 10
           qty: 3
     required:
       - products

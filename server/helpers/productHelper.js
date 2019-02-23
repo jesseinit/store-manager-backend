@@ -2,6 +2,7 @@ import pool from '../utils/connection';
 import query from '../utils/queries';
 import errorHandler from '../utils/errorHandler';
 import { paginatedResult, paginateEmptyResult } from '../utils/paginateRecords';
+import { uploadImage } from '../utils/imageUploadHandler';
 
 /**
  *
@@ -16,13 +17,12 @@ class ProductHelper {
    * @returns {array} An array of products objects
    * @memberof ProductHelper
    */
-  static async allProducts(request) {
-    const { limit, page } = request;
+  static async allProducts({ limit, page }) {
     const { rowCount } = await pool.query(query.getAllProductsCount());
 
     if (!rowCount) return paginateEmptyResult('You have not created products yet.');
 
-    const limitBy = Number(limit) || 10;
+    const limitBy = Number(limit) || 12;
     let currentPage = Number(page) || 1;
     const totalPages = Math.ceil(rowCount / limitBy);
 
@@ -43,8 +43,7 @@ class ProductHelper {
    * @returns {array} An array of products objects
    * @memberof ProductHelper
    */
-  static async allProductsByCategory(request) {
-    const { search, catid, page } = request;
+  static async allProductsByCategory({ search, catid, page }) {
     const { rowCount } = await pool.query(query.getAllProductsByCategoryCount(catid, search));
 
     if (!rowCount) return paginateEmptyResult('No product matches your search.');
@@ -162,19 +161,33 @@ class ProductHelper {
    */
   static async createProduct(newProduct) {
     try {
-      const foundCategory = await pool.query(query.findCategoryById(newProduct.categoryid));
+      const {
+        file,
+        body: { name, categoryid, price, qty }
+      } = newProduct;
+
+      const foundCategory = await pool.query(query.findCategoryById(categoryid));
       if (foundCategory.rowCount < 1) {
         errorHandler(400, 'The category does not exit');
       }
 
       const allProducts = await pool.query(query.getAllProducts());
-      const isExists = allProducts.rows.some(product => product.product_name === newProduct.name);
+      const isExists = allProducts.rows.some(product => product.product_name === name);
 
       if (isExists) {
         errorHandler(400, 'The provided product name already exists.');
       }
 
-      const createdProduct = await pool.query(query.createProduct(newProduct));
+      const productInfo = {
+        imgUrl: file
+          ? await uploadImage(file)
+          : 'https://res.cloudinary.com/jesseinit/image/upload/v1544027864/sample.jpg',
+        name,
+        categoryid,
+        price,
+        qty
+      };
+      const createdProduct = await pool.query(query.createProduct(productInfo));
       return createdProduct.rows[0];
     } catch (error) {
       return error;
@@ -191,12 +204,12 @@ class ProductHelper {
    */
   static async updateProduct(productInfo) {
     try {
-      const result = await this.getProductById(productInfo.id);
-      if (result instanceof Error) {
-        return result;
+      const thisProduct = await this.getProductById(productInfo.id);
+      if (thisProduct instanceof Error) {
+        return thisProduct;
       }
 
-      if (result.product_name !== productInfo.body.name) {
+      if (thisProduct.product_name !== productInfo.body.name) {
         const allProducts = await pool.query(query.getAllProductsCount());
 
         const isExists = allProducts.rows.some(product => product.product_name === productInfo.body.name);
@@ -211,7 +224,16 @@ class ProductHelper {
         errorHandler(400, 'The category does not exist.');
       }
 
-      const updatedProduct = await pool.query(query.updateProduct(productInfo.id, productInfo.body));
+      const updateData = {
+        id: productInfo.id,
+        imageUrl: productInfo.file ? await uploadImage(productInfo.file) : thisProduct.product_image,
+        name: productInfo.body.name,
+        price: productInfo.body.price,
+        qty: productInfo.body.qty,
+        categoryid: productInfo.body.categoryid
+      };
+
+      const updatedProduct = await pool.query(query.updateProduct(updateData));
 
       return updatedProduct.rows[0];
     } catch (error) {
@@ -229,10 +251,11 @@ class ProductHelper {
    */
   static async deleteProduct(productid) {
     try {
-      const result = await this.getProductById(productid);
-      if (result instanceof Error) {
-        return result;
+      const thisProduct = await this.getProductById(productid);
+      if (thisProduct instanceof Error) {
+        return thisProduct;
       }
+
       await pool.query(query.deleteProduct(productid));
       return [];
     } catch (error) {

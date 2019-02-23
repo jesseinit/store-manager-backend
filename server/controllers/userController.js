@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import UserHelper from '../helpers/userHelper';
 import handleResponse from '../utils/responseHandler';
 
@@ -20,7 +19,7 @@ class UserController {
    */
   static async loginUser(req, res, next) {
     const result = await UserHelper.loginUser(req.body);
-    handleResponse(result, next, res, 200, 'Login successfully');
+    handleResponse(result, next, res, 200, 'success', 'Login successfully');
   }
 
   /**
@@ -35,7 +34,7 @@ class UserController {
    */
   static async createUser(req, res, next) {
     const result = await UserHelper.createUser(req.body);
-    handleResponse(result, next, res, 201, 'User created successfully');
+    handleResponse(result, next, res, 201, 'success', 'User created successfully');
   }
 
   /**
@@ -50,7 +49,7 @@ class UserController {
    */
   static async getAllUsers(req, res, next) {
     const result = await UserHelper.getAllUsers();
-    handleResponse(result, next, res, 200, 'Users retrieved successfully');
+    handleResponse(result, next, res, 200, 'success', 'Users retrieved successfully');
   }
 
   /**
@@ -66,7 +65,7 @@ class UserController {
   static async getSingleUsers(req, res, next) {
     const { userid } = req.params;
     const result = await UserHelper.getSingleUser(Number(userid));
-    handleResponse(result, next, res, 200, 'User retrieved successfully');
+    handleResponse(result, next, res, 200, 'success', 'User retrieved successfully');
   }
 
   /**
@@ -84,7 +83,7 @@ class UserController {
     const { userid } = req.params;
     const { name, password, role } = req.body;
     const result = await UserHelper.updateUser({ userid, name, password, role, userRole });
-    handleResponse(result, next, res, 200, 'User updated successfully');
+    handleResponse(result, next, res, 200, 'success', 'User updated successfully');
   }
 
   /**
@@ -100,7 +99,7 @@ class UserController {
   static async deleteUser(req, res, next) {
     const { userid } = req.params;
     const result = await UserHelper.deleteUser(userid);
-    handleResponse(result, next, res, 200, result);
+    handleResponse(result, next, res, 200, 'success', result);
   }
 }
 

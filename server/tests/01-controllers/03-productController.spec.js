@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import app from '../../index';
+import app from '../../app';
 import mockData from '../mock';
 
 const { expect } = chai;
@@ -258,6 +258,7 @@ describe('Products', () => {
         .request(app)
         .del('/api/v1/products/1')
         .set('Authorization', `Bearer ${ownerToken}`);
+
       expect(response.status).to.equal(200);
     });
   });

@@ -15,7 +15,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../ui/')));
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 app.use(router);
-
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.json({ message: err.message, status: 'failure' });
