@@ -181,7 +181,7 @@ class ProductHelper {
       const productInfo = {
         imgUrl: file
           ? await uploadImage(file)
-          : 'https://res.cloudinary.com/jesseinit/image/upload/v1544027864/sample.jpg',
+          : 'https://res.cloudinary.com/jesseinit/image/upload/v1551953795/store/no_data_qbuo.svg',
         name,
         categoryid,
         price,

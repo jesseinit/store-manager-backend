@@ -99,27 +99,28 @@ const validateSaleId = [
 ];
 
 const validateNewProduct = [
+  sanitizeBody('name').customSanitizer(value => value.replace(/\s\s+/g, ' ').trim()),
   body('name')
     .isLength({ min: 2 })
-    .withMessage('Product name must be 2 letters long'),
+    .withMessage('Product name must be atleast 2 letters long.'),
   body('categoryid')
     .isInt({ min: 1 })
-    .withMessage('Category ID must be a positive number from 1'),
+    .withMessage("Please select the product's category."),
   body('price')
     .isFloat({ min: 1.0 })
-    .withMessage('Product price must be decimal number of 1.0 or more'),
+    .withMessage('Product price must be decimal number of 1.0 or more.'),
   body('qty')
     .isInt({ min: 1 })
-    .withMessage('Product qty must be a positive number from 1'),
+    .withMessage('Please enter a postive number for quantity.'),
   body('name')
     .exists()
     .withMessage('Product name must be provided.'),
   body('categoryid')
     .exists()
-    .withMessage('Category Id must be provided.'),
+    .withMessage("Please select the product's category."),
   body('price')
     .exists()
-    .withMessage('Product price must  be provided.'),
+    .withMessage('Product price must be provided.'),
   body('qty')
     .exists()
     .withMessage('Product quantity must be provided.')
@@ -127,10 +128,10 @@ const validateNewProduct = [
 
 const validateProductUpdate = [
   validateProductId[0],
-  validateNewProduct[0].optional(),
   validateNewProduct[1].optional(),
   validateNewProduct[2].optional(),
-  validateNewProduct[3].optional()
+  validateNewProduct[3].optional(),
+  validateNewProduct[4].optional()
 ];
 
 const valaidateGetProducts = [

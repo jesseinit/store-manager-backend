@@ -9,7 +9,7 @@ cloudinary.config(process.env.CLOUDINARY_URL);
 const uploadImage = file =>
   new Promise((resolve, reject) => {
     if (file.size > 250 * 1000 || !file.mimetype.includes('image/jpeg')) {
-      reject(errorHandler(400, 'Only .jpg images less than 250kb is allowed'));
+      reject(errorHandler(400, 'Only .jpg images less than 250kb are allowed'));
     }
     cloudinary.v2.uploader
       .upload_stream({ resource_type: 'image', folder: 'store', use_filename: true }, (error, result) => {
