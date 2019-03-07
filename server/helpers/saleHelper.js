@@ -225,7 +225,7 @@ class SalesHelper {
           )
         );
 
-        await pool.query(query.updateProduct(product.id, { price: foundRecord.product_price, qty: newProductQty }));
+        await pool.query(query.updateProduct({ id: product.id, price: foundRecord.product_price, qty: newProductQty }));
       });
 
       const thisSale = await pool.query(query.thisSale(saleId));
