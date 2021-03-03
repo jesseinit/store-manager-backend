@@ -51,7 +51,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
     "babel-polyfill": "^6.26.0",
-    "bcrypt": "^3.0.2",
+    "bcrypt": "^5.0.0",
     "chai": "^4.2.0",
     "chai-http": "^4.2.0",
     "cloudinary": "^1.13.2",
