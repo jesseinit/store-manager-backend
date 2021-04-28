@@ -1,4 +1,4 @@
-# Store Manager
+# Store Manager API Backend
 
 ### Build Status
 
